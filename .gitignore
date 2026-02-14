@@ -1,0 +1,74 @@
+# ── Python ────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
+
+# ── Virtual Environment ──────────────────────────────
+.venv/
+venv/
+env/
+ENV/
+
+# ── IDE ───────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ── Environment & Secrets ────────────────────────────
+.env
+.env.local
+.env.production
+*.pem
+*.key
+*.crt
+credentials.json
+
+# ── Testing ───────────────────────────────────────────
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+
+# ── Docker ────────────────────────────────────────────
+docker-compose.override.yml
+
+# ── Terraform ─────────────────────────────────────────
+*.tfstate
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl
+*.tfvars
+!*.tfvars.example
+
+# ── OS ────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Logs ──────────────────────────────────────────────
+logs/
+*.log
+
+# ── ML Models ─────────────────────────────────────────
+models/
+*.pkl
+*.joblib
+*.h5
+
+# ── Node (for frontend) ──────────────────────────────
+node_modules/
+.next/
+
+# ── Misc ──────────────────────────────────────────────
+*.bak
+*.tmp
+.ruff_cache/
