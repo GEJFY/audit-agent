@@ -1,7 +1,6 @@
 """LLMゲートウェイ テスト"""
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock
 
 from src.llm_gateway.gateway import LLMGateway
 from src.llm_gateway.providers.base import BaseLLMProvider, LLMResponse

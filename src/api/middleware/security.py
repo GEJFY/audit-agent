@@ -2,8 +2,8 @@
 
 import re
 import time
-from typing import Any
 from collections import defaultdict
+from typing import Any
 
 from fastapi import Request, Response
 from loguru import logger
@@ -23,24 +23,18 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     - Permissions-Policy
     """
 
-    async def dispatch(
-        self, request: Request, call_next: RequestResponseEndpoint
-    ) -> Response:
+    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         response = await call_next(request)
 
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["X-XSS-Protection"] = "1; mode=block"
-        response.headers["Strict-Transport-Security"] = (
-            "max-age=31536000; includeSubDomains; preload"
-        )
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload"
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'"
         )
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-        response.headers["Permissions-Policy"] = (
-            "camera=(), microphone=(), geolocation=()"
-        )
+        response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
         # サーバー情報を隠す
         response.headers.pop("Server", None)
 
@@ -84,15 +78,14 @@ class RequestValidationMiddleware(BaseHTTPMiddleware):
             for p in patterns
         ]
 
-    async def dispatch(
-        self, request: Request, call_next: RequestResponseEndpoint
-    ) -> Response:
+    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         # パスチェック
         path = request.url.path
         if self._is_suspicious(path):
             logger.warning(
                 "不審なリクエストパス検出: path={}, ip={}",
-                path, request.client.host if request.client else "unknown",
+                path,
+                request.client.host if request.client else "unknown",
             )
             return Response(content="Forbidden", status_code=403)
 
@@ -101,7 +94,8 @@ class RequestValidationMiddleware(BaseHTTPMiddleware):
             if self._is_suspicious(value):
                 logger.warning(
                     "不審なクエリパラメータ検出: key={}, ip={}",
-                    key, request.client.host if request.client else "unknown",
+                    key,
+                    request.client.host if request.client else "unknown",
                 )
                 return Response(content="Forbidden", status_code=403)
 
@@ -109,10 +103,7 @@ class RequestValidationMiddleware(BaseHTTPMiddleware):
 
     def _is_suspicious(self, value: str) -> bool:
         """危険パターンの検出"""
-        for pattern in self._compiled_patterns:
-            if pattern.search(value):
-                return True
-        return False
+        return any(pattern.search(value) for pattern in self._compiled_patterns)
 
 
 class IPThrottleMiddleware(BaseHTTPMiddleware):
@@ -136,9 +127,7 @@ class IPThrottleMiddleware(BaseHTTPMiddleware):
         # {ip: blocked_until}
         self._blocked: dict[str, float] = {}
 
-    async def dispatch(
-        self, request: Request, call_next: RequestResponseEndpoint
-    ) -> Response:
+    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         client_ip = request.client.host if request.client else "0.0.0.0"
         now = time.time()
 
@@ -155,16 +144,15 @@ class IPThrottleMiddleware(BaseHTTPMiddleware):
 
         # リクエストログ更新
         window_start = now - 60  # 直近1分
-        self._request_log[client_ip] = [
-            t for t in self._request_log[client_ip] if t > window_start
-        ]
+        self._request_log[client_ip] = [t for t in self._request_log[client_ip] if t > window_start]
         self._request_log[client_ip].append(now)
 
         if len(self._request_log[client_ip]) > self._max_rpm:
             self._blocked[client_ip] = now + self._block_duration
             logger.warning(
                 "IPブロック: ip={}, requests_in_minute={}",
-                client_ip, len(self._request_log[client_ip]),
+                client_ip,
+                len(self._request_log[client_ip]),
             )
             return Response(
                 content="Too Many Requests",

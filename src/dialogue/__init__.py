@@ -1,4 +1,4 @@
-from src.dialogue.protocol import DialogueMessageSchema
 from src.dialogue.bus import DialogueBus
+from src.dialogue.protocol import DialogueMessageSchema
 
-__all__ = ["DialogueMessageSchema", "DialogueBus"]
+__all__ = ["DialogueBus", "DialogueMessageSchema"]

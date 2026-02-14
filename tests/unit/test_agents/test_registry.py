@@ -1,10 +1,11 @@
 """Agent Registry テスト"""
 
-import pytest
 from unittest.mock import MagicMock
 
+import pytest
+
+from src.agents.base import BaseAuditAgent
 from src.agents.registry import AgentRegistry
-from src.agents.base import BaseAuditAgent, AgentResult
 from src.agents.state import AuditorState
 
 

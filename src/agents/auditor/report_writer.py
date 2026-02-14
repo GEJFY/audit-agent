@@ -1,7 +1,6 @@
 """Report Writer Agent — 監査報告書自動生成"""
 
 import json
-from typing import Any
 
 from loguru import logger
 

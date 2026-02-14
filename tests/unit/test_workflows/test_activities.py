@@ -1,7 +1,8 @@
 """Temporal Activities テスト"""
 
+from unittest.mock import MagicMock
+
 import pytest
-from unittest.mock import MagicMock, AsyncMock, patch
 
 from src.workflows.activities import (
     AgentActivityInput,
@@ -57,8 +58,8 @@ class TestGetOrCreateAgent:
 
     def test_get_from_registry(self, mock_llm_gateway: MagicMock) -> None:
         """レジストリにあればそこから取得"""
-        from src.agents.registry import AgentRegistry
         from src.agents.base import BaseAuditAgent
+        from src.agents.registry import AgentRegistry
         from src.agents.state import AuditorState
 
         class FakeAgent(BaseAuditAgent[AuditorState]):

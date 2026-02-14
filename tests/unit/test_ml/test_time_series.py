@@ -10,9 +10,7 @@ from tests.factories import create_time_series
 class TestTimeSeriesAnalyzer:
     """時系列分析のユニットテスト"""
 
-    async def test_detect_anomaly_trend(
-        self, sample_time_series_data: list[float]
-    ) -> None:
+    async def test_detect_anomaly_trend(self, sample_time_series_data: list[float]) -> None:
         """異常トレンド検出基本テスト"""
         analyzer = TimeSeriesAnalyzer()
 
@@ -83,10 +81,7 @@ class TestTimeSeriesAnalyzer:
     async def test_forecast_kpi(self) -> None:
         """KPI予測テスト"""
         analyzer = TimeSeriesAnalyzer()
-        historical = [
-            {"date": f"2025-01-{i+1:02d}", "value": 100 + i * 2.0}
-            for i in range(30)
-        ]
+        historical = [{"date": f"2025-01-{i + 1:02d}", "value": 100 + i * 2.0} for i in range(30)]
 
         forecast = await analyzer.forecast_kpi(historical, periods=10)
 

@@ -1,11 +1,11 @@
 """Dialogue Bus テスト"""
 
-import pytest
 from uuid import uuid4
 
-from src.config.constants import DialogueMessageType
+import pytest
+
 from src.dialogue.bus import DialogueBus
-from src.dialogue.protocol import QuestionMessage, AnswerMessage
+from src.dialogue.protocol import AnswerMessage, QuestionMessage
 
 
 @pytest.fixture

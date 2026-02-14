@@ -37,10 +37,7 @@ class SharePointConnector(BaseConnector):
 
         try:
             self._client = httpx.AsyncClient(timeout=30.0)
-            token_url = (
-                f"https://login.microsoftonline.com/{self._tenant_id}"
-                "/oauth2/v2.0/token"
-            )
+            token_url = f"https://login.microsoftonline.com/{self._tenant_id}/oauth2/v2.0/token"
             response = await self._client.post(
                 token_url,
                 data={
@@ -110,30 +107,22 @@ class SharePointConnector(BaseConnector):
                 for container in hit_container.get("hitsContainers", []):
                     for hit in container.get("hits", []):
                         resource = hit.get("resource", {})
-                        results.append({
-                            "id": resource.get("id", ""),
-                            "name": resource.get("name", ""),
-                            "web_url": resource.get("webUrl", ""),
-                            "size": resource.get("size", 0),
-                            "created_datetime": resource.get("createdDateTime", ""),
-                            "last_modified_datetime": resource.get(
-                                "lastModifiedDateTime", ""
-                            ),
-                            "created_by": (
-                                resource.get("createdBy", {})
-                                .get("user", {})
-                                .get("displayName", "")
-                            ),
-                            "mime_type": (
-                                resource.get("file", {}).get("mimeType", "")
-                            ),
-                            "source": "sharepoint",
-                            "summary": hit.get("summary", ""),
-                        })
+                        results.append(
+                            {
+                                "id": resource.get("id", ""),
+                                "name": resource.get("name", ""),
+                                "web_url": resource.get("webUrl", ""),
+                                "size": resource.get("size", 0),
+                                "created_datetime": resource.get("createdDateTime", ""),
+                                "last_modified_datetime": resource.get("lastModifiedDateTime", ""),
+                                "created_by": (resource.get("createdBy", {}).get("user", {}).get("displayName", "")),
+                                "mime_type": (resource.get("file", {}).get("mimeType", "")),
+                                "source": "sharepoint",
+                                "summary": hit.get("summary", ""),
+                            }
+                        )
 
-            logger.info(
-                "SharePoint検索完了: query='{}', results={}", query, len(results)
-            )
+            logger.info("SharePoint検索完了: query='{}', results={}", query, len(results))
             return results
 
         except httpx.HTTPStatusError as e:

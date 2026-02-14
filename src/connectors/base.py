@@ -3,8 +3,6 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
-from loguru import logger
-
 
 class BaseConnector(ABC):
     """外部システムコネクタの基底クラス"""

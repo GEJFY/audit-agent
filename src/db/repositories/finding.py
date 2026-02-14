@@ -2,7 +2,7 @@
 
 from uuid import UUID
 
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.db.models.auditor import Finding
@@ -15,9 +15,7 @@ class FindingRepository(BaseRepository[Finding]):
     def __init__(self, session: AsyncSession) -> None:
         super().__init__(Finding, session)
 
-    async def get_by_project(
-        self, tenant_id: str | UUID, project_id: str | UUID
-    ) -> list[Finding]:
+    async def get_by_project(self, tenant_id: str | UUID, project_id: str | UUID) -> list[Finding]:
         """プロジェクト別検出事項一覧"""
         query = (
             select(Finding)
@@ -30,9 +28,7 @@ class FindingRepository(BaseRepository[Finding]):
         result = await self._session.execute(query)
         return list(result.scalars().all())
 
-    async def get_risk_summary(
-        self, tenant_id: str | UUID, project_id: str | UUID
-    ) -> dict[str, int]:
+    async def get_risk_summary(self, tenant_id: str | UUID, project_id: str | UUID) -> dict[str, int]:
         """リスクレベル別集計"""
         query = (
             select(Finding.risk_level, func.count())

@@ -1,10 +1,9 @@
 """LangGraph共通State定義 — 全エージェントのステートマシン基盤"""
 
 from typing import Annotated, Any
-from uuid import UUID
 
-from pydantic import BaseModel, Field
 from langgraph.graph.message import add_messages
+from pydantic import BaseModel, Field
 
 
 class AgentMessage(BaseModel):

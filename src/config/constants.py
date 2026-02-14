@@ -83,8 +83,8 @@ class EscalationReason(StrEnum):
 
 # ── Agent動作モード ───────────────────────────────────
 class AgentMode(StrEnum):
-    AUDIT = "audit"       # 全判断に人間承認が必要
-    ASSIST = "assist"     # 定型タスクは自動、重要判断は人間承認
+    AUDIT = "audit"  # 全判断に人間承認が必要
+    ASSIST = "assist"  # 定型タスクは自動、重要判断は人間承認
     AUTONOMOUS = "autonomous"  # 自律実行（ログ記録のみ）
 
 

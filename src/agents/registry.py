@@ -34,10 +34,7 @@ class AgentRegistry:
 
     def list_agents(self) -> list[dict[str, str]]:
         """登録済みAgent一覧"""
-        return [
-            {"name": a.agent_name, "description": a.agent_description}
-            for a in self._agents.values()
-        ]
+        return [{"name": a.agent_name, "description": a.agent_description} for a in self._agents.values()]
 
     def has(self, agent_name: str) -> bool:
         """Agent登録確認"""

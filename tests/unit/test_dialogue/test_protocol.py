@@ -1,15 +1,16 @@
 """Dialogue Protocol テスト"""
 
-import pytest
 from uuid import uuid4
+
+import pytest
 
 from src.config.constants import DialogueMessageType
 from src.dialogue.protocol import (
-    DialogueMessageSchema,
-    QuestionMessage,
     AnswerMessage,
-    EvidenceRequestMessage,
+    DialogueMessageSchema,
     EscalationMessage,
+    EvidenceRequestMessage,
+    QuestionMessage,
 )
 
 

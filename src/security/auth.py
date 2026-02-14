@@ -15,13 +15,13 @@ from src.config.settings import get_settings
 class TokenPayload(BaseModel):
     """JWTトークンペイロード"""
 
-    sub: str          # user_id
-    tenant_id: str    # テナントID
-    role: str         # ユーザーロール
-    exp: datetime     # 有効期限
-    iat: datetime     # 発行日時
-    jti: str          # トークンID（ユニーク）
-    token_type: str   # access / refresh
+    sub: str  # user_id
+    tenant_id: str  # テナントID
+    role: str  # ユーザーロール
+    exp: datetime  # 有効期限
+    iat: datetime  # 発行日時
+    jti: str  # トークンID（ユニーク）
+    token_type: str  # access / refresh
 
 
 class TokenPair(BaseModel):
@@ -29,7 +29,7 @@ class TokenPair(BaseModel):
 
     access_token: str
     refresh_token: str
-    token_type: str = "bearer"
+    token_type: str = "bearer"  # noqa: S105
     expires_in: int  # アクセストークン有効期限（秒）
 
 

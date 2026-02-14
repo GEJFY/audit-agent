@@ -2,11 +2,10 @@
 
 import hashlib
 import mimetypes
-from typing import Any
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 from loguru import logger
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.dependencies import get_db_session
@@ -54,9 +53,7 @@ async def list_evidence(
     limit: int = 50,
 ) -> EvidenceListResponse:
     """証跡一覧"""
-    query = select(EvidenceRegistry).where(
-        EvidenceRegistry.tenant_id == user.tenant_id
-    )
+    query = select(EvidenceRegistry).where(EvidenceRegistry.tenant_id == user.tenant_id)
 
     if source_system:
         query = query.where(EvidenceRegistry.source_system == source_system)
@@ -90,7 +87,7 @@ async def upload_evidence(
     file_size = len(file_data)
 
     # ファイルタイプ判定
-    mime_type, _ = mimetypes.guess_type(file_name)
+    _mime_type, _ = mimetypes.guess_type(file_name)
     ext = file_name.rsplit(".", 1)[-1].lower() if "." in file_name else "unknown"
     file_type_map = {
         "pdf": "pdf",

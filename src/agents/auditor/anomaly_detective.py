@@ -55,20 +55,15 @@ class AnomalyDetectiveAgent(BaseAuditAgent[AuditorState]):
         state.findings.extend(findings)
 
         state.current_agent = self.agent_name
-        logger.info(
-            f"Anomaly Detective: 完了 — {len(confirmed_anomalies)}件確認, "
-            f"{len(findings)}件がFindingに昇格"
-        )
+        logger.info(f"Anomaly Detective: 完了 — {len(confirmed_anomalies)}件確認, {len(findings)}件がFindingに昇格")
         return state
 
-    async def _run_ml_detection(
-        self, data: list[dict[str, Any]]
-    ) -> list[dict[str, Any]]:
+    async def _run_ml_detection(self, data: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """MLモデルで統計的異常検出"""
         try:
             from src.ml.anomaly_detector import AnomalyDetector
 
-            detector = AnomalyDetector()
+            _detector = AnomalyDetector()
             # 実際のデータがある場合はMLモデルを実行
             # PoC段階ではプレースホルダー
             return []
@@ -107,11 +102,13 @@ class AnomalyDetectiveAgent(BaseAuditAgent[AuditorState]):
         for anomaly in llm_anomalies:
             confidence = anomaly.get("confidence", 0.5)
             if confidence >= 0.3:  # 低閾値で候補を保持
-                confirmed.append({
-                    **anomaly,
-                    "detection_method": "llm",
-                    "confirmed": confidence >= 0.7,
-                })
+                confirmed.append(
+                    {
+                        **anomaly,
+                        "detection_method": "llm",
+                        "confirmed": confidence >= 0.7,
+                    }
+                )
 
         # ML検出の異常をLLMで確認
         for ml_anomaly in ml_results:
@@ -124,18 +121,22 @@ class AnomalyDetectiveAgent(BaseAuditAgent[AuditorState]):
             try:
                 evaluation = json.loads(response)
                 if evaluation.get("is_true_positive", False):
-                    confirmed.append({
-                        **ml_anomaly,
-                        "detection_method": "ml+llm",
-                        "llm_evaluation": evaluation,
-                        "confirmed": True,
-                    })
+                    confirmed.append(
+                        {
+                            **ml_anomaly,
+                            "detection_method": "ml+llm",
+                            "llm_evaluation": evaluation,
+                            "confirmed": True,
+                        }
+                    )
             except json.JSONDecodeError:
-                confirmed.append({
-                    **ml_anomaly,
-                    "detection_method": "ml",
-                    "confirmed": False,
-                })
+                confirmed.append(
+                    {
+                        **ml_anomaly,
+                        "detection_method": "ml",
+                        "confirmed": False,
+                    }
+                )
 
         return confirmed
 

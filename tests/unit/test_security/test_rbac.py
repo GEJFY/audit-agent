@@ -2,8 +2,7 @@
 
 import pytest
 
-from src.config.constants import UserRole
-from src.security.rbac import RBACService, ROLE_PERMISSIONS, Permission
+from src.security.rbac import Permission, RBACService
 
 
 @pytest.mark.unit

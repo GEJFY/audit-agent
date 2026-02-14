@@ -4,11 +4,10 @@ import json
 from typing import Any
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from loguru import logger
 
 from src.api.dependencies import get_current_user_ws
-from src.config.settings import get_settings
 
 router = APIRouter()
 
@@ -20,9 +19,7 @@ class ConnectionManager:
         # {tenant_id: {user_id: [websocket, ...]}}
         self._connections: dict[str, dict[str, list[WebSocket]]] = {}
 
-    async def connect(
-        self, websocket: WebSocket, tenant_id: str, user_id: str
-    ) -> None:
+    async def connect(self, websocket: WebSocket, tenant_id: str, user_id: str) -> None:
         """接続追加"""
         await websocket.accept()
         if tenant_id not in self._connections:
@@ -34,10 +31,7 @@ class ConnectionManager:
 
     def disconnect(self, websocket: WebSocket, tenant_id: str, user_id: str) -> None:
         """接続削除"""
-        if (
-            tenant_id in self._connections
-            and user_id in self._connections[tenant_id]
-        ):
+        if tenant_id in self._connections and user_id in self._connections[tenant_id]:
             conns = self._connections[tenant_id][user_id]
             if websocket in conns:
                 conns.remove(websocket)
@@ -47,9 +41,7 @@ class ConnectionManager:
                 del self._connections[tenant_id]
         logger.info("WebSocket切断: tenant={}, user={}", tenant_id, user_id)
 
-    async def send_to_user(
-        self, tenant_id: str, user_id: str, data: dict[str, Any]
-    ) -> int:
+    async def send_to_user(self, tenant_id: str, user_id: str, data: dict[str, Any]) -> int:
         """特定ユーザーに送信"""
         sent = 0
         conns = self._connections.get(tenant_id, {}).get(user_id, [])
@@ -58,12 +50,10 @@ class ConnectionManager:
                 await ws.send_json(data)
                 sent += 1
             except Exception:
-                pass
+                logger.debug("WebSocket送信エラー (user)")
         return sent
 
-    async def broadcast_to_tenant(
-        self, tenant_id: str, data: dict[str, Any]
-    ) -> int:
+    async def broadcast_to_tenant(self, tenant_id: str, data: dict[str, Any]) -> int:
         """テナント全ユーザーにブロードキャスト"""
         sent = 0
         users = self._connections.get(tenant_id, {})
@@ -73,21 +63,14 @@ class ConnectionManager:
                     await ws.send_json(data)
                     sent += 1
                 except Exception:
-                    pass
+                    logger.debug("WebSocket送信エラー (broadcast)")
         return sent
 
     def get_active_count(self, tenant_id: str | None = None) -> int:
         """アクティブ接続数"""
         if tenant_id:
-            return sum(
-                len(conns)
-                for conns in self._connections.get(tenant_id, {}).values()
-            )
-        return sum(
-            len(conns)
-            for users in self._connections.values()
-            for conns in users.values()
-        )
+            return sum(len(conns) for conns in self._connections.get(tenant_id, {}).values())
+        return sum(len(conns) for users in self._connections.values() for conns in users.values())
 
 
 # シングルトン
@@ -142,10 +125,12 @@ async def websocket_endpoint(
 
             elif msg_type == "subscribe":
                 channels = data.get("channels", [])
-                await websocket.send_json({
-                    "type": "subscribed",
-                    "channels": channels,
-                })
+                await websocket.send_json(
+                    {
+                        "type": "subscribed",
+                        "channels": channels,
+                    }
+                )
 
             elif msg_type == "dialogue_send":
                 # Dialogue Busへメッセージ送信
@@ -153,10 +138,12 @@ async def websocket_endpoint(
                 await websocket.send_json(result)
 
             else:
-                await websocket.send_json({
-                    "type": "error",
-                    "message": f"不明なメッセージタイプ: {msg_type}",
-                })
+                await websocket.send_json(
+                    {
+                        "type": "error",
+                        "message": f"不明なメッセージタイプ: {msg_type}",
+                    }
+                )
 
     except WebSocketDisconnect:
         manager.disconnect(websocket, tenant_id, user_id)
@@ -165,9 +152,7 @@ async def websocket_endpoint(
         manager.disconnect(websocket, tenant_id, user_id)
 
 
-async def _handle_dialogue_send(
-    data: dict[str, Any], tenant_id: str, user_id: str
-) -> dict[str, Any]:
+async def _handle_dialogue_send(data: dict[str, Any], tenant_id: str, user_id: str) -> dict[str, Any]:
     """WebSocket経由の対話メッセージ送信"""
     content = data.get("content", "")
     to_tenant = data.get("to_tenant_id", "")
@@ -176,9 +161,9 @@ async def _handle_dialogue_send(
         return {"type": "error", "message": "content, to_tenant_idが必要です"}
 
     # DialogueBusに送信
+    from src.config.constants import DialogueMessageType
     from src.dialogue.bus import DialogueBus
     from src.dialogue.protocol import DialogueMessageSchema
-    from src.config.constants import DialogueMessageType
 
     bus = DialogueBus()
     try:
@@ -193,16 +178,19 @@ async def _handle_dialogue_send(
         sent = await bus.send(message)
 
         # 相手テナントにリアルタイム通知
-        await manager.broadcast_to_tenant(to_tenant, {
-            "type": "dialogue_message",
-            "data": {
-                "id": str(sent.id),
-                "from_tenant_id": tenant_id,
-                "content": content[:200],
-                "message_type": sent.message_type.value,
-                "timestamp": sent.timestamp.isoformat(),
+        await manager.broadcast_to_tenant(
+            to_tenant,
+            {
+                "type": "dialogue_message",
+                "data": {
+                    "id": str(sent.id),
+                    "from_tenant_id": tenant_id,
+                    "content": content[:200],
+                    "message_type": sent.message_type.value,
+                    "timestamp": sent.timestamp.isoformat(),
+                },
             },
-        })
+        )
 
         return {"type": "dialogue_sent", "message_id": str(sent.id)}
     except Exception as e:

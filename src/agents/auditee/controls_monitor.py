@@ -1,10 +1,10 @@
 """Controls Monitor Agent — 統制状態リアルタイムモニタリング（DB連携）"""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from loguru import logger
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.agents.base import BaseAuditAgent
@@ -55,8 +55,7 @@ class ControlsMonitorAgent(BaseAuditAgent[AuditeeState]):
                     "severity": "high",
                     "title": f"統制不備: {issue.get('control_name', '')}",
                     "description": (
-                        f"実施率: {issue.get('execution_rate', 0)}%, "
-                        f"逸脱率: {issue.get('deviation_rate', 0)}%"
+                        f"実施率: {issue.get('execution_rate', 0)}%, 逸脱率: {issue.get('deviation_rate', 0)}%"
                     ),
                     "escalate_to_auditor": True,
                 }
@@ -84,9 +83,7 @@ class ControlsMonitorAgent(BaseAuditAgent[AuditeeState]):
         logger.info("Controls Monitor: {}件の統制評価完了", len(scorecard))
         return state
 
-    async def _collect_controls_data(
-        self, state: AuditeeState
-    ) -> list[dict[str, Any]]:
+    async def _collect_controls_data(self, state: AuditeeState) -> list[dict[str, Any]]:
         """統制実施データをRCM・TestResultからDB集計"""
         try:
             async for session in get_session():
@@ -96,20 +93,15 @@ class ControlsMonitorAgent(BaseAuditAgent[AuditeeState]):
             return []
         return []
 
-    async def _query_controls_data(
-        self, session: AsyncSession, tenant_id: str
-    ) -> list[dict[str, Any]]:
+    async def _query_controls_data(self, session: AsyncSession, tenant_id: str) -> list[dict[str, Any]]:
         """DBからRCMとTestResultを結合して統制実施状況を集計"""
-        rcm_query = (
-            select(
-                RCM.control_id,
-                RCM.control_name,
-                RCM.control_type,
-                RCM.control_frequency,
-                RCM.id,
-            )
-            .where(RCM.tenant_id == tenant_id)
-        )
+        rcm_query = select(
+            RCM.control_id,
+            RCM.control_name,
+            RCM.control_type,
+            RCM.control_frequency,
+            RCM.id,
+        ).where(RCM.tenant_id == tenant_id)
         rcm_result = await session.execute(rcm_query)
         rcm_rows = rcm_result.fetchall()
 
@@ -123,8 +115,7 @@ class ControlsMonitorAgent(BaseAuditAgent[AuditeeState]):
                     func.count(TestResult.id).label("total_tests"),
                     func.sum(TestResult.exceptions_found).label("total_exceptions"),
                     func.sum(TestResult.sample_tested).label("total_samples"),
-                )
-                .where(
+                ).where(
                     TestResult.rcm_id == str(rcm_id),
                     TestResult.tenant_id == tenant_id,
                 )
@@ -138,16 +129,18 @@ class ControlsMonitorAgent(BaseAuditAgent[AuditeeState]):
             control_name = row[1] or ""
             category = self._infer_category(control_name, row[2] or "")
 
-            controls_data.append({
-                "control_id": row[0],
-                "control_name": control_name,
-                "category": category,
-                "control_type": row[2],
-                "frequency": row[3],
-                "executions": max(total_samples, total_tests),
-                "deviations": total_exceptions,
-                "rcm_id": str(rcm_id),
-            })
+            controls_data.append(
+                {
+                    "control_id": row[0],
+                    "control_name": control_name,
+                    "category": category,
+                    "control_type": row[2],
+                    "frequency": row[3],
+                    "executions": max(total_samples, total_tests),
+                    "deviations": total_exceptions,
+                    "rcm_id": str(rcm_id),
+                }
+            )
 
         # RCMが空の場合、ControlsStatusテーブルから既存データを取得
         if not controls_data:
@@ -155,13 +148,9 @@ class ControlsMonitorAgent(BaseAuditAgent[AuditeeState]):
 
         return controls_data
 
-    async def _fallback_controls_status(
-        self, session: AsyncSession, tenant_id: str
-    ) -> list[dict[str, Any]]:
+    async def _fallback_controls_status(self, session: AsyncSession, tenant_id: str) -> list[dict[str, Any]]:
         """ControlsStatusテーブルからフォールバック取得"""
-        result = await session.execute(
-            select(ControlsStatus).where(ControlsStatus.tenant_id == tenant_id)
-        )
+        result = await session.execute(select(ControlsStatus).where(ControlsStatus.tenant_id == tenant_id))
         rows = result.scalars().all()
         return [
             {
@@ -189,9 +178,7 @@ class ControlsMonitorAgent(BaseAuditAgent[AuditeeState]):
             return "reporting"
         return "other"
 
-    def _calculate_scorecard(
-        self, controls_data: list[dict[str, Any]]
-    ) -> list[dict[str, Any]]:
+    def _calculate_scorecard(self, controls_data: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """スコアカード計算"""
         scorecard: list[dict[str, Any]] = []
 
@@ -208,18 +195,18 @@ class ControlsMonitorAgent(BaseAuditAgent[AuditeeState]):
             else:
                 status = "red"
 
-            scorecard.append({
-                **control,
-                "execution_rate": round(execution_rate, 1),
-                "deviation_rate": round(deviation_rate, 1),
-                "status": status,
-            })
+            scorecard.append(
+                {
+                    **control,
+                    "execution_rate": round(execution_rate, 1),
+                    "deviation_rate": round(deviation_rate, 1),
+                    "status": status,
+                }
+            )
 
         return scorecard
 
-    def _analyze_trends(
-        self, scorecard: list[dict[str, Any]]
-    ) -> dict[str, int]:
+    def _analyze_trends(self, scorecard: list[dict[str, Any]]) -> dict[str, int]:
         """スコアカードのサマリを集計"""
         summary = {"green": 0, "yellow": 0, "red": 0}
         for card in scorecard:
@@ -228,13 +215,11 @@ class ControlsMonitorAgent(BaseAuditAgent[AuditeeState]):
                 summary[status] += 1
         return summary
 
-    async def _persist_scorecard(
-        self, tenant_id: str, scorecard: list[dict[str, Any]]
-    ) -> None:
+    async def _persist_scorecard(self, tenant_id: str, scorecard: list[dict[str, Any]]) -> None:
         """スコアカードをDBに保存（upsert）"""
         try:
             async for session in get_session():
-                now = datetime.now(timezone.utc).isoformat()
+                now = datetime.now(UTC).isoformat()
                 for card in scorecard:
                     existing = await session.execute(
                         select(ControlsStatus).where(
@@ -299,7 +284,7 @@ class ControlsMonitorAgent(BaseAuditAgent[AuditeeState]):
                     },
                     status="open",
                     escalated_to_auditor=alert.get("escalate_to_auditor", True),
-                    escalated_at=datetime.now(timezone.utc).isoformat(),
+                    escalated_at=datetime.now(UTC).isoformat(),
                 )
                 session.add(new_alert)
                 await session.commit()

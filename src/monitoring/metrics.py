@@ -1,6 +1,6 @@
 """Prometheus メトリクス定義"""
 
-from prometheus_client import Counter, Histogram, Gauge, Info
+from prometheus_client import Counter, Gauge, Histogram, Info
 
 # ── アプリケーション情報 ──────────────────────────────
 app_info = Info("audit_agent", "アプリケーション情報")

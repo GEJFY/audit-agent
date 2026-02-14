@@ -2,7 +2,7 @@
 
 import os
 from typing import Any
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 from uuid import UUID, uuid4
 
 import pytest
@@ -170,8 +170,7 @@ def make_dialogue_message() -> Any:
             message_type=DialogueMessageType(msg_type),
             content=content,
             confidence=confidence,
-            **{k: v for k, v in kwargs.items()
-               if k not in ("from_tenant_id", "to_tenant_id", "from_agent")},
+            **{k: v for k, v in kwargs.items() if k not in ("from_tenant_id", "to_tenant_id", "from_agent")},
         )
 
     return _make

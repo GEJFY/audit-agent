@@ -1,8 +1,7 @@
 """Anomaly Detector MLモデル テスト"""
 
-import pytest
 import pandas as pd
-import numpy as np
+import pytest
 
 from src.ml.anomaly_detector import AnomalyDetector
 from tests.factories import create_journal_entries

@@ -171,16 +171,16 @@ class SAPConnector(BaseConnector):
             results: list[dict[str, Any]] = []
             for item in results_raw:
                 # __metadata などSAP内部フィールドを除去
-                clean = {
-                    k: v for k, v in item.items() if not k.startswith("__")
-                }
+                clean = {k: v for k, v in item.items() if not k.startswith("__")}
                 clean["source"] = "sap"
                 clean["module"] = module
                 results.append(clean)
 
             logger.info(
                 "SAP検索完了: service={}, entity={}, results={}",
-                service, entity_set, len(results),
+                service,
+                entity_set,
+                len(results),
             )
             return results
 
@@ -209,21 +209,17 @@ class SAPConnector(BaseConnector):
             f"FiscalYear eq '{fiscal_year}'",
         ]
         if posting_date_from:
-            filters_parts.append(
-                f"PostingDate ge datetime'{posting_date_from}T00:00:00'"
-            )
+            filters_parts.append(f"PostingDate ge datetime'{posting_date_from}T00:00:00'")
         if posting_date_to:
-            filters_parts.append(
-                f"PostingDate le datetime'{posting_date_to}T23:59:59'"
-            )
+            filters_parts.append(f"PostingDate le datetime'{posting_date_to}T23:59:59'")
 
         return await self.search(
             "",
             module="fi",
             filters=" and ".join(filters_parts),
             select="CompanyCode,FiscalYear,AccountingDocument,PostingDate,"
-                   "GLAccount,AmountInCompanyCodeCurrency,DocumentDate,"
-                   "AccountingDocumentType,CreatedByUser",
+            "GLAccount,AmountInCompanyCodeCurrency,DocumentDate,"
+            "AccountingDocumentType,CreatedByUser",
             top=top,
         )
 

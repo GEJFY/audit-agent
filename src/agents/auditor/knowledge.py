@@ -47,9 +47,9 @@ class KnowledgeAgent(BaseAuditAgent[AuditorState]):
 
     # 検索するドキュメントタイプ
     KNOWLEDGE_DOC_TYPES = [
-        "audit_standard",   # J-SOX, IIA基準
-        "regulation",       # 社内規程
-        "guidance",         # ガイダンス
+        "audit_standard",  # J-SOX, IIA基準
+        "regulation",  # 社内規程
+        "guidance",  # ガイダンス
     ]
 
     @property
@@ -73,14 +73,16 @@ class KnowledgeAgent(BaseAuditAgent[AuditorState]):
         answered_count = 0
         for question in pending:
             result = await self._search_knowledge_base(question, state.tenant_id)
-            state.dialogue_history.append({
-                "agent": self.agent_name,
-                "question": question,
-                "answer": result.get("answer", ""),
-                "confidence": result.get("confidence", 0.5),
-                "references": result.get("referenced_standards", []),
-                "sources_used": result.get("sources_used", 0),
-            })
+            state.dialogue_history.append(
+                {
+                    "agent": self.agent_name,
+                    "question": question,
+                    "answer": result.get("answer", ""),
+                    "confidence": result.get("confidence", 0.5),
+                    "references": result.get("referenced_standards", []),
+                    "sources_used": result.get("sources_used", 0),
+                }
+            )
             answered_count += 1
 
             # 判断を記録
@@ -90,9 +92,7 @@ class KnowledgeAgent(BaseAuditAgent[AuditorState]):
                 tenant_id=state.tenant_id,
                 decision="knowledge_searched",
                 reasoning=(
-                    f"質問: {query_str[:100]}, "
-                    f"検索結果: {result.get('sources_used', 0)}件, "
-                    f"信頼度: {confidence}"
+                    f"質問: {query_str[:100]}, 検索結果: {result.get('sources_used', 0)}件, 信頼度: {confidence}"
                 ),
                 confidence=confidence,
                 resource_type="knowledge_base",
@@ -103,15 +103,9 @@ class KnowledgeAgent(BaseAuditAgent[AuditorState]):
         logger.info("Knowledge: {}件の質問に回答完了", answered_count)
         return state
 
-    async def _search_knowledge_base(
-        self, question: dict[str, Any] | str, tenant_id: str
-    ) -> dict[str, Any]:
+    async def _search_knowledge_base(self, question: dict[str, Any] | str, tenant_id: str) -> dict[str, Any]:
         """pgvectorからRAG検索してLLMで回答生成"""
-        query = (
-            question.get("content", str(question))
-            if isinstance(question, dict)
-            else str(question)
-        )
+        query = question.get("content", str(question)) if isinstance(question, dict) else str(question)
 
         # pgvectorでセマンティック検索
         context_docs = await self._retrieve_context(query, tenant_id)
@@ -122,9 +116,7 @@ class KnowledgeAgent(BaseAuditAgent[AuditorState]):
         else:
             return await self._generate_direct_answer(query)
 
-    async def _retrieve_context(
-        self, query: str, tenant_id: str
-    ) -> list[dict[str, Any]]:
+    async def _retrieve_context(self, query: str, tenant_id: str) -> list[dict[str, Any]]:
         """pgvectorから関連文書を検索"""
         all_results: list[dict[str, Any]] = []
 
@@ -161,13 +153,13 @@ class KnowledgeAgent(BaseAuditAgent[AuditorState]):
 
         logger.debug(
             "知識ベース検索: query='{}', total={}, filtered={}",
-            query[:50], len(all_results), len(filtered),
+            query[:50],
+            len(all_results),
+            len(filtered),
         )
         return filtered[:8]  # 最大8件
 
-    async def _generate_rag_answer(
-        self, query: str, context_docs: list[dict[str, Any]]
-    ) -> dict[str, Any]:
+    async def _generate_rag_answer(self, query: str, context_docs: list[dict[str, Any]]) -> dict[str, Any]:
         """RAG: 検索結果をコンテキストとしてLLM回答を生成"""
         # コンテキストを整形
         context_parts: list[str] = []

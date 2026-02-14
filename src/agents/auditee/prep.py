@@ -53,14 +53,11 @@ JSON配列形式で返してください。
         except json.JSONDecodeError:
             return [response]
 
-    async def _generate_checklist(
-        self, state: AuditeeState, predicted_questions: list[str]
-    ) -> dict[str, Any]:
+    async def _generate_checklist(self, state: AuditeeState, predicted_questions: list[str]) -> dict[str, Any]:
         """準備チェックリスト生成"""
         return {
             "items": [
-                {"task": f"質問「{q[:50]}...」への回答準備", "status": "pending"}
-                for q in predicted_questions[:10]
+                {"task": f"質問「{q[:50]}...」への回答準備", "status": "pending"} for q in predicted_questions[:10]
             ],
             "completion_rate": 0.0,
         }

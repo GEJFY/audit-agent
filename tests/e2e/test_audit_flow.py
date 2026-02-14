@@ -1,9 +1,10 @@
 """E2E 監査フローテスト"""
 
-import pytest
-from unittest.mock import MagicMock, AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
-from src.agents.state import AuditorState, AuditeeState
+import pytest
+
+from src.agents.state import AuditeeState, AuditorState
 
 
 @pytest.mark.e2e
@@ -16,9 +17,9 @@ class TestAuditFlowE2E:
         planner → anomaly_detective の一連のフローを
         モック環境で実行し、Stateが正しく伝搬されることを検証。
         """
-        from src.llm_gateway.providers.base import LLMResponse
-        from src.agents.auditor.planner import PlannerAgent
         from src.agents.auditor.anomaly_detective import AnomalyDetectiveAgent
+        from src.agents.auditor.planner import PlannerAgent
+        from src.llm_gateway.providers.base import LLMResponse
 
         plan_response = LLMResponse(
             content='{"risk_areas": ["revenue"], "audit_scope": "Q3-Q4", "priority": "high"}',
@@ -32,7 +33,11 @@ class TestAuditFlowE2E:
         )
 
         anomaly_response = LLMResponse(
-            content='{"anomalies": [{"transaction_id": "JE-003", "anomaly_type": "amount", "severity": "high", "description": "高額期末仕訳", "confidence": 0.85}], "summary": "1件検出"}',
+            content=(
+                '{"anomalies": [{"transaction_id": "JE-003", "anomaly_type": "amount",'
+                ' "severity": "high", "description": "高額期末仕訳",'
+                ' "confidence": 0.85}], "summary": "1件検出"}'
+            ),
             model="claude-sonnet-4-5-20250929",
             provider="anthropic",
             input_tokens=300,
@@ -69,11 +74,15 @@ class TestAuditFlowE2E:
 
         質問受信 → 回答生成 の基本フロー。
         """
-        from src.llm_gateway.providers.base import LLMResponse
         from src.agents.auditee.response import ResponseAgent
+        from src.llm_gateway.providers.base import LLMResponse
 
         response_llm = LLMResponse(
-            content='{"response_draft": "購買承認は3段階制です。", "confidence": 0.85, "referenced_documents": ["購買規程"], "evidence_to_attach": [], "clarification_needed": []}',
+            content=(
+                '{"response_draft": "購買承認は3段階制です。", "confidence": 0.85,'
+                ' "referenced_documents": ["購買規程"],'
+                ' "evidence_to_attach": [], "clarification_needed": []}'
+            ),
             model="claude-sonnet-4-5-20250929",
             provider="anthropic",
             input_tokens=300,
@@ -110,8 +119,9 @@ class TestAuditFlowE2E:
         監査側 → 被監査側 → 監査側 のメッセージ往復。
         """
         from uuid import uuid4
+
         from src.dialogue.bus import DialogueBus
-        from src.dialogue.protocol import QuestionMessage, AnswerMessage
+        from src.dialogue.protocol import AnswerMessage, QuestionMessage
 
         bus = DialogueBus()
 
@@ -140,7 +150,7 @@ class TestAuditFlowE2E:
             thread_id=sent_q.thread_id,
             parent_message_id=sent_q.id,
         )
-        sent_a = await bus.send(answer)
+        _sent_a = await bus.send(answer)
 
         # スレッド確認
         thread = bus.get_thread(sent_q.thread_id)

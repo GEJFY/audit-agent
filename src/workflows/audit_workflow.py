@@ -127,9 +127,7 @@ class AuditProjectWorkflow:
         self._state["workflow_status"] = "completed"
         return self._state
 
-    async def _run_agent(
-        self, agent_name: str, tenant_id: str
-    ) -> AgentActivityOutput:
+    async def _run_agent(self, agent_name: str, tenant_id: str) -> AgentActivityOutput:
         """Agent Activityを実行"""
         return await workflow.execute_activity(
             run_auditor_agent,
@@ -183,9 +181,7 @@ class AuditProjectWorkflow:
         self._approval_pending = False
         return False
 
-    def _error_result(
-        self, message: str, detail: str | None = None
-    ) -> dict[str, Any]:
+    def _error_result(self, message: str, detail: str | None = None) -> dict[str, Any]:
         """エラー結果を生成"""
         self._state["workflow_status"] = "error"
         self._state["workflow_error"] = message

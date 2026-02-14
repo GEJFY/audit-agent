@@ -1,7 +1,7 @@
 """LLMコスト追跡"""
 
 from collections import defaultdict
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
 from src.llm_gateway.providers.base import LLMResponse
@@ -35,9 +35,7 @@ class CostTracker:
     def get_summary(self) -> dict[str, Any]:
         """コストサマリー"""
         total_cost = sum(r.total_cost_usd for r in self._records.values())
-        total_tokens = sum(
-            r.total_input_tokens + r.total_output_tokens for r in self._records.values()
-        )
+        total_tokens = sum(r.total_input_tokens + r.total_output_tokens for r in self._records.values())
 
         return {
             "total_cost_usd": round(total_cost, 6),

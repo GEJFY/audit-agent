@@ -108,15 +108,11 @@ class ResponseAgent(BaseAuditAgent[AuditeeState]):
 
         # 過去回答の再利用元を記録
         if past_responses:
-            draft["reused_source_ids"] = [
-                r.get("source_id", "") for r in past_responses if r.get("source_id")
-            ]
+            draft["reused_source_ids"] = [r.get("source_id", "") for r in past_responses if r.get("source_id")]
 
         return draft
 
-    async def _search_past_responses(
-        self, question: dict[str, Any], tenant_id: str
-    ) -> list[dict[str, Any]]:
+    async def _search_past_responses(self, question: dict[str, Any], tenant_id: str) -> list[dict[str, Any]]:
         """過去の類似回答をVectorStoreとDBから検索"""
         query_text = question.get("content", question.get("text", ""))
         if not query_text:
@@ -135,22 +131,22 @@ class ResponseAgent(BaseAuditAgent[AuditeeState]):
             )
             for vr in vector_results:
                 if vr.get("similarity", 0) >= 0.7:  # 類似度70%以上のみ
-                    results.append({
-                        "content": vr.get("content", ""),
-                        "similarity": vr.get("similarity", 0),
-                        "source_id": vr.get("source_id", ""),
-                        "metadata": vr.get("metadata", {}),
-                        "source": "vector_search",
-                    })
+                    results.append(
+                        {
+                            "content": vr.get("content", ""),
+                            "similarity": vr.get("similarity", 0),
+                            "source_id": vr.get("source_id", ""),
+                            "metadata": vr.get("metadata", {}),
+                            "source": "vector_search",
+                        }
+                    )
         except Exception as e:
             logger.warning("VectorStore検索エラー (past_responses): {}", str(e))
 
         # DBからも直近の回答を補完
         try:
             async for session in get_session():
-                db_results = await self._query_past_responses_db(
-                    session, tenant_id, query_text
-                )
+                db_results = await self._query_past_responses_db(session, tenant_id, query_text)
                 results.extend(db_results)
                 break
         except Exception as e:
@@ -159,9 +155,7 @@ class ResponseAgent(BaseAuditAgent[AuditeeState]):
         logger.debug("過去回答検索: {}件 (query='{}')", len(results), query_text[:50])
         return results
 
-    async def _query_past_responses_db(
-        self, session: AsyncSession, tenant_id: str, query: str
-    ) -> list[dict[str, Any]]:
+    async def _query_past_responses_db(self, session: AsyncSession, tenant_id: str, query: str) -> list[dict[str, Any]]:
         """DBから過去の回答履歴を取得"""
         result = await session.execute(
             select(AuditeeResponse)
@@ -185,9 +179,7 @@ class ResponseAgent(BaseAuditAgent[AuditeeState]):
             for r in rows
         ]
 
-    async def _search_regulations(
-        self, question: dict[str, Any], tenant_id: str
-    ) -> list[dict[str, Any]]:
+    async def _search_regulations(self, question: dict[str, Any], tenant_id: str) -> list[dict[str, Any]]:
         """関連する社内規程をVectorStoreから検索"""
         query_text = question.get("content", question.get("text", ""))
         if not query_text:
@@ -216,9 +208,7 @@ class ResponseAgent(BaseAuditAgent[AuditeeState]):
             logger.warning("VectorStore検索エラー (regulations): {}", str(e))
             return []
 
-    async def _search_evidence(
-        self, question: dict[str, Any], tenant_id: str
-    ) -> list[dict[str, Any]]:
+    async def _search_evidence(self, question: dict[str, Any], tenant_id: str) -> list[dict[str, Any]]:
         """関連証跡をDBから検索"""
         query_text = question.get("content", question.get("text", ""))
         if not query_text:
@@ -237,21 +227,21 @@ class ResponseAgent(BaseAuditAgent[AuditeeState]):
             )
             for vr in vector_results:
                 if vr.get("similarity", 0) >= 0.5:
-                    results.append({
-                        "content_preview": vr.get("content", "")[:200],
-                        "similarity": vr.get("similarity", 0),
-                        "source_id": vr.get("source_id", ""),
-                        "metadata": vr.get("metadata", {}),
-                    })
+                    results.append(
+                        {
+                            "content_preview": vr.get("content", "")[:200],
+                            "similarity": vr.get("similarity", 0),
+                            "source_id": vr.get("source_id", ""),
+                            "metadata": vr.get("metadata", {}),
+                        }
+                    )
         except Exception as e:
             logger.warning("VectorStore検索エラー (evidence): {}", str(e))
 
         # EvidenceRegistryからメタデータ検索
         try:
             async for session in get_session():
-                db_evidence = await self._query_evidence_db(
-                    session, tenant_id, query_text
-                )
+                db_evidence = await self._query_evidence_db(session, tenant_id, query_text)
                 results.extend(db_evidence)
                 break
         except Exception as e:
@@ -260,9 +250,7 @@ class ResponseAgent(BaseAuditAgent[AuditeeState]):
         logger.debug("証跡検索: {}件 (query='{}')", len(results), query_text[:50])
         return results
 
-    async def _query_evidence_db(
-        self, session: AsyncSession, tenant_id: str, query: str
-    ) -> list[dict[str, Any]]:
+    async def _query_evidence_db(self, session: AsyncSession, tenant_id: str, query: str) -> list[dict[str, Any]]:
         """EvidenceRegistryから関連証跡を検索"""
         # extracted_textが存在する証跡をキーワード検索
         keywords = [w for w in query.split() if len(w) >= 2]
@@ -285,14 +273,16 @@ class ResponseAgent(BaseAuditAgent[AuditeeState]):
             text_lower = text_content.lower()
             match_count = sum(1 for kw in keywords if kw.lower() in text_lower)
             if match_count > 0:
-                matched.append({
-                    "file_name": r.file_name,
-                    "file_type": r.file_type,
-                    "source_system": r.source_system,
-                    "evidence_id": str(r.id),
-                    "keyword_matches": match_count,
-                    "source": "evidence_registry",
-                })
+                matched.append(
+                    {
+                        "file_name": r.file_name,
+                        "file_type": r.file_type,
+                        "source_system": r.source_system,
+                        "evidence_id": str(r.id),
+                        "keyword_matches": match_count,
+                        "source": "evidence_registry",
+                    }
+                )
 
         # マッチ数で降順ソート
         matched.sort(key=lambda x: x.get("keyword_matches", 0), reverse=True)

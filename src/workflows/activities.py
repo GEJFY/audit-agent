@@ -59,6 +59,7 @@ def _get_or_create_agent(agent_name: str) -> Any:
         raise ValueError(f"Unknown agent: {agent_name}")
 
     import importlib
+
     module = importlib.import_module(mapping[0])
     cls = getattr(module, mapping[1])
     agent = cls(llm_gateway=gateway)
@@ -70,12 +71,12 @@ def _get_or_create_agent(agent_name: str) -> Any:
 
 
 @activity.defn(name="run_auditor_agent")
-async def run_auditor_agent(input: AgentActivityInput) -> AgentActivityOutput:
+async def run_auditor_agent(activity_input: AgentActivityInput) -> AgentActivityOutput:
     """監査側Agent実行Activity"""
-    logger.info("Activity実行: agent={}, tenant={}", input.agent_name, input.tenant_id)
+    logger.info("Activity実行: agent={}, tenant={}", activity_input.agent_name, activity_input.tenant_id)
     try:
-        agent = _get_or_create_agent(input.agent_name)
-        state = AuditorState(**input.state_dict)
+        agent = _get_or_create_agent(activity_input.agent_name)
+        state = AuditorState(**activity_input.state_dict)
 
         updated_state = await agent.run(state)
 
@@ -84,21 +85,21 @@ async def run_auditor_agent(input: AgentActivityInput) -> AgentActivityOutput:
             success=True,
         )
     except Exception as e:
-        logger.error("Activity失敗: agent={}, error={}", input.agent_name, str(e))
+        logger.error("Activity失敗: agent={}, error={}", activity_input.agent_name, str(e))
         return AgentActivityOutput(
-            updated_state=input.state_dict,
+            updated_state=activity_input.state_dict,
             success=False,
             error=str(e),
         )
 
 
 @activity.defn(name="run_auditee_agent")
-async def run_auditee_agent(input: AgentActivityInput) -> AgentActivityOutput:
+async def run_auditee_agent(activity_input: AgentActivityInput) -> AgentActivityOutput:
     """被監査側Agent実行Activity"""
-    logger.info("Activity実行: agent={}, tenant={}", input.agent_name, input.tenant_id)
+    logger.info("Activity実行: agent={}, tenant={}", activity_input.agent_name, activity_input.tenant_id)
     try:
-        agent = _get_or_create_agent(input.agent_name)
-        state = AuditeeState(**input.state_dict)
+        agent = _get_or_create_agent(activity_input.agent_name)
+        state = AuditeeState(**activity_input.state_dict)
 
         updated_state = await agent.run(state)
 
@@ -107,18 +108,16 @@ async def run_auditee_agent(input: AgentActivityInput) -> AgentActivityOutput:
             success=True,
         )
     except Exception as e:
-        logger.error("Activity失敗: agent={}, error={}", input.agent_name, str(e))
+        logger.error("Activity失敗: agent={}, error={}", activity_input.agent_name, str(e))
         return AgentActivityOutput(
-            updated_state=input.state_dict,
+            updated_state=activity_input.state_dict,
             success=False,
             error=str(e),
         )
 
 
 @activity.defn(name="send_notification")
-async def send_notification(
-    tenant_id: str, message: str, channel: str = "slack"
-) -> bool:
+async def send_notification(tenant_id: str, message: str, channel: str = "slack") -> bool:
     """通知送信Activity（Slack, Email等）"""
     logger.info("通知送信: tenant={}, channel={}", tenant_id, channel)
     # Phase 1+で実装: Slack API, SendGrid等
@@ -126,9 +125,7 @@ async def send_notification(
 
 
 @activity.defn(name="check_approval_status")
-async def check_approval_status(
-    tenant_id: str, decision_id: str
-) -> dict[str, Any]:
+async def check_approval_status(tenant_id: str, decision_id: str) -> dict[str, Any]:
     """承認ステータス確認Activity"""
     from sqlalchemy import select
 

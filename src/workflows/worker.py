@@ -9,8 +9,8 @@ from temporalio.worker import Worker
 from src.config.settings import get_settings
 from src.workflows.activities import (
     check_approval_status,
-    run_auditor_agent,
     run_auditee_agent,
+    run_auditor_agent,
     send_notification,
 )
 from src.workflows.audit_workflow import AuditProjectWorkflow
@@ -86,9 +86,7 @@ async def start_workflow(
         task_queue=TASK_QUEUE,
     )
 
-    logger.info(
-        "ワークフロー開始: type={}, id={}", workflow_type, handle.id
-    )
+    logger.info("ワークフロー開始: type={}, id={}", workflow_type, handle.id)
     return handle.id
 
 

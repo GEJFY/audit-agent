@@ -18,12 +18,12 @@ async def get_current_user(
     try:
         payload = _auth_service.verify_token(credentials.credentials)
         return payload
-    except Exception as e:
+    except Exception as err:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"認証エラー: {e!s}",
+            detail=f"認証エラー: {err!s}",
             headers={"WWW-Authenticate": "Bearer"},
-        )
+        ) from err
 
 
 def require_permission(permission: str):  # type: ignore[no-untyped-def]

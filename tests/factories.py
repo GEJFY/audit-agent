@@ -1,11 +1,10 @@
 """テストデータファクトリ"""
 
-from datetime import UTC, datetime
 from typing import Any
 from uuid import uuid4
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 
 
 def create_journal_entries(n: int = 100, anomaly_rate: float = 0.05) -> pd.DataFrame:
@@ -28,14 +27,16 @@ def create_journal_entries(n: int = 100, anomaly_rate: float = 0.05) -> pd.DataF
 
     dates = pd.date_range("2026-01-01", periods=n, freq="h")
 
-    df = pd.DataFrame({
-        "id": [f"JE-{i:04d}" for i in range(n)],
-        "date": dates[:n],
-        "account_code": accounts,
-        "amount": amounts.round(0).astype(int),
-        "description": [f"仕訳 {i}" for i in range(n)],
-        "timestamp": dates[:n],
-    })
+    df = pd.DataFrame(
+        {
+            "id": [f"JE-{i:04d}" for i in range(n)],
+            "date": dates[:n],
+            "account_code": accounts,
+            "amount": amounts.round(0).astype(int),
+            "description": [f"仕訳 {i}" for i in range(n)],
+            "timestamp": dates[:n],
+        }
+    )
 
     # シャッフル
     return df.sample(frac=1, random_state=42).reset_index(drop=True)
@@ -63,16 +64,18 @@ def create_dialogue_thread(n_messages: int = 5) -> list[dict[str, Any]]:
     messages = []
     for i in range(n_messages):
         is_auditor = i % 2 == 0
-        messages.append({
-            "id": str(uuid4()),
-            "thread_id": thread_id,
-            "from_tenant_id": auditor_tenant if is_auditor else auditee_tenant,
-            "to_tenant_id": auditee_tenant if is_auditor else auditor_tenant,
-            "from_agent": "auditor_controls_tester" if is_auditor else "auditee_response",
-            "message_type": "question" if is_auditor else "answer",
-            "content": f"メッセージ {i + 1}",
-            "confidence": 0.8 + (i * 0.02),
-        })
+        messages.append(
+            {
+                "id": str(uuid4()),
+                "thread_id": thread_id,
+                "from_tenant_id": auditor_tenant if is_auditor else auditee_tenant,
+                "to_tenant_id": auditee_tenant if is_auditor else auditor_tenant,
+                "from_agent": "auditor_controls_tester" if is_auditor else "auditee_response",
+                "message_type": "question" if is_auditor else "answer",
+                "content": f"メッセージ {i + 1}",
+                "confidence": 0.8 + (i * 0.02),
+            }
+        )
 
     return messages
 

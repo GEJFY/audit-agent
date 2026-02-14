@@ -4,7 +4,7 @@ import uuid as uuid_mod
 from typing import Any
 
 from loguru import logger
-from sqlalchemy import Column, Float, Index, String, Text, text
+from sqlalchemy import Column, String, Text, text
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -183,7 +183,7 @@ class VectorStore:
 
         result = await session.execute(
             text(
-                f"SELECT id, content, metadata, doc_type, source_id, "
+                f"SELECT id, content, metadata, doc_type, source_id, "  # noqa: S608
                 f"1 - (embedding <=> :query_embedding::vector) AS similarity "
                 f"FROM vector_documents "
                 f"WHERE {where_clause} "
@@ -196,14 +196,16 @@ class VectorStore:
         rows = result.fetchall()
         results: list[dict[str, Any]] = []
         for row in rows:
-            results.append({
-                "id": row[0],
-                "content": row[1],
-                "metadata": row[2],
-                "doc_type": row[3],
-                "source_id": row[4],
-                "similarity": float(row[5]),
-            })
+            results.append(
+                {
+                    "id": row[0],
+                    "content": row[1],
+                    "metadata": row[2],
+                    "doc_type": row[3],
+                    "source_id": row[4],
+                    "similarity": float(row[5]),
+                }
+            )
 
         logger.debug(
             "ベクトル検索完了: query='{}', results={}, top_similarity={}",
@@ -229,10 +231,7 @@ class VectorStore:
         """ソースID単位で文書削除"""
         session = await self._get_session()
         result = await session.execute(
-            text(
-                "DELETE FROM vector_documents "
-                "WHERE tenant_id = :tenant_id AND source_id = :source_id"
-            ),
+            text("DELETE FROM vector_documents WHERE tenant_id = :tenant_id AND source_id = :source_id"),
             {"tenant_id": tenant_id, "source_id": source_id},
         )
         await session.commit()

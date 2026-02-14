@@ -42,9 +42,7 @@ class ControlsTesterAgent(BaseAuditAgent[AuditorState]):
         logger.info(f"Controls Tester: {len(results)}件のテスト完了")
         return state
 
-    async def _execute_test(
-        self, procedure: dict[str, Any] | str, state: AuditorState
-    ) -> dict[str, Any]:
+    async def _execute_test(self, procedure: dict[str, Any] | str, state: AuditorState) -> dict[str, Any]:
         """個別テスト実行"""
         prompt = f"""
 以下の統制テスト手続を実行し、結果を評価してください。

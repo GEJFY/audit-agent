@@ -3,16 +3,16 @@
 from typing import Any
 
 from loguru import logger
-from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
+from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
 from src.config.settings import get_settings
 from src.llm_gateway.cost_tracker import CostTracker
 from src.llm_gateway.providers.base import BaseLLMProvider, LLMResponse
 from src.monitoring.metrics import (
-    llm_requests_total,
-    llm_tokens_total,
     llm_cost_total,
     llm_request_duration_seconds,
+    llm_requests_total,
+    llm_tokens_total,
 )
 
 

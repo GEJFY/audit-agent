@@ -1,8 +1,8 @@
 """Kafka Bus — Dialogue Busのエンタープライズ版メッセージブローカー"""
 
 import json
-from typing import Any, Callable
-from uuid import UUID
+from collections.abc import Callable
+from typing import Any
 
 from loguru import logger
 
@@ -32,13 +32,11 @@ class KafkaBus:
             return False
 
         try:
-            from aiokafka import AIOKafkaProducer, AIOKafkaConsumer
+            from aiokafka import AIOKafkaProducer
 
             self._producer = AIOKafkaProducer(
                 bootstrap_servers=self._bootstrap_servers,
-                value_serializer=lambda v: json.dumps(
-                    v, ensure_ascii=False, default=str
-                ).encode("utf-8"),
+                value_serializer=lambda v: json.dumps(v, ensure_ascii=False, default=str).encode("utf-8"),
                 key_serializer=lambda k: k.encode("utf-8") if k else None,
             )
             await self._producer.start()
@@ -99,7 +97,9 @@ class KafkaBus:
 
             logger.debug(
                 "Kafka送信: topic={}, key={}, msg_id={}",
-                target_topic, key, str(message.id),
+                target_topic,
+                key,
+                str(message.id),
             )
             return True
         except Exception as e:
@@ -132,7 +132,8 @@ class KafkaBus:
             await self._consumer.start()
             logger.info(
                 "Kafka Consumer開始: topics={}, group={}",
-                target_topics, group_id,
+                target_topics,
+                group_id,
             )
 
             async for msg in self._consumer:
@@ -166,12 +167,15 @@ class KafkaBus:
             from src.api.routes.websocket import get_connection_manager
 
             ws_manager = get_connection_manager()
-            await ws_manager.broadcast_to_tenant(to_tenant, {
-                "type": "dialogue_message",
-                "data": payload,
-            })
+            await ws_manager.broadcast_to_tenant(
+                to_tenant,
+                {
+                    "type": "dialogue_message",
+                    "data": payload,
+                },
+            )
         except Exception:
-            pass  # WebSocketが未起動の場合はスキップ
+            logger.debug("WebSocket未起動のためスキップ")
 
 
 # シングルトン

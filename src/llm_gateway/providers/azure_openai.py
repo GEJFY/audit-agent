@@ -97,10 +97,7 @@ class AzureOpenAIProvider(BaseLLMProvider):
         """構造化データ生成"""
         import json
 
-        schema_instruction = (
-            f"Respond with valid JSON matching this schema:\n"
-            f"{json.dumps(response_schema, indent=2)}"
-        )
+        schema_instruction = f"Respond with valid JSON matching this schema:\n{json.dumps(response_schema, indent=2)}"
         combined_system = f"{system_prompt}\n\n{schema_instruction}" if system_prompt else schema_instruction
         return await self.generate(prompt=prompt, system_prompt=combined_system, model=model, **kwargs)
 

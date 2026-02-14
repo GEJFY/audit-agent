@@ -11,7 +11,7 @@ from src.config.settings import get_settings
 from src.db.base import Base
 
 # モデルをインポートしてメタデータに登録
-from src.db.models import *  # noqa: F401, F403
+from src.db.models import *  # noqa: F403
 
 config = context.config
 

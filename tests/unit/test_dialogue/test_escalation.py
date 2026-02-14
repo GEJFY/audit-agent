@@ -1,11 +1,12 @@
 """Escalation Engine テスト"""
 
-import pytest
 from uuid import uuid4
 
-from src.config.constants import DialogueMessageType, EscalationReason, CONFIDENCE_THRESHOLD
-from src.dialogue.protocol import DialogueMessageSchema
+import pytest
+
+from src.config.constants import DialogueMessageType, EscalationReason
 from src.dialogue.escalation import EscalationEngine
+from src.dialogue.protocol import DialogueMessageSchema
 
 
 @pytest.fixture

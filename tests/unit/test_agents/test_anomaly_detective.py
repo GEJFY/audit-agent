@@ -1,7 +1,8 @@
 """Anomaly Detective Agent テスト"""
 
+from unittest.mock import AsyncMock, MagicMock
+
 import pytest
-from unittest.mock import MagicMock, AsyncMock
 
 from src.agents.auditor.anomaly_detective import AnomalyDetectiveAgent
 from src.agents.state import AuditorState
@@ -19,9 +20,7 @@ class TestAnomalyDetectiveAgent:
     def test_agent_name(self, anomaly_agent: AnomalyDetectiveAgent) -> None:
         assert anomaly_agent.agent_name == "auditor_anomaly_detective"
 
-    async def test_execute_empty_data(
-        self, anomaly_agent: AnomalyDetectiveAgent
-    ) -> None:
+    async def test_execute_empty_data(self, anomaly_agent: AnomalyDetectiveAgent) -> None:
         """空データでの実行テスト"""
         from src.llm_gateway.providers.base import LLMResponse
 
@@ -60,7 +59,11 @@ class TestAnomalyDetectiveAgent:
 
         anomaly_agent._llm.generate = AsyncMock(
             return_value=LLMResponse(
-                content='{"anomalies": [{"transaction_id": "JE-003", "anomaly_type": "amount", "severity": "high", "description": "異常に高額な期末調整仕訳", "confidence": 0.85}], "summary": "1件の異常検出"}',
+                content=(
+                    '{"anomalies": [{"transaction_id": "JE-003", "anomaly_type": "amount",'
+                    ' "severity": "high", "description": "異常に高額な期末調整仕訳",'
+                    ' "confidence": 0.85}], "summary": "1件の異常検出"}'
+                ),
                 model="claude-sonnet-4-5-20250929",
                 provider="anthropic",
                 input_tokens=200,
@@ -81,9 +84,7 @@ class TestAnomalyDetectiveAgent:
 
         assert result.current_agent == "auditor_anomaly_detective"
 
-    def test_promote_to_findings(
-        self, anomaly_agent: AnomalyDetectiveAgent
-    ) -> None:
+    def test_promote_to_findings(self, anomaly_agent: AnomalyDetectiveAgent) -> None:
         """重大異常のFinding昇格テスト"""
         state = AuditorState(project_id="test", tenant_id="test-tenant")
         anomalies = [

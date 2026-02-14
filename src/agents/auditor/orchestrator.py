@@ -1,7 +1,5 @@
 """監査側Orchestrator — 監査ワークフロー全体を統括指揮"""
 
-from typing import Any
-
 from loguru import logger
 
 from src.agents.base import BaseAuditAgent

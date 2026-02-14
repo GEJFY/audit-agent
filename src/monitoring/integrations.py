@@ -17,8 +17,8 @@ def setup_sentry() -> None:
     try:
         import sentry_sdk
         from sentry_sdk.integrations.fastapi import FastApiIntegration
-        from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
         from sentry_sdk.integrations.loguru import LoguruIntegration
+        from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 
         sentry_sdk.init(
             dsn=settings.sentry_dsn,
@@ -78,15 +78,18 @@ def setup_datadog() -> None:
         )
 
         # カスタムタグ
-        tracer.set_tags({
-            "env": settings.dd_env,
-            "service": settings.dd_service,
-            "version": _get_version(),
-        })
+        tracer.set_tags(
+            {
+                "env": settings.dd_env,
+                "service": settings.dd_service,
+                "version": _get_version(),
+            }
+        )
 
         logger.info(
             "Datadog APM初期化完了: service={}, env={}",
-            settings.dd_service, settings.dd_env,
+            settings.dd_service,
+            settings.dd_env,
         )
     except ImportError:
         logger.warning("ddtrace未インストール")
@@ -113,7 +116,7 @@ def setup_langsmith() -> None:
         # 接続テスト
         from langsmith import Client
 
-        client = Client()
+        _client = Client()
         # プロジェクト確認
         logger.info(
             "LangSmith初期化完了: project={}",
@@ -195,7 +198,6 @@ class LangSmithTracer:
             return
 
         try:
-            from langsmith import Client
             from langsmith.run_trees import RunTree
 
             run = RunTree(
@@ -223,7 +225,6 @@ class LangSmithTracer:
             return
 
         try:
-            from langsmith import Client
             from langsmith.run_trees import RunTree
 
             run = RunTree(
@@ -255,6 +256,7 @@ def _get_version() -> str:
     """バージョン取得"""
     try:
         from src import __version__
+
         return __version__
     except Exception:
         return "0.0.0"

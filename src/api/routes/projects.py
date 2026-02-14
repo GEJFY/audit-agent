@@ -1,10 +1,7 @@
 """監査プロジェクトエンドポイント — DB連携"""
 
-import uuid as uuid_mod
-from typing import Any
-
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select, func, update
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.dependencies import get_db_session
@@ -13,14 +10,12 @@ from src.api.schemas.projects import (
     AnomalyResponse,
     FindingCreate,
     FindingResponse,
-    FindingUpdate,
     ProjectCreate,
     ProjectListResponse,
     ProjectResponse,
     ProjectUpdate,
     RemediationCreate,
     RemediationResponse,
-    ReportCreate,
     ReportResponse,
 )
 from src.db.models.auditor import (
@@ -57,6 +52,7 @@ def _project_to_response(p: AuditProject) -> ProjectResponse:
 
 # ── プロジェクトCRUD ───────────────────────────────────
 
+
 @router.get("/", response_model=ProjectListResponse)
 async def list_projects(
     user: TokenPayload = Depends(require_permission("project:read")),
@@ -67,9 +63,7 @@ async def list_projects(
     fiscal_year: int | None = None,
 ) -> ProjectListResponse:
     """監査プロジェクト一覧"""
-    query = select(AuditProject).where(
-        AuditProject.tenant_id == user.tenant_id
-    )
+    query = select(AuditProject).where(AuditProject.tenant_id == user.tenant_id)
 
     if status_filter:
         query = query.where(AuditProject.status == status_filter)
@@ -162,7 +156,7 @@ async def update_project(
     update_data = data.model_dump(exclude_unset=True)
     for field, value in update_data.items():
         if field == "metadata":
-            setattr(project, "metadata_", value)
+            project.metadata_ = value
         else:
             setattr(project, field, value)
 
@@ -195,6 +189,7 @@ async def delete_project(
 
 # ── Findings ───────────────────────────────────────────
 
+
 @router.get("/{project_id}/findings", response_model=list[FindingResponse])
 async def list_findings(
     project_id: str,
@@ -203,10 +198,12 @@ async def list_findings(
 ) -> list[FindingResponse]:
     """プロジェクトの検出事項一覧"""
     result = await session.execute(
-        select(Finding).where(
+        select(Finding)
+        .where(
             Finding.project_id == project_id,
             Finding.tenant_id == user.tenant_id,
-        ).order_by(Finding.created_at.desc())
+        )
+        .order_by(Finding.created_at.desc())
     )
     findings = result.scalars().all()
     return [
@@ -242,9 +239,7 @@ async def create_finding(
     """検出事項を追加"""
     # 採番
     count_result = await session.execute(
-        select(func.count()).select_from(Finding).where(
-            Finding.project_id == project_id
-        )
+        select(func.count()).select_from(Finding).where(Finding.project_id == project_id)
     )
     seq = (count_result.scalar_one() or 0) + 1
     finding_ref = f"F-{project_id[:8].upper()}-{seq:03d}"
@@ -285,6 +280,7 @@ async def create_finding(
 
 # ── Anomalies ─────────────────────────────────────────
 
+
 @router.get("/{project_id}/anomalies", response_model=list[AnomalyResponse])
 async def list_anomalies(
     project_id: str,
@@ -293,10 +289,12 @@ async def list_anomalies(
 ) -> list[AnomalyResponse]:
     """プロジェクトの異常検知結果一覧"""
     result = await session.execute(
-        select(Anomaly).where(
+        select(Anomaly)
+        .where(
             Anomaly.project_id == project_id,
             Anomaly.tenant_id == user.tenant_id,
-        ).order_by(Anomaly.created_at.desc())
+        )
+        .order_by(Anomaly.created_at.desc())
     )
     anomalies = result.scalars().all()
     return [
@@ -318,6 +316,7 @@ async def list_anomalies(
 
 # ── Reports ────────────────────────────────────────────
 
+
 @router.get("/{project_id}/reports", response_model=list[ReportResponse])
 async def list_reports(
     project_id: str,
@@ -326,10 +325,12 @@ async def list_reports(
 ) -> list[ReportResponse]:
     """プロジェクトの報告書一覧"""
     result = await session.execute(
-        select(Report).where(
+        select(Report)
+        .where(
             Report.project_id == project_id,
             Report.tenant_id == user.tenant_id,
-        ).order_by(Report.created_at.desc())
+        )
+        .order_by(Report.created_at.desc())
     )
     reports = result.scalars().all()
     return [
@@ -350,6 +351,7 @@ async def list_reports(
 
 
 # ── Remediation Actions ───────────────────────────────
+
 
 @router.get("/{project_id}/remediations", response_model=list[RemediationResponse])
 async def list_remediations(

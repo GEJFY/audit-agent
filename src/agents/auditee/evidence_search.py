@@ -65,9 +65,7 @@ class EvidenceSearchAgent(BaseAuditAgent[AuditeeState]):
         logger.info("Evidence Search: {}件の証跡候補発見", len(results))
         return state
 
-    async def _search_sources(
-        self, request: dict[str, Any]
-    ) -> list[dict[str, Any]]:
+    async def _search_sources(self, request: dict[str, Any]) -> list[dict[str, Any]]:
         """複数ソースから証跡を並列検索"""
         query = request.get("query", request.get("description", ""))
         sources = request.get("sources", ["sharepoint", "sap", "email"])
@@ -77,17 +75,13 @@ class EvidenceSearchAgent(BaseAuditAgent[AuditeeState]):
         # 並列で各ソースを検索
         tasks = []
         for source in sources:
-            tasks.append(
-                self._search_single_source(
-                    source, query, max_results=max_per_source, file_type=file_type
-                )
-            )
+            tasks.append(self._search_single_source(source, query, max_results=max_per_source, file_type=file_type))
 
         source_results = await asyncio.gather(*tasks, return_exceptions=True)
 
         # 結果を統合・スコアリング
         all_results: list[dict[str, Any]] = []
-        for source, result in zip(sources, source_results):
+        for source, result in zip(sources, source_results, strict=False):
             if isinstance(result, Exception):
                 logger.error("証跡検索エラー ({}): {}", source, str(result))
                 continue
@@ -132,16 +126,20 @@ class EvidenceSearchAgent(BaseAuditAgent[AuditeeState]):
             # メタデータを付与
             enriched: list[dict[str, Any]] = []
             for item in results:
-                enriched.append({
-                    **item,
-                    "evidence_source": source,
-                    "search_query": query,
-                    "evidence_type": self._classify_evidence_type(item, source),
-                })
+                enriched.append(
+                    {
+                        **item,
+                        "evidence_source": source,
+                        "search_query": query,
+                        "evidence_type": self._classify_evidence_type(item, source),
+                    }
+                )
 
             logger.info(
                 "証跡検索完了 ({}): query='{}', results={}",
-                source, query[:50], len(enriched),
+                source,
+                query[:50],
+                len(enriched),
             )
             return enriched
 
@@ -155,18 +153,19 @@ class EvidenceSearchAgent(BaseAuditAgent[AuditeeState]):
         """ソースタイプに応じたコネクタを取得"""
         if source == "sharepoint":
             from src.connectors.sharepoint import SharePointConnector
+
             return SharePointConnector()
         elif source in ("sap", "erp"):
             from src.connectors.sap import SAPConnector
+
             return SAPConnector()
         elif source == "email":
             from src.connectors.email import EmailConnector
+
             return EmailConnector()
         return None
 
-    def _classify_evidence_type(
-        self, item: dict[str, Any], source: str
-    ) -> str:
+    def _classify_evidence_type(self, item: dict[str, Any], source: str) -> str:
         """証跡タイプを分類"""
         if source == "email":
             if item.get("has_attachments"):
@@ -197,26 +196,20 @@ class EvidenceSearchAgent(BaseAuditAgent[AuditeeState]):
             return "image"
         return "document"
 
-    def _calculate_relevance(
-        self, item: dict[str, Any], query: str
-    ) -> float:
+    def _calculate_relevance(self, item: dict[str, Any], query: str) -> float:
         """関連度スコアを算出（0.0〜1.0）"""
         score = 0.0
         query_lower = query.lower()
         query_terms = query_lower.split()
 
         # 名前・件名にクエリ語が含まれるか
-        name = (
-            item.get("name", "") or item.get("subject", "") or ""
-        ).lower()
+        name = (item.get("name", "") or item.get("subject", "") or "").lower()
         for term in query_terms:
             if term in name:
                 score += 0.3
 
         # 本文プレビューにクエリ語が含まれるか
-        body = (
-            item.get("summary", "") or item.get("body_preview", "") or ""
-        ).lower()
+        body = (item.get("summary", "") or item.get("body_preview", "") or "").lower()
         for term in query_terms:
             if term in body:
                 score += 0.1

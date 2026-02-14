@@ -1,7 +1,8 @@
 """Response Agent テスト"""
 
+from unittest.mock import AsyncMock, MagicMock
+
 import pytest
-from unittest.mock import MagicMock, AsyncMock
 
 from src.agents.auditee.response import ResponseAgent
 from src.agents.state import AuditeeState
@@ -29,7 +30,11 @@ class TestResponseAgent:
 
         response_agent._llm.generate = AsyncMock(
             return_value=LLMResponse(
-                content='{"response_draft": "購買承認フローは3段階制です。", "confidence": 0.82, "referenced_documents": ["購買規程 v3.0"], "evidence_to_attach": ["承認フロー図"], "clarification_needed": []}',
+                content=(
+                    '{"response_draft": "購買承認フローは3段階制です。",'
+                    ' "confidence": 0.82, "referenced_documents": ["購買規程 v3.0"],'
+                    ' "evidence_to_attach": ["承認フロー図"], "clarification_needed": []}'
+                ),
                 model="claude-sonnet-4-5-20250929",
                 provider="anthropic",
                 input_tokens=300,
@@ -52,9 +57,7 @@ class TestResponseAgent:
         assert result.current_phase == "responding"
         assert len(result.drafted_responses) == 1
 
-    async def test_execute_no_questions(
-        self, response_agent: ResponseAgent
-    ) -> None:
+    async def test_execute_no_questions(self, response_agent: ResponseAgent) -> None:
         """質問なしの実行テスト"""
         state = AuditeeState(
             tenant_id="test-tenant",

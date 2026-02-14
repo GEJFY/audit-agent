@@ -2,8 +2,8 @@
 
 from fastapi import Depends, HTTPException, status
 
-from src.security.auth import TokenPayload
 from src.api.middleware.auth import get_current_user
+from src.security.auth import TokenPayload
 
 
 async def get_current_tenant_id(

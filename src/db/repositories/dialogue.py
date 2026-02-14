@@ -25,9 +25,7 @@ class DialogueRepository(BaseRepository[DialogueMessage]):
         result = await self._session.execute(query)
         return list(result.scalars().all())
 
-    async def get_by_project(
-        self, project_id: str | UUID, limit: int = 100
-    ) -> list[DialogueMessage]:
+    async def get_by_project(self, project_id: str | UUID, limit: int = 100) -> list[DialogueMessage]:
         """プロジェクト別対話メッセージ"""
         query = (
             select(DialogueMessage)
@@ -38,9 +36,7 @@ class DialogueRepository(BaseRepository[DialogueMessage]):
         result = await self._session.execute(query)
         return list(result.scalars().all())
 
-    async def get_pending_approvals(
-        self, tenant_id: str | UUID
-    ) -> list[DialogueMessage]:
+    async def get_pending_approvals(self, tenant_id: str | UUID) -> list[DialogueMessage]:
         """承認待ちメッセージ一覧"""
         query = (
             select(DialogueMessage)
@@ -53,9 +49,7 @@ class DialogueRepository(BaseRepository[DialogueMessage]):
         result = await self._session.execute(query)
         return list(result.scalars().all())
 
-    async def get_escalated(
-        self, tenant_id: str | UUID
-    ) -> list[DialogueMessage]:
+    async def get_escalated(self, tenant_id: str | UUID) -> list[DialogueMessage]:
         """エスカレーション済みメッセージ"""
         query = (
             select(DialogueMessage)

@@ -32,10 +32,7 @@ class EscalationEngine:
             return True
 
         # エスカレーション理由が設定されている場合
-        if message.escalation_reason is not None:
-            return True
-
-        return False
+        return message.escalation_reason is not None
 
     def get_reason(self, message: DialogueMessageSchema) -> EscalationReason:
         """エスカレーション理由を判定"""

@@ -95,7 +95,7 @@ class HashChain:
             return False
 
         prev_hash = "0" * 64
-        for entry, expected_hash in zip(entries, hashes):
+        for entry, expected_hash in zip(entries, hashes, strict=False):
             entry_str = json.dumps(entry, sort_keys=True, default=str)
             combined = f"{prev_hash}:{entry_str}"
             computed_hash = hashlib.new(self._algorithm, combined.encode()).hexdigest()

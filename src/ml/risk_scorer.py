@@ -55,7 +55,7 @@ class RiskScorer:
 
     def fit(
         self,
-        X: list[dict[str, Any]],
+        x_data: list[dict[str, Any]],
         y: list[float],
         params: dict[str, Any] | None = None,
     ) -> None:
@@ -64,7 +64,7 @@ class RiskScorer:
             logger.warning("XGBoost未インストール、ルールベースで動作")
             return
 
-        features_array = np.vstack([self._extract_features(x) for x in X])
+        features_array = np.vstack([self._extract_features(x) for x in x_data])
         labels = np.array(y)
 
         default_params = {
@@ -85,13 +85,13 @@ class RiskScorer:
         self._model = xgb.XGBRegressor(**default_params)
         self._model.fit(features_array, labels)
         self._is_fitted = True
-        logger.info("RiskScorer訓練完了: samples={}", len(X))
+        logger.info("RiskScorer訓練完了: samples={}", len(x_data))
 
     def score(self, features: dict[str, Any]) -> float:
         """リスクスコア算出 (0-100)"""
         if self._is_fitted and self._model is not None:
-            X = self._extract_features(features)
-            prediction = float(self._model.predict(X)[0])
+            x_data = self._extract_features(features)
+            prediction = float(self._model.predict(x_data)[0])
             return min(100.0, max(0.0, prediction))
         return self._score_rule_based(features)
 
@@ -142,8 +142,8 @@ class RiskScorer:
     def batch_score(self, features_list: list[dict[str, Any]]) -> list[float]:
         """バッチスコアリング"""
         if self._is_fitted and self._model is not None and HAS_XGBOOST:
-            X = np.vstack([self._extract_features(f) for f in features_list])
-            predictions = self._model.predict(X)
+            x_data = np.vstack([self._extract_features(f) for f in features_list])
+            predictions = self._model.predict(x_data)
             return [min(100.0, max(0.0, float(p))) for p in predictions]
         return [self._score_rule_based(f) for f in features_list]
 
@@ -152,7 +152,7 @@ class RiskScorer:
         if not self._is_fitted or self._model is None:
             return {}
         importance = self._model.feature_importances_
-        return dict(zip(self.FEATURE_NAMES, [float(v) for v in importance]))
+        return dict(zip(self.FEATURE_NAMES, [float(v) for v in importance], strict=False))
 
     def save(self, path: str) -> None:
         """モデル保存"""

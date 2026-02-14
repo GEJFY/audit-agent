@@ -44,7 +44,7 @@ class RiskAlertAgent(BaseAuditAgent[AuditeeState]):
             if alert.get("severity") in ("critical", "high"):
                 alert["escalate_to_auditor"] = True
                 logger.warning(
-                    f"重大リスク検出 — Auditor側にエスカレーション",
+                    "重大リスク検出 — Auditor側にエスカレーション",
                     alert_type=alert.get("type"),
                     severity=alert.get("severity"),
                 )
@@ -54,9 +54,7 @@ class RiskAlertAgent(BaseAuditAgent[AuditeeState]):
         logger.info(f"Risk Alert: {len(alerts)}件のアラート検出")
         return state
 
-    async def _scan_category(
-        self, category: str, state: AuditeeState
-    ) -> list[dict[str, Any]]:
+    async def _scan_category(self, category: str, state: AuditeeState) -> list[dict[str, Any]]:
         """カテゴリ別リスクスキャン"""
         prompt = f"""
 リスクカテゴリ「{category}」の監視データを分析してください。

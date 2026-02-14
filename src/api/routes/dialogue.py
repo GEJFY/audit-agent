@@ -1,11 +1,10 @@
 """対話エンドポイント — DB + Dialogue Bus連携"""
 
 import uuid as uuid_mod
-from datetime import datetime, timezone
-from typing import Any
+from datetime import UTC, datetime
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select, func, or_
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.dependencies import get_db_session
@@ -94,11 +93,7 @@ async def send_message(
     # スレッドID決定（新規 or 既存）
     thread_id = None
     if request.parent_message_id:
-        parent = await session.execute(
-            select(DialogueMessage).where(
-                DialogueMessage.id == request.parent_message_id
-            )
-        )
+        parent = await session.execute(select(DialogueMessage).where(DialogueMessage.id == request.parent_message_id))
         parent_msg = parent.scalar_one_or_none()
         if parent_msg:
             thread_id = parent_msg.thread_id or parent_msg.id
@@ -137,14 +132,18 @@ async def get_pending_approvals(
     session: AsyncSession = Depends(get_db_session),
 ) -> DialogueListResponse:
     """承認待ちメッセージ一覧"""
-    query = select(DialogueMessage).where(
-        or_(
-            DialogueMessage.from_tenant_id == user.tenant_id,
-            DialogueMessage.to_tenant_id == user.tenant_id,
-        ),
-        DialogueMessage.human_approved.is_(None),
-        DialogueMessage.confidence.isnot(None),
-    ).order_by(DialogueMessage.created_at.asc())
+    query = (
+        select(DialogueMessage)
+        .where(
+            or_(
+                DialogueMessage.from_tenant_id == user.tenant_id,
+                DialogueMessage.to_tenant_id == user.tenant_id,
+            ),
+            DialogueMessage.human_approved.is_(None),
+            DialogueMessage.confidence.isnot(None),
+        )
+        .order_by(DialogueMessage.created_at.asc())
+    )
 
     result = await session.execute(query)
     messages = result.scalars().all()
@@ -163,9 +162,7 @@ async def approve_message(
     session: AsyncSession = Depends(get_db_session),
 ) -> dict[str, str]:
     """メッセージ承認 / 却下"""
-    result = await session.execute(
-        select(DialogueMessage).where(DialogueMessage.id == message_id)
-    )
+    result = await session.execute(select(DialogueMessage).where(DialogueMessage.id == message_id))
     message = result.scalar_one_or_none()
     if message is None:
         raise HTTPException(status_code=404, detail="メッセージが見つかりません")
@@ -176,7 +173,7 @@ async def approve_message(
 
     message.human_approved = body.approved
     message.approved_by = user.sub
-    message.approved_at = datetime.now(timezone.utc).isoformat()
+    message.approved_at = datetime.now(UTC).isoformat()
 
     await session.commit()
 
@@ -192,13 +189,15 @@ async def get_thread(
 ) -> ThreadResponse:
     """スレッド詳細 — 時系列順のメッセージ一覧"""
     result = await session.execute(
-        select(DialogueMessage).where(
+        select(DialogueMessage)
+        .where(
             DialogueMessage.thread_id == thread_id,
             or_(
                 DialogueMessage.from_tenant_id == user.tenant_id,
                 DialogueMessage.to_tenant_id == user.tenant_id,
             ),
-        ).order_by(DialogueMessage.created_at.asc())
+        )
+        .order_by(DialogueMessage.created_at.asc())
     )
     messages = result.scalars().all()
 

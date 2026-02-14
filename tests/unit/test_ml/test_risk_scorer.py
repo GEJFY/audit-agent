@@ -1,7 +1,8 @@
 """Risk Scorer テスト"""
 
-import pytest
 from typing import Any
+
+import pytest
 
 from src.ml.risk_scorer import RiskScorer
 from tests.factories import create_risk_features

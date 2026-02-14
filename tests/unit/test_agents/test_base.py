@@ -1,9 +1,10 @@
 """BaseAuditAgent テスト"""
 
-import pytest
 from unittest.mock import MagicMock
 
-from src.agents.base import BaseAuditAgent, AgentResult
+import pytest
+
+from src.agents.base import BaseAuditAgent
 from src.agents.state import AuditorState
 from src.config.constants import CONFIDENCE_THRESHOLD
 
@@ -60,9 +61,7 @@ class TestBaseAuditAgent:
         result = await dummy_agent.call_llm("テストプロンプト")
         assert result == '{"result": "test"}'
 
-    def test_record_decision(
-        self, dummy_agent: DummyAgent, auditor_tenant_id: str
-    ) -> None:
+    def test_record_decision(self, dummy_agent: DummyAgent, auditor_tenant_id: str) -> None:
         """判断記録テスト"""
         dummy_agent.record_decision(
             tenant_id=str(auditor_tenant_id),

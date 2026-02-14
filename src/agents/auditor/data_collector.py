@@ -57,9 +57,7 @@ class DataCollectorAgent(BaseAuditAgent[AuditorState]):
         logger.info("Data Collector: {}件のデータセット収集完了", len(collected_data))
         return state
 
-    async def _collect_for_procedure(
-        self, procedure: dict[str, Any] | str
-    ) -> dict[str, Any]:
+    async def _collect_for_procedure(self, procedure: dict[str, Any] | str) -> dict[str, Any]:
         """テスト手続に基づいてデータ収集 — コネクタ経由"""
         if isinstance(procedure, str):
             procedure = {"description": procedure, "source_type": "sap", "module": "fi"}

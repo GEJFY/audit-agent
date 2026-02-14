@@ -120,6 +120,9 @@ ignore = [
     "S104",   # 0.0.0.0バインド許可
     "B008",   # Depends()関数コール許可
     "RUF012", # mutable class variable
+    "RUF001", # 全角文字（日本語プロジェクト）
+    "RUF002", # 全角文字（docstring）
+    "RUF003", # 全角文字（コメント）
 ]
 
 [tool.ruff.lint.per-file-ignores]

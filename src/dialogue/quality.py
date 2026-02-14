@@ -1,7 +1,5 @@
 """回答品質自動評価エンジン"""
 
-from typing import Any
-
 from loguru import logger
 
 from src.dialogue.protocol import DialogueMessageSchema

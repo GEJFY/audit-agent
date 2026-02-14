@@ -1,13 +1,14 @@
 """Dialogue Bus — Auditor ⇔ Auditee間の中央対話基盤"""
 
 from collections import defaultdict
+from collections.abc import Callable
 from datetime import UTC, datetime
-from typing import Any, Callable
-from uuid import UUID, uuid4
+from typing import Any
+from uuid import UUID
 
 from loguru import logger
 
-from src.config.constants import CONFIDENCE_THRESHOLD, DialogueMessageType
+from src.config.constants import DialogueMessageType
 from src.dialogue.escalation import EscalationEngine
 from src.dialogue.protocol import DialogueMessageSchema, EscalationMessage
 from src.dialogue.quality import QualityEvaluator
@@ -101,17 +102,11 @@ class DialogueBus:
 
     def get_messages_for_tenant(self, tenant_id: UUID) -> list[DialogueMessageSchema]:
         """テナント宛メッセージを取得"""
-        return [
-            m for m in self._message_log
-            if m.to_tenant_id == tenant_id or m.from_tenant_id == tenant_id
-        ]
+        return [m for m in self._message_log if m.to_tenant_id == tenant_id or m.from_tenant_id == tenant_id]
 
     def get_pending_approvals(self, tenant_id: UUID) -> list[DialogueMessageSchema]:
         """承認待ちメッセージを取得"""
-        return [
-            m for m in self._message_log
-            if m.from_tenant_id == tenant_id and m.human_approved is None
-        ]
+        return [m for m in self._message_log if m.from_tenant_id == tenant_id and m.human_approved is None]
 
     def approve_message(self, message_id: UUID, approver_id: UUID) -> bool:
         """メッセージを承認"""
@@ -136,9 +131,7 @@ class DialogueBus:
         # 簡易判定（実際にはテナントのタイプで判定）
         return "auditor_to_auditee"
 
-    async def _create_escalation(
-        self, original: DialogueMessageSchema
-    ) -> EscalationMessage:
+    async def _create_escalation(self, original: DialogueMessageSchema) -> EscalationMessage:
         """エスカレーションメッセージ作成"""
         reason = self._escalation_engine.get_reason(original)
         return EscalationMessage(
@@ -168,22 +161,25 @@ class DialogueBus:
             kafka_bus = get_kafka_bus()
             await kafka_bus.publish(message)
         except Exception:
-            pass  # Kafka未起動時はスキップ
+            logger.debug("Kafka未起動のためスキップ")
 
         # WebSocketリアルタイム通知
         try:
             from src.api.routes.websocket import get_connection_manager
 
             ws_manager = get_connection_manager()
-            await ws_manager.broadcast_to_tenant(tenant_id, {
-                "type": "dialogue_message",
-                "data": {
-                    "id": str(message.id),
-                    "from_agent": message.from_agent,
-                    "message_type": message.message_type.value,
-                    "content": message.content[:200],
-                    "timestamp": message.timestamp.isoformat(),
+            await ws_manager.broadcast_to_tenant(
+                tenant_id,
+                {
+                    "type": "dialogue_message",
+                    "data": {
+                        "id": str(message.id),
+                        "from_agent": message.from_agent,
+                        "message_type": message.message_type.value,
+                        "content": message.content[:200],
+                        "timestamp": message.timestamp.isoformat(),
+                    },
                 },
-            })
+            )
         except Exception:
-            pass  # WebSocket未起動時はスキップ
+            logger.debug("WebSocket未起動のためスキップ")

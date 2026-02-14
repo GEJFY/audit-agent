@@ -80,15 +80,10 @@ class TimeSeriesAnalyzer:
 
         # トレンド成分の抽出
         trend_values = forecast["trend"].values
-        trend_direction = float(trend_values[-1] - trend_values[0]) / max(
-            abs(trend_values[0]), 1.0
-        )
+        trend_direction = float(trend_values[-1] - trend_values[0]) / max(abs(trend_values[0]), 1.0)
 
         # 季節性の大きさ
-        if "weekly" in forecast.columns:
-            seasonality_magnitude = float(forecast["weekly"].std())
-        else:
-            seasonality_magnitude = 0.0
+        seasonality_magnitude = float(forecast["weekly"].std()) if "weekly" in forecast.columns else 0.0
 
         # 異常検知: 実測値が信頼区間外
         merged = forecast[: len(df)].copy()
@@ -98,15 +93,17 @@ class TimeSeriesAnalyzer:
         for idx, row in merged.iterrows():
             actual = row["actual"]
             if actual < row["yhat_lower"] or actual > row["yhat_upper"]:
-                anomalies.append({
-                    "index": int(idx),
-                    "date": str(row["ds"]),
-                    "actual": float(actual),
-                    "expected": float(row["yhat"]),
-                    "lower": float(row["yhat_lower"]),
-                    "upper": float(row["yhat_upper"]),
-                    "deviation": float(actual - row["yhat"]),
-                })
+                anomalies.append(
+                    {
+                        "index": int(idx),
+                        "date": str(row["ds"]),
+                        "actual": float(actual),
+                        "expected": float(row["yhat"]),
+                        "lower": float(row["yhat_lower"]),
+                        "upper": float(row["yhat_upper"]),
+                        "deviation": float(actual - row["yhat"]),
+                    }
+                )
 
         anomaly_probability = len(anomalies) / max(len(df), 1)
 
@@ -155,17 +152,19 @@ class TimeSeriesAnalyzer:
         mean = float(np.mean(residuals))
 
         anomalies: list[dict[str, Any]] = []
-        for i, (val, res) in enumerate(zip(values, residuals)):
+        for i, (val, res) in enumerate(zip(values, residuals, strict=False)):
             z = abs(res - mean) / max(std, 1e-10)
             if z > 2.5:
-                anomalies.append({
-                    "index": i,
-                    "date": str(df["ds"].iloc[i]),
-                    "actual": float(val),
-                    "expected": float(ma.values[i]),
-                    "deviation": float(res),
-                    "z_score": float(z),
-                })
+                anomalies.append(
+                    {
+                        "index": i,
+                        "date": str(df["ds"].iloc[i]),
+                        "actual": float(val),
+                        "expected": float(ma.values[i]),
+                        "deviation": float(res),
+                        "z_score": float(z),
+                    }
+                )
 
         anomaly_probability = len(anomalies) / max(n, 1)
 
@@ -173,12 +172,14 @@ class TimeSeriesAnalyzer:
         forecast: list[dict[str, Any]] = []
         for i in range(30):
             pred = float(coeffs[0] * (n + i) + coeffs[1])
-            forecast.append({
-                "date": str(df["ds"].iloc[-1] + pd.Timedelta(days=i + 1)),
-                "predicted": pred,
-                "lower": pred - 2 * std,
-                "upper": pred + 2 * std,
-            })
+            forecast.append(
+                {
+                    "date": str(df["ds"].iloc[-1] + pd.Timedelta(days=i + 1)),
+                    "predicted": pred,
+                    "lower": pred - 2 * std,
+                    "upper": pred + 2 * std,
+                }
+            )
 
         return {
             "trend": trend_direction,

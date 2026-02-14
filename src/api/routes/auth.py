@@ -1,6 +1,6 @@
 """認証エンドポイント — DB連携"""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -34,7 +34,7 @@ class RegisterRequest(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     refresh_token: str
-    token_type: str = "bearer"
+    token_type: str = "bearer"  # noqa: S105
     expires_in: int
 
 
@@ -59,9 +59,7 @@ async def login(
     session: AsyncSession = Depends(get_db_session),
 ) -> TokenResponse:
     """ログイン — DB認証 + JWTトークンペア発行"""
-    result = await session.execute(
-        select(User).where(User.email == request.email, User.is_active.is_(True))
-    )
+    result = await session.execute(select(User).where(User.email == request.email, User.is_active.is_(True)))
     user = result.scalar_one_or_none()
 
     if user is None:
@@ -76,7 +74,7 @@ async def login(
             detail="メールアドレスまたはパスワードが正しくありません",
         )
 
-    user.last_login_at = datetime.now(timezone.utc).isoformat()
+    user.last_login_at = datetime.now(UTC).isoformat()
     await session.commit()
 
     token_pair = _auth_service.create_token_pair(
@@ -99,9 +97,7 @@ async def register(
     session: AsyncSession = Depends(get_db_session),
 ) -> UserResponse:
     """ユーザー登録"""
-    existing = await session.execute(
-        select(User).where(User.email == request.email)
-    )
+    existing = await session.execute(select(User).where(User.email == request.email))
     if existing.scalar_one_or_none() is not None:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -138,14 +134,12 @@ async def register(
 async def refresh_token(request: RefreshRequest) -> TokenResponse:
     """トークンリフレッシュ"""
     try:
-        payload = _auth_service.verify_token(
-            request.refresh_token, expected_type="refresh"
-        )
-    except Exception as e:
+        payload = _auth_service.verify_token(request.refresh_token, expected_type="refresh")
+    except Exception as err:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"リフレッシュトークンが無効: {e!s}",
-        )
+            detail=f"リフレッシュトークンが無効: {err!s}",
+        ) from err
 
     token_pair = _auth_service.create_token_pair(
         user_id=UUID(payload.sub),

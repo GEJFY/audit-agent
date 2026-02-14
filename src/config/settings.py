@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     app_port: int = 8000
     app_host: str = "0.0.0.0"
     app_log_level: str = "DEBUG"
-    secret_key: str = "change-me-in-production"
+    secret_key: str = "change-me-in-production"  # noqa: S105
 
     # ── Database ──────────────────────────────────────
     database_url: str = "postgresql+asyncpg://audit_user:audit_pass@localhost:5432/audit_agent"
@@ -36,7 +36,7 @@ class Settings(BaseSettings):
     redis_max_connections: int = 50
 
     # ── JWT ───────────────────────────────────────────
-    jwt_secret_key: str = "change-me-in-production"
+    jwt_secret_key: str = "change-me-in-production"  # noqa: S105
     jwt_algorithm: str = "HS256"
     jwt_access_token_expire_minutes: int = 30
     jwt_refresh_token_expire_days: int = 7

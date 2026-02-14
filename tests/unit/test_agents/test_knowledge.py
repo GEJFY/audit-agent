@@ -1,7 +1,8 @@
 """Knowledge Agent テスト"""
 
+from unittest.mock import AsyncMock, MagicMock
+
 import pytest
-from unittest.mock import MagicMock, AsyncMock
 
 from src.agents.auditor.knowledge import KnowledgeAgent
 from src.agents.state import AuditorState
@@ -19,15 +20,16 @@ class TestKnowledgeAgent:
     def test_agent_name(self, knowledge_agent: KnowledgeAgent) -> None:
         assert knowledge_agent.agent_name == "auditor_knowledge"
 
-    async def test_execute_with_questions(
-        self, knowledge_agent: KnowledgeAgent
-    ) -> None:
+    async def test_execute_with_questions(self, knowledge_agent: KnowledgeAgent) -> None:
         """質問ありでの実行テスト"""
         from src.llm_gateway.providers.base import LLMResponse
 
         knowledge_agent._llm.generate = AsyncMock(
             return_value=LLMResponse(
-                content='{"answer": "J-SOX法では内部統制報告書の提出が義務付けられています", "references": ["J-SOX基準 第5条"], "confidence": 0.9}',
+                content=(
+                    '{"answer": "J-SOX法では内部統制報告書の提出が義務付けられています",'
+                    ' "references": ["J-SOX基準 第5条"], "confidence": 0.9}'
+                ),
                 model="claude-sonnet-4-5-20250929",
                 provider="anthropic",
                 input_tokens=300,
@@ -54,9 +56,7 @@ class TestKnowledgeAgent:
 
         assert result.current_agent == "auditor_knowledge"
 
-    async def test_execute_no_questions(
-        self, knowledge_agent: KnowledgeAgent
-    ) -> None:
+    async def test_execute_no_questions(self, knowledge_agent: KnowledgeAgent) -> None:
         """質問なしでの実行テスト"""
         state = AuditorState(
             project_id="test-project",
@@ -67,9 +67,7 @@ class TestKnowledgeAgent:
         result = await knowledge_agent.execute(state)
         assert result.current_agent == "auditor_knowledge"
 
-    async def test_generate_direct_answer(
-        self, knowledge_agent: KnowledgeAgent
-    ) -> None:
+    async def test_generate_direct_answer(self, knowledge_agent: KnowledgeAgent) -> None:
         """直接回答生成テスト（ベクトル検索結果なし時）"""
         from src.llm_gateway.providers.base import LLMResponse
 

@@ -3,18 +3,18 @@
 import pytest
 
 from src.monitoring.metrics import (
-    app_info,
-    http_requests_total,
-    http_request_duration_seconds,
-    agent_executions_total,
-    agent_execution_duration_seconds,
     agent_confidence_score,
-    llm_requests_total,
-    llm_tokens_total,
-    llm_cost_total,
+    agent_execution_duration_seconds,
+    agent_executions_total,
+    app_info,
+    db_pool_size,
     dialogue_messages_total,
     escalations_total,
-    db_pool_size,
+    http_request_duration_seconds,
+    http_requests_total,
+    llm_cost_total,
+    llm_requests_total,
+    llm_tokens_total,
 )
 
 

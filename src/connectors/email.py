@@ -36,10 +36,7 @@ class EmailConnector(BaseConnector):
 
         try:
             self._client = httpx.AsyncClient(timeout=30.0)
-            token_url = (
-                f"https://login.microsoftonline.com/{self._tenant_id}"
-                "/oauth2/v2.0/token"
-            )
+            token_url = f"https://login.microsoftonline.com/{self._tenant_id}/oauth2/v2.0/token"
             response = await self._client.post(
                 token_url,
                 data={
@@ -99,9 +96,7 @@ class EmailConnector(BaseConnector):
             # $search はトップレベルクエリ
             pass
         if from_address:
-            filter_parts.append(
-                f"from/emailAddress/address eq '{from_address}'"
-            )
+            filter_parts.append(f"from/emailAddress/address eq '{from_address}'")
         if date_from:
             filter_parts.append(f"receivedDateTime ge {date_from}T00:00:00Z")
         if date_to:
@@ -117,8 +112,7 @@ class EmailConnector(BaseConnector):
 
         params: dict[str, str] = {
             "$top": str(max_results),
-            "$select": "id,subject,bodyPreview,from,toRecipients,receivedDateTime,"
-                       "hasAttachments,importance,isRead",
+            "$select": "id,subject,bodyPreview,from,toRecipients,receivedDateTime,hasAttachments,importance,isRead",
             "$orderby": "receivedDateTime desc",
         }
         if query:
@@ -135,33 +129,24 @@ class EmailConnector(BaseConnector):
 
             results: list[dict[str, Any]] = []
             for msg in data.get("value", []):
-                results.append({
-                    "id": msg.get("id", ""),
-                    "subject": msg.get("subject", ""),
-                    "body_preview": msg.get("bodyPreview", ""),
-                    "from_name": (
-                        msg.get("from", {})
-                        .get("emailAddress", {})
-                        .get("name", "")
-                    ),
-                    "from_address": (
-                        msg.get("from", {})
-                        .get("emailAddress", {})
-                        .get("address", "")
-                    ),
-                    "to_recipients": [
-                        r.get("emailAddress", {}).get("address", "")
-                        for r in msg.get("toRecipients", [])
-                    ],
-                    "received_datetime": msg.get("receivedDateTime", ""),
-                    "has_attachments": msg.get("hasAttachments", False),
-                    "importance": msg.get("importance", "normal"),
-                    "source": "email",
-                })
+                results.append(
+                    {
+                        "id": msg.get("id", ""),
+                        "subject": msg.get("subject", ""),
+                        "body_preview": msg.get("bodyPreview", ""),
+                        "from_name": (msg.get("from", {}).get("emailAddress", {}).get("name", "")),
+                        "from_address": (msg.get("from", {}).get("emailAddress", {}).get("address", "")),
+                        "to_recipients": [
+                            r.get("emailAddress", {}).get("address", "") for r in msg.get("toRecipients", [])
+                        ],
+                        "received_datetime": msg.get("receivedDateTime", ""),
+                        "has_attachments": msg.get("hasAttachments", False),
+                        "importance": msg.get("importance", "normal"),
+                        "source": "email",
+                    }
+                )
 
-            logger.info(
-                "Email検索完了: query='{}', results={}", query, len(results)
-            )
+            logger.info("Email検索完了: query='{}', results={}", query, len(results))
             return results
 
         except httpx.HTTPStatusError as e:
@@ -175,9 +160,7 @@ class EmailConnector(BaseConnector):
             logger.error("Email検索エラー: {}", str(e))
             return []
 
-    async def get_attachments(
-        self, user_id: str, message_id: str
-    ) -> list[dict[str, Any]]:
+    async def get_attachments(self, user_id: str, message_id: str) -> list[dict[str, Any]]:
         """メール添付ファイル一覧取得"""
         if not self._access_token or not self._client:
             return []
@@ -185,8 +168,7 @@ class EmailConnector(BaseConnector):
         headers = {"Authorization": f"Bearer {self._access_token}"}
         try:
             response = await self._client.get(
-                f"https://graph.microsoft.com/v1.0/users/{user_id}"
-                f"/messages/{message_id}/attachments",
+                f"https://graph.microsoft.com/v1.0/users/{user_id}/messages/{message_id}/attachments",
                 headers=headers,
             )
             response.raise_for_status()
@@ -206,9 +188,7 @@ class EmailConnector(BaseConnector):
             logger.error("Email添付取得エラー: {}", str(e))
             return []
 
-    async def get_attachment_content(
-        self, user_id: str, message_id: str, attachment_id: str
-    ) -> bytes | None:
+    async def get_attachment_content(self, user_id: str, message_id: str, attachment_id: str) -> bytes | None:
         """添付ファイルコンテンツ取得"""
         if not self._access_token or not self._client:
             return None
@@ -216,8 +196,7 @@ class EmailConnector(BaseConnector):
         headers = {"Authorization": f"Bearer {self._access_token}"}
         try:
             response = await self._client.get(
-                f"https://graph.microsoft.com/v1.0/users/{user_id}"
-                f"/messages/{message_id}/attachments/{attachment_id}",
+                f"https://graph.microsoft.com/v1.0/users/{user_id}/messages/{message_id}/attachments/{attachment_id}",
                 headers=headers,
             )
             response.raise_for_status()

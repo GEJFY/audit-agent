@@ -1,7 +1,8 @@
 """Controls Monitor Agent テスト"""
 
+from unittest.mock import AsyncMock, MagicMock
+
 import pytest
-from unittest.mock import MagicMock, AsyncMock
 
 from src.agents.auditee.controls_monitor import ControlsMonitorAgent
 from src.agents.state import AuditeeState
@@ -19,15 +20,17 @@ class TestControlsMonitorAgent:
     def test_agent_name(self, monitor_agent: ControlsMonitorAgent) -> None:
         assert monitor_agent.agent_name == "auditee_controls_monitor"
 
-    async def test_execute_monitoring(
-        self, monitor_agent: ControlsMonitorAgent
-    ) -> None:
+    async def test_execute_monitoring(self, monitor_agent: ControlsMonitorAgent) -> None:
         """モニタリング実行テスト"""
         from src.llm_gateway.providers.base import LLMResponse
 
         monitor_agent._llm.generate = AsyncMock(
             return_value=LLMResponse(
-                content='{"controls_assessment": [{"control_id": "CTL-001", "status": "effective", "compliance_rate": 0.95}], "overall_score": 0.88, "recommendations": []}',
+                content=(
+                    '{"controls_assessment": [{"control_id": "CTL-001",'
+                    ' "status": "effective", "compliance_rate": 0.95}],'
+                    ' "overall_score": 0.88, "recommendations": []}'
+                ),
                 model="claude-sonnet-4-5-20250929",
                 provider="anthropic",
                 input_tokens=200,
@@ -49,15 +52,18 @@ class TestControlsMonitorAgent:
         assert result.current_agent == "auditee_controls_monitor"
         assert isinstance(result.controls_status, list)
 
-    async def test_execute_with_deficiency(
-        self, monitor_agent: ControlsMonitorAgent
-    ) -> None:
+    async def test_execute_with_deficiency(self, monitor_agent: ControlsMonitorAgent) -> None:
         """不備検出時のテスト"""
         from src.llm_gateway.providers.base import LLMResponse
 
         monitor_agent._llm.generate = AsyncMock(
             return_value=LLMResponse(
-                content='{"controls_assessment": [{"control_id": "CTL-002", "status": "deficient", "compliance_rate": 0.5, "deficiency_type": "significant"}], "overall_score": 0.5, "recommendations": ["即時改善が必要"]}',
+                content=(
+                    '{"controls_assessment": [{"control_id": "CTL-002",'
+                    ' "status": "deficient", "compliance_rate": 0.5,'
+                    ' "deficiency_type": "significant"}],'
+                    ' "overall_score": 0.5, "recommendations": ["即時改善が必要"]}'
+                ),
                 model="claude-sonnet-4-5-20250929",
                 provider="anthropic",
                 input_tokens=200,

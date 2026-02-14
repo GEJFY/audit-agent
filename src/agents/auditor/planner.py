@@ -74,9 +74,7 @@ JSON形式で以下を含むリスク評価結果を返してください:
         except json.JSONDecodeError:
             return {"raw_assessment": response, "confidence": 0.5}
 
-    async def _generate_plan(
-        self, state: AuditorState, risk_assessment: dict[str, Any]
-    ) -> dict[str, Any]:
+    async def _generate_plan(self, state: AuditorState, risk_assessment: dict[str, Any]) -> dict[str, Any]:
         """監査計画を生成"""
         prompt = f"""
 以下のリスク評価結果に基づいて監査計画を策定してください。
@@ -92,7 +90,9 @@ JSON形式で以下を含む監査計画を返してください:
 - timeline: スケジュール
 - confidence: 計画の信頼度(0-1)
 """
-        response = await self.call_llm(prompt, system_prompt="あなたは内部監査計画の専門AIです。J-SOX要件を考慮してください。")
+        response = await self.call_llm(
+            prompt, system_prompt="あなたは内部監査計画の専門AIです。J-SOX要件を考慮してください。"
+        )
 
         try:
             return json.loads(response)

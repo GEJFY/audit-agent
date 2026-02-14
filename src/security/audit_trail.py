@@ -18,13 +18,13 @@ class AuditEntry(BaseModel):
     tenant_id: UUID
     user_id: UUID | None = None
     agent_name: str | None = None
-    action: str               # create, update, delete, execute, approve, reject
-    resource_type: str         # project, finding, evidence, dialogue, agent_decision
+    action: str  # create, update, delete, execute, approve, reject
+    resource_type: str  # project, finding, evidence, dialogue, agent_decision
     resource_id: str
     details: dict[str, Any] = Field(default_factory=dict)
     confidence: float | None = None  # Agent判断時の信頼度
-    hash: str = ""             # ハッシュチェーン値
-    previous_hash: str = ""    # 前エントリのハッシュ
+    hash: str = ""  # ハッシュチェーン値
+    previous_hash: str = ""  # 前エントリのハッシュ
 
 
 class AuditTrailService:

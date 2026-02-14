@@ -28,9 +28,7 @@ class ProjectRepository(BaseRepository[AuditProject]):
         result = await self._session.execute(query)
         return list(result.scalars().all())
 
-    async def get_by_fiscal_year(
-        self, tenant_id: str | UUID, fiscal_year: int
-    ) -> list[AuditProject]:
+    async def get_by_fiscal_year(self, tenant_id: str | UUID, fiscal_year: int) -> list[AuditProject]:
         """年度別プロジェクト取得"""
         query = (
             select(AuditProject)

@@ -1,9 +1,10 @@
 """Audit Trail テスト"""
 
-import pytest
 from uuid import uuid4
 
-from src.security.audit_trail import AuditTrailService, AuditEntry
+import pytest
+
+from src.security.audit_trail import AuditTrailService
 
 
 @pytest.mark.unit

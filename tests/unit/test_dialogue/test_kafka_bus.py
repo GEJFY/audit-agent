@@ -1,10 +1,11 @@
 """Kafka Bus テスト"""
 
-import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock
 from uuid import uuid4
 
-from src.dialogue.kafka_bus import KafkaBus, get_kafka_bus
+import pytest
+
+from src.dialogue.kafka_bus import KafkaBus
 from src.dialogue.protocol import QuestionMessage
 
 

@@ -3,7 +3,7 @@
 from typing import Any, Generic, TypeVar
 from uuid import UUID
 
-from sqlalchemy import select, update, delete, func
+from sqlalchemy import delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.db.base import Base
@@ -28,9 +28,9 @@ class BaseRepository(Generic[ModelT]):
         await self._session.flush()
         return instance
 
-    async def get_by_id(self, id: str | UUID, tenant_id: str | UUID | None = None) -> ModelT | None:
+    async def get_by_id(self, id_: str | UUID, tenant_id: str | UUID | None = None) -> ModelT | None:
         """IDでレコード取得"""
-        query = select(self._model).where(self._model.id == str(id))  # type: ignore[attr-defined]
+        query = select(self._model).where(self._model.id == str(id_))  # type: ignore[attr-defined]
         if tenant_id and hasattr(self._model, "tenant_id"):
             query = query.where(self._model.tenant_id == str(tenant_id))  # type: ignore[attr-defined]
         result = await self._session.execute(query)
@@ -65,14 +65,14 @@ class BaseRepository(Generic[ModelT]):
 
     async def update(
         self,
-        id: str | UUID,
+        id_: str | UUID,
         tenant_id: str | UUID | None = None,
         **kwargs: Any,
     ) -> ModelT | None:
         """レコード更新"""
         stmt = (
             update(self._model)
-            .where(self._model.id == str(id))  # type: ignore[attr-defined]
+            .where(self._model.id == str(id_))  # type: ignore[attr-defined]
             .values(**kwargs)
             .returning(self._model)
         )
@@ -82,9 +82,9 @@ class BaseRepository(Generic[ModelT]):
         result = await self._session.execute(stmt)
         return result.scalar_one_or_none()
 
-    async def delete(self, id: str | UUID, tenant_id: str | UUID | None = None) -> bool:
+    async def delete(self, id_: str | UUID, tenant_id: str | UUID | None = None) -> bool:
         """レコード削除"""
-        stmt = delete(self._model).where(self._model.id == str(id))  # type: ignore[attr-defined]
+        stmt = delete(self._model).where(self._model.id == str(id_))  # type: ignore[attr-defined]
         if tenant_id and hasattr(self._model, "tenant_id"):
             stmt = stmt.where(self._model.tenant_id == str(tenant_id))  # type: ignore[attr-defined]
 

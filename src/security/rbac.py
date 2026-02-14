@@ -49,22 +49,37 @@ PERMISSIONS = {
 ROLE_PERMISSIONS: dict[UserRole, set[str]] = {
     UserRole.ADMIN: set(PERMISSIONS.keys()),
     UserRole.AUDITOR: {
-        "project:read", "project:create", "project:update",
-        "agent:execute", "agent:configure", "agent:approve",
-        "dialogue:read", "dialogue:send", "dialogue:approve",
-        "evidence:read", "evidence:download",
-        "report:read", "report:create", "report:approve",
+        "project:read",
+        "project:create",
+        "project:update",
+        "agent:execute",
+        "agent:configure",
+        "agent:approve",
+        "dialogue:read",
+        "dialogue:send",
+        "dialogue:approve",
+        "evidence:read",
+        "evidence:download",
+        "report:read",
+        "report:create",
+        "report:approve",
     },
     UserRole.AUDITEE_MANAGER: {
         "project:read",
-        "dialogue:read", "dialogue:send", "dialogue:approve",
-        "evidence:read", "evidence:upload", "evidence:download",
+        "dialogue:read",
+        "dialogue:send",
+        "dialogue:approve",
+        "evidence:read",
+        "evidence:upload",
+        "evidence:download",
         "agent:execute",
     },
     UserRole.AUDITEE_USER: {
         "project:read",
-        "dialogue:read", "dialogue:send",
-        "evidence:read", "evidence:upload",
+        "dialogue:read",
+        "dialogue:send",
+        "evidence:read",
+        "evidence:upload",
     },
     UserRole.VIEWER: {
         "project:read",
@@ -101,6 +116,4 @@ class RBACService:
             PermissionError: 権限なし
         """
         if not self.has_permission(role, permission_key):
-            raise PermissionError(
-                f"Role '{role}' does not have permission '{permission_key}'"
-            )
+            raise PermissionError(f"Role '{role}' does not have permission '{permission_key}'")

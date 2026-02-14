@@ -1,12 +1,11 @@
 """エージェント操作エンドポイント — DB + Agent Registry連携"""
 
-import asyncio
 import uuid as uuid_mod
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select, func
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.dependencies import get_db_session, get_llm_gateway
@@ -128,9 +127,7 @@ async def list_agent_decisions(
     limit: int = 50,
 ) -> AgentDecisionListResponse:
     """Agent判断履歴"""
-    query = select(AgentDecision).where(
-        AgentDecision.tenant_id == user.tenant_id
-    )
+    query = select(AgentDecision).where(AgentDecision.tenant_id == user.tenant_id)
 
     if agent_type:
         query = query.where(AgentDecision.agent_type == agent_type)
@@ -188,13 +185,11 @@ async def approve_decision(
     await session.commit()
 
     # 承認キューにも反映
-    queue_result = await session.execute(
-        select(ApprovalQueue).where(ApprovalQueue.decision_id == decision_id)
-    )
+    queue_result = await session.execute(select(ApprovalQueue).where(ApprovalQueue.decision_id == decision_id))
     queue_item = queue_result.scalar_one_or_none()
     if queue_item:
         queue_item.status = body.action
-        queue_item.resolved_at = datetime.now(timezone.utc).isoformat()
+        queue_item.resolved_at = datetime.now(UTC).isoformat()
         queue_item.resolution_comment = body.comment
         await session.commit()
 

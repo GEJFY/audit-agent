@@ -1,9 +1,8 @@
 """FastAPI メインアプリケーション"""
 
 import asyncio
-from contextlib import asynccontextmanager
 from collections.abc import AsyncGenerator
-from typing import Any
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -18,7 +17,7 @@ from src.api.middleware.security import (
     RequestValidationMiddleware,
     SecurityHeadersMiddleware,
 )
-from src.api.routes import health, auth, projects, agents, dialogue, evidence, websocket
+from src.api.routes import agents, auth, dialogue, evidence, health, projects, websocket
 from src.config.settings import get_settings
 from src.monitoring.logging import setup_logging
 from src.monitoring.metrics import app_info
@@ -42,13 +41,16 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     )
 
     # メトリクス情報設定
-    app_info.info({
-        "version": __version__,
-        "environment": settings.app_env,
-    })
+    app_info.info(
+        {
+            "version": __version__,
+            "environment": settings.app_env,
+        }
+    )
 
     # 外部監視統合（Sentry, Datadog, LangSmith）
     from src.monitoring.integrations import setup_all_integrations
+
     setup_all_integrations()
 
     # Kafka Consumer起動（バックグラウンド）
@@ -73,7 +75,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
             await get_kafka_bus().disconnect()
         except Exception:
-            pass
+            logger.debug("Kafka Consumer停止時エラー")
 
     logger.info("audit-agent シャットダウン")
 

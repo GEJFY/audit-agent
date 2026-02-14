@@ -1,10 +1,11 @@
 """Quality Evaluator テスト"""
 
-import pytest
 from uuid import uuid4
 
+import pytest
+
 from src.config.constants import DialogueMessageType
-from src.dialogue.protocol import DialogueMessageSchema, QuestionMessage, AnswerMessage
+from src.dialogue.protocol import AnswerMessage, DialogueMessageSchema, QuestionMessage
 from src.dialogue.quality import QualityEvaluator
 
 
@@ -90,9 +91,7 @@ class TestQualityEvaluator:
             from_agent="test",
             message_type=DialogueMessageType.ANSWER,
             content="回答",
-            attachments=[
-                Attachment(file_name="file1.pdf", file_type="pdf", s3_path="s3://bucket/file1.pdf")
-            ],
+            attachments=[Attachment(file_name="file1.pdf", file_type="pdf", s3_path="s3://bucket/file1.pdf")],
         )
 
         score = evaluator._check_evidence(msg)

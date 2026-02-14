@@ -1,7 +1,8 @@
 """認証サービス テスト"""
 
-import pytest
 from uuid import uuid4
+
+import pytest
 
 from src.security.auth import AuthService
 
