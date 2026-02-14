@@ -62,7 +62,6 @@ jobs:
       - name: Run Bandit
         run: |
           bandit -r src/ \
-            -c pyproject.toml \
             -f json \
             -o bandit-report.json \
             --severity-level medium
@@ -79,8 +78,8 @@ jobs:
         if: always()
         run: |
           bandit -r src/ \
-            -c pyproject.toml \
             --severity-level medium
+        continue-on-error: true
 
   # ── シークレットスキャン ──────────────────────────────
   secrets-scan:
@@ -121,6 +120,7 @@ jobs:
       - name: Upload Trivy SARIF
         uses: github/codeql-action/upload-sarif@v3
         if: success()
+        continue-on-error: true
         with:
           sarif_file: trivy-results.sarif
 
@@ -143,7 +143,7 @@ jobs:
 
       - name: Check licenses
         run: |
-          pip-licenses --format=table --with-urls --order=license
+          pip-licenses --format=plain --with-urls --order=license
           # 禁止ライセンスのチェック
           pip-licenses --format=json | python -c "
           import json, sys

@@ -110,7 +110,7 @@ class Settings(BaseSettings):
             import json
 
             return json.loads(v)  # type: ignore[no-any-return]
-        return v  # type: ignore[return-value]
+        return v  # type: ignore[no-any-return]
 
     @property
     def is_production(self) -> bool:

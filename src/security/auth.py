@@ -42,11 +42,11 @@ class AuthService:
 
     def hash_password(self, password: str) -> str:
         """パスワードをbcryptハッシュ化"""
-        return self._pwd_context.hash(password)
+        return self._pwd_context.hash(password)  # type: ignore[no-any-return]
 
     def verify_password(self, plain_password: str, hashed_password: str) -> bool:
         """パスワード検証"""
-        return self._pwd_context.verify(plain_password, hashed_password)
+        return self._pwd_context.verify(plain_password, hashed_password)  # type: ignore[no-any-return]
 
     def create_token_pair(
         self,

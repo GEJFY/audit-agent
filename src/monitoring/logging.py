@@ -55,7 +55,7 @@ def setup_logging(level: str = "INFO", json_output: bool = True) -> None:
     if json_output:
         logger.add(
             sys.stdout,
-            format=_json_formatter,
+            format=_json_formatter,  # type: ignore[arg-type]
             level=level,
             serialize=False,
         )
@@ -79,7 +79,7 @@ def setup_logging(level: str = "INFO", json_output: bool = True) -> None:
         rotation="100 MB",
         retention="30 days",
         compression="gz",
-        format=_json_formatter if json_output else "{time} | {level} | {module}:{function}:{line} | {message}",
+        format=_json_formatter if json_output else "{time} | {level} | {module}:{function}:{line} | {message}",  # type: ignore[arg-type]
         level=level,
     )
 

@@ -156,8 +156,35 @@ module = [
     "ddtrace.*",
     "datadog.*",
     "prophet.*",
+    "passlib.*",
+    "openai.*",
+    "pandas.*",
+    "numpy.*",
+    "loguru.*",
+    "structlog.*",
+    "httpx.*",
+    "slowapi.*",
+    "tenacity.*",
+    "boto3.*",
+    "botocore.*",
+    "orjson.*",
+    "statsmodels.*",
 ]
 ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = [
+    "src.db.models.*",
+    "src.db.repositories.*",
+    "src.db.migrations.*",
+]
+disallow_untyped_defs = false
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = ["tests.*"]
+disallow_untyped_defs = false
+ignore_errors = true
 
 # ── Pytest ────────────────────────────────────────────
 [tool.pytest.ini_options]

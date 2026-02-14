@@ -85,7 +85,7 @@ class AnomalyDetectiveAgent(BaseAuditAgent[AuditorState]):
         response = await self.call_llm(prompt, system_prompt=SYSTEM_PROMPT)
 
         try:
-            return json.loads(response)
+            return json.loads(response)  # type: ignore[no-any-return]
         except json.JSONDecodeError:
             return {"raw_analysis": response, "anomalies": []}
 

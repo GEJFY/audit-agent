@@ -86,7 +86,7 @@ class S3Storage:
         if decrypt:
             data = self._encryption.decrypt_bytes(data)
 
-        return data
+        return data  # type: ignore[no-any-return]
 
     def generate_presigned_url(
         self,

@@ -52,7 +52,7 @@ async def execute_agent(
     registry = AgentRegistry.get_instance()
 
     # Agent存在確認
-    agent = registry.get_agent(request.agent_name)
+    agent = registry.get_agent(request.agent_name)  # type: ignore[attr-defined]
     if agent is None:
         raise HTTPException(
             status_code=404,
