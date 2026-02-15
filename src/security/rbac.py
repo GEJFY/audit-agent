@@ -43,6 +43,11 @@ PERMISSIONS = {
     "admin:users": Permission("admin", "users"),
     "admin:tenants": Permission("admin", "tenants"),
     "admin:settings": Permission("admin", "settings"),
+    # 分析・ポートフォリオ
+    "analytics:read": Permission("analytics", "read"),
+    "analytics:benchmark": Permission("analytics", "benchmark"),
+    "analytics:portfolio": Permission("analytics", "portfolio"),
+    "analytics:export": Permission("analytics", "export"),
 }
 
 # ── ロール別権限マッピング ────────────────────────────
@@ -86,6 +91,14 @@ ROLE_PERMISSIONS: dict[UserRole, set[str]] = {
         "dialogue:read",
         "evidence:read",
         "report:read",
+    },
+    UserRole.EXECUTIVE: {
+        "project:read",
+        "report:read",
+        "analytics:read",
+        "analytics:benchmark",
+        "analytics:portfolio",
+        "analytics:export",
     },
 }
 
