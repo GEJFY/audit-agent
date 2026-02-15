@@ -5,13 +5,13 @@ Phase 3: 全14エージェント対応、段階的信頼度閾値、リスク連
 
 from __future__ import annotations
 
-from enum import Enum
+from enum import StrEnum
 
 from loguru import logger
 from pydantic import BaseModel
 
 
-class ExecutionMode(str, Enum):
+class ExecutionMode(StrEnum):
     """エージェント実行モード"""
 
     AUDIT = "audit"  # 全て人間承認必須
@@ -19,7 +19,7 @@ class ExecutionMode(str, Enum):
     AUTONOMOUS = "autonomous"  # 自律実行（ガバナンス制約付き）
 
 
-class RiskTier(str, Enum):
+class RiskTier(StrEnum):
     """エージェントリスクティア — 操作の影響度に基づく分類"""
 
     LOW = "low"  # 情報参照・検索のみ（承認不要の傾向）
