@@ -196,7 +196,7 @@ class SelfAssessmentWorkflow:
 
     async def _run_auditor_agent(self, agent_name: str, tenant_id: str) -> AgentActivityOutput:
         """監査側エージェント実行"""
-        return await workflow.execute_activity(  # type: ignore[call-overload]
+        return await workflow.execute_activity(
             run_auditor_agent,
             arg=AgentActivityInput(
                 agent_name=agent_name,
