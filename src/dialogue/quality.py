@@ -260,17 +260,15 @@ class QualityEvaluator:
 
 # ── ヘルパー関数 ──────────────────────────────────────────
 
+
 def _count_question_points(text: str) -> int:
     """テキスト中の質問ポイント数を推定"""
-    # 日本語の疑問文（？、か。、ですか等）
-    ja_markers = len(re.findall(r"[？?]", text))
-    ja_ka = len(re.findall(r"か[。？?]|ですか|ますか|でしょうか", text))
-    # 英語の疑問文
-    en_markers = len(re.findall(r"\?", text))
+    # 疑問符（全角・半角）をカウント
+    question_marks = len(re.findall(r"[？?]", text))
     # 箇条書きの質問
     list_items = len(re.findall(r"^[\s]*[-・●▪]\s", text, re.MULTILINE))
 
-    return max(1, ja_markers + ja_ka + en_markers - ja_markers + list_items)
+    return max(1, question_marks + list_items)
 
 
 def _count_sentences(text: str) -> int:

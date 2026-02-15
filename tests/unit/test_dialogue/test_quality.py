@@ -124,9 +124,7 @@ class TestQualityEvaluator:
 
     # ── 多次元評価テスト ──────────────────────────────
 
-    async def test_evaluate_detailed_returns_breakdown(
-        self, evaluator: QualityEvaluator
-    ) -> None:
+    async def test_evaluate_detailed_returns_breakdown(self, evaluator: QualityEvaluator) -> None:
         """evaluate_detailed が QualityResult と内訳を返す"""
         from_id, to_id = _make_ids()
         question = QuestionMessage(
@@ -224,9 +222,7 @@ class TestQualityEvaluator:
         timeliness = evaluator._check_timeliness(answer, [question])
         assert timeliness == 1.0
 
-    async def test_quality_issues_detected(
-        self, evaluator: QualityEvaluator
-    ) -> None:
+    async def test_quality_issues_detected(self, evaluator: QualityEvaluator) -> None:
         """低品質回答で issues が検出される"""
         from_id, to_id = _make_ids()
         question = QuestionMessage(
@@ -245,9 +241,7 @@ class TestQualityEvaluator:
         result = await evaluator.evaluate_detailed(answer, [question])
         assert len(result.issues) >= 1
 
-    async def test_evidence_with_referenced_documents(
-        self, evaluator: QualityEvaluator
-    ) -> None:
+    async def test_evidence_with_referenced_documents(self, evaluator: QualityEvaluator) -> None:
         """referenced_documents がある場合の証跡スコア"""
         msg = DialogueMessageSchema(
             from_tenant_id=uuid4(),
@@ -255,9 +249,7 @@ class TestQualityEvaluator:
             from_agent="test",
             message_type=DialogueMessageType.ANSWER,
             content="回答",
-            structured_content={
-                "referenced_documents": ["doc1.pdf", "doc2.xlsx", "doc3.csv"]
-            },
+            structured_content={"referenced_documents": ["doc1.pdf", "doc2.xlsx", "doc3.csv"]},
         )
 
         score = evaluator._check_evidence(msg)
@@ -283,9 +275,7 @@ class TestQualityEvaluator:
         result = await evaluator.evaluate_detailed(answer, [])
         assert 0.0 <= result.score <= 1.0
 
-    async def test_evidence_multiple_attachments_bonus(
-        self, evaluator: QualityEvaluator
-    ) -> None:
+    async def test_evidence_multiple_attachments_bonus(self, evaluator: QualityEvaluator) -> None:
         """複数添付でボーナススコア"""
         msg = DialogueMessageSchema(
             from_tenant_id=uuid4(),

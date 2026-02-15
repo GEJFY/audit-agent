@@ -78,9 +78,7 @@ class DialogueBus:
 
         # 回答メッセージの品質評価（多次元スコアリング）
         if message.message_type == DialogueMessageType.ANSWER:
-            result = await self._quality_evaluator.evaluate_detailed(
-                message, self._threads[message.thread_id]
-            )
+            result = await self._quality_evaluator.evaluate_detailed(message, self._threads[message.thread_id])
             message.quality_score = result.score
             message.metadata["quality_breakdown"] = result.breakdown.model_dump()
             if result.issues:
