@@ -47,6 +47,7 @@ class AuditeeAgentType(StrEnum):
 class DialogueMessageType(StrEnum):
     QUESTION = "question"
     ANSWER = "answer"
+    CLARIFICATION = "clarification"
     EVIDENCE_REQUEST = "evidence_request"
     EVIDENCE_SUBMIT = "evidence_submit"
     ESCALATION = "escalation"

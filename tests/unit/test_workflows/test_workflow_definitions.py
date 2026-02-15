@@ -2,6 +2,9 @@
 
 import pytest
 
+# temporalioが未インストールの場合はスキップ
+pytest.importorskip("temporalio")
+
 
 @pytest.mark.unit
 class TestAuditProjectWorkflow:

@@ -18,6 +18,7 @@ from src.workflows.auditee_workflow import (
     AuditeeResponseWorkflow,
     ControlsMonitoringWorkflow,
 )
+from src.workflows.self_assessment import SelfAssessmentWorkflow
 
 TASK_QUEUE = "audit-agent-tasks"
 
@@ -44,6 +45,7 @@ async def start_worker() -> None:
             AuditProjectWorkflow,
             AuditeeResponseWorkflow,
             ControlsMonitoringWorkflow,
+            SelfAssessmentWorkflow,
         ],
         activities=[
             run_auditor_agent,
@@ -73,6 +75,7 @@ async def start_workflow(
         "audit_project": AuditProjectWorkflow.run,
         "auditee_response": AuditeeResponseWorkflow.run,
         "controls_monitoring": ControlsMonitoringWorkflow.run,
+        "self_assessment": SelfAssessmentWorkflow.run,
     }
 
     workflow_fn = workflow_map.get(workflow_type)
