@@ -132,16 +132,12 @@ class RiskIntelligenceReportGenerator:
         # 1. サマリーセクション
         overall_score = risk_data.get("overall_score", 0.0)
         risk_trend = risk_data.get("risk_trend", "stable")
-        sections.append(
-            self._build_summary_section(overall_score, risk_trend)
-        )
+        sections.append(self._build_summary_section(overall_score, risk_trend))
 
         # 2. リスク概観セクション
         category_scores = risk_data.get("category_scores", {})
         if category_scores:
-            sections.append(
-                self._build_risk_overview_section(category_scores)
-            )
+            sections.append(self._build_risk_overview_section(category_scores))
 
         # 3. 予測リスクセクション
         forecast = risk_data.get("forecast", {})
@@ -156,9 +152,7 @@ class RiskIntelligenceReportGenerator:
         # 5. プロセス分析セクション
         process_issues = risk_data.get("process_issues", [])
         if process_issues:
-            sections.append(
-                self._build_process_section(process_issues)
-            )
+            sections.append(self._build_process_section(process_issues))
 
         # 6. 推奨アクション
         recommendations = self._generate_recommendations(risk_data)
@@ -223,9 +217,7 @@ class RiskIntelligenceReportGenerator:
         sections.append(
             ReportSection(
                 title="予測サマリー",
-                content=self._format_forecast_summary(
-                    current, predicted, confidence
-                ),
+                content=self._format_forecast_summary(current, predicted, confidence),
                 section_type="summary",
                 priority=0,
                 data={"current": current, "predicted": predicted},
@@ -251,9 +243,7 @@ class RiskIntelligenceReportGenerator:
             sections.append(
                 ReportSection(
                     title="主要リスク要因",
-                    content="\n".join(
-                        f"- {f}" for f in risk_factors
-                    ),
+                    content="\n".join(f"- {f}" for f in risk_factors),
                     section_type="risk_overview",
                     priority=2,
                 )
@@ -285,14 +275,10 @@ class RiskIntelligenceReportGenerator:
             overall_risk_score=current,
             risk_trend=trend,
             key_findings=[f"予測信頼度: {confidence:.0%}"],
-            recommendations=self._generate_forecast_recommendations(
-                forecast_data
-            ),
+            recommendations=self._generate_forecast_recommendations(forecast_data),
         )
 
-    def _build_summary_section(
-        self, overall_score: float, risk_trend: str
-    ) -> ReportSection:
+    def _build_summary_section(self, overall_score: float, risk_trend: str) -> ReportSection:
         """サマリーセクション構築"""
         trend_label = {
             "improving": "改善傾向",
@@ -302,10 +288,7 @@ class RiskIntelligenceReportGenerator:
 
         level = self._score_to_level(overall_score)
 
-        content = (
-            f"全体リスクスコア: **{overall_score:.1f}** ({level})\n"
-            f"リスクトレンド: **{trend_label}**"
-        )
+        content = f"全体リスクスコア: **{overall_score:.1f}** ({level})\nリスクトレンド: **{trend_label}**"
 
         return ReportSection(
             title="エグゼクティブサマリー",
@@ -319,14 +302,10 @@ class RiskIntelligenceReportGenerator:
             },
         )
 
-    def _build_risk_overview_section(
-        self, category_scores: dict[str, float]
-    ) -> ReportSection:
+    def _build_risk_overview_section(self, category_scores: dict[str, float]) -> ReportSection:
         """リスク概観セクション構築"""
         lines = []
-        for category, score in sorted(
-            category_scores.items(), key=lambda x: x[1], reverse=True
-        ):
+        for category, score in sorted(category_scores.items(), key=lambda x: x[1], reverse=True):
             level = self._score_to_level(score)
             lines.append(f"- **{category}**: {score:.1f} ({level})")
 
@@ -338,17 +317,12 @@ class RiskIntelligenceReportGenerator:
             data=category_scores,
         )
 
-    def _build_forecast_section(
-        self, forecast: dict[str, Any]
-    ) -> ReportSection:
+    def _build_forecast_section(self, forecast: dict[str, Any]) -> ReportSection:
         """予測リスクセクション構築"""
         predicted = forecast.get("predicted_score", 0.0)
         confidence = forecast.get("confidence", 0.0)
 
-        content = (
-            f"予測リスクスコア（3ヶ月後）: **{predicted:.1f}**\n"
-            f"予測信頼度: **{confidence:.0%}**"
-        )
+        content = f"予測リスクスコア（3ヶ月後）: **{predicted:.1f}**\n予測信頼度: **{confidence:.0%}**"
 
         return ReportSection(
             title="予測リスク分析",
@@ -358,17 +332,12 @@ class RiskIntelligenceReportGenerator:
             data=forecast,
         )
 
-    def _build_benchmark_section(
-        self, benchmark: dict[str, Any]
-    ) -> ReportSection:
+    def _build_benchmark_section(self, benchmark: dict[str, Any]) -> ReportSection:
         """ベンチマークセクション構築"""
         percentile = benchmark.get("percentile", 50.0)
         industry_avg = benchmark.get("industry_avg", 0.0)
 
-        content = (
-            f"業種内パーセンタイル: **{percentile:.0f}%**\n"
-            f"業種平均: **{industry_avg:.1f}**"
-        )
+        content = f"業種内パーセンタイル: **{percentile:.0f}%**\n業種平均: **{industry_avg:.1f}**"
 
         return ReportSection(
             title="業種ベンチマーク比較",
@@ -378,9 +347,7 @@ class RiskIntelligenceReportGenerator:
             data=benchmark,
         )
 
-    def _build_process_section(
-        self, issues: list[str]
-    ) -> ReportSection:
+    def _build_process_section(self, issues: list[str]) -> ReportSection:
         """プロセス分析セクション構築"""
         content = "\n".join(f"- {issue}" for issue in issues)
 
@@ -391,82 +358,57 @@ class RiskIntelligenceReportGenerator:
             priority=4,
         )
 
-    def _generate_recommendations(
-        self, risk_data: dict[str, Any]
-    ) -> list[str]:
+    def _generate_recommendations(self, risk_data: dict[str, Any]) -> list[str]:
         """推奨アクションを生成"""
         recommendations: list[str] = []
 
         overall = risk_data.get("overall_score", 0.0)
         if overall >= 80:
-            recommendations.append(
-                "全体リスクがクリティカルレベルです。緊急の是正計画策定を推奨します。"
-            )
+            recommendations.append("全体リスクがクリティカルレベルです。緊急の是正計画策定を推奨します。")
         elif overall >= 60:
-            recommendations.append(
-                "全体リスクが高水準です。重点カテゴリの統制強化を検討してください。"
-            )
+            recommendations.append("全体リスクが高水準です。重点カテゴリの統制強化を検討してください。")
 
         # カテゴリ別推奨
         category_scores = risk_data.get("category_scores", {})
         for cat, score in category_scores.items():
             if score >= 80:
-                recommendations.append(
-                    f"'{cat}' カテゴリのリスクが非常に高い状態です。"
-                    "即座の対策を検討してください。"
-                )
+                recommendations.append(f"'{cat}' カテゴリのリスクが非常に高い状態です。即座の対策を検討してください。")
 
         # 予測ベース推奨
         forecast = risk_data.get("forecast", {})
         predicted = forecast.get("predicted_score", 0.0)
         if predicted > overall * 1.2:
-            recommendations.append(
-                "予測モデルにより今後のリスク上昇が見込まれています。"
-                "予防的対策を検討してください。"
-            )
+            recommendations.append("予測モデルにより今後のリスク上昇が見込まれています。予防的対策を検討してください。")
 
         # プロセスベース推奨
         process_issues = risk_data.get("process_issues", [])
         if len(process_issues) >= 3:
             recommendations.append(
-                f"プロセス分析で{len(process_issues)}件の課題が検出されています。"
-                "業務プロセスの見直しを推奨します。"
+                f"プロセス分析で{len(process_issues)}件の課題が検出されています。業務プロセスの見直しを推奨します。"
             )
 
         if not recommendations:
-            recommendations.append(
-                "現状のリスクレベルは許容範囲内です。"
-                "引き続きモニタリングを継続してください。"
-            )
+            recommendations.append("現状のリスクレベルは許容範囲内です。引き続きモニタリングを継続してください。")
 
         return recommendations
 
-    def _generate_forecast_recommendations(
-        self, forecast_data: dict[str, Any]
-    ) -> list[str]:
+    def _generate_forecast_recommendations(self, forecast_data: dict[str, Any]) -> list[str]:
         """予測レポート用推奨アクション"""
         recommendations: list[str] = []
         confidence = forecast_data.get("confidence", 0.0)
 
         if confidence < 0.5:
-            recommendations.append(
-                "予測モデルの信頼度が低いです。"
-                "追加データの収集を検討してください。"
-            )
+            recommendations.append("予測モデルの信頼度が低いです。追加データの収集を検討してください。")
 
         cat_forecasts = forecast_data.get("category_forecasts", {})
         for cat, data in cat_forecasts.items():
             current = data.get("current", 0.0)
             predicted = data.get("predicted", 0.0)
             if predicted > current * 1.3:
-                recommendations.append(
-                    f"'{cat}' カテゴリで30%以上のリスク上昇が予測されています。"
-                )
+                recommendations.append(f"'{cat}' カテゴリで30%以上のリスク上昇が予測されています。")
 
         if not recommendations:
-            recommendations.append(
-                "予測リスクは安定しています。定期モニタリングを継続してください。"
-            )
+            recommendations.append("予測リスクは安定しています。定期モニタリングを継続してください。")
 
         return recommendations
 
@@ -488,9 +430,7 @@ class RiskIntelligenceReportGenerator:
         lines.append(f"\n予測信頼度: **{confidence:.0%}**")
         return "\n".join(lines)
 
-    def _format_category_forecasts(
-        self, cat_forecasts: dict[str, Any]
-    ) -> str:
+    def _format_category_forecasts(self, cat_forecasts: dict[str, Any]) -> str:
         """カテゴリ別予測のフォーマット"""
         lines = []
         for cat, data in cat_forecasts.items():
@@ -498,9 +438,7 @@ class RiskIntelligenceReportGenerator:
             predicted = data.get("predicted", 0.0)
             diff = predicted - current
             arrow = "↑" if diff > 0 else "↓" if diff < 0 else "→"
-            lines.append(
-                f"- **{cat}**: {current:.1f} → {predicted:.1f} ({arrow}{abs(diff):.1f})"
-            )
+            lines.append(f"- **{cat}**: {current:.1f} → {predicted:.1f} ({arrow}{abs(diff):.1f})")
         return "\n".join(lines)
 
     @staticmethod

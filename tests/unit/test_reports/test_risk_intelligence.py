@@ -203,9 +203,7 @@ class TestExecutiveSummaryGeneration:
 
     def test_company_info_in_metadata(self) -> None:
         """企業情報がメタデータに反映"""
-        gen = RiskIntelligenceReportGenerator(
-            company_id="C001", company_name="テスト社"
-        )
+        gen = RiskIntelligenceReportGenerator(company_id="C001", company_name="テスト社")
         report = gen.generate_executive_summary(_sample_risk_data())
 
         assert report.metadata.company_id == "C001"
