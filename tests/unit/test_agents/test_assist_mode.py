@@ -71,9 +71,9 @@ class TestAssistModeManager:
     def test_set_threshold_invalid(self) -> None:
         """無効な閾値"""
         manager = AssistModeManager()
-        with pytest.raises(ValueError, match="0.0〜1.0"):
+        with pytest.raises(ValueError, match=r"0.0〜1.0"):
             manager.set_threshold("tenant1", 1.5)
-        with pytest.raises(ValueError, match="0.0〜1.0"):
+        with pytest.raises(ValueError, match=r"0.0〜1.0"):
             manager.set_threshold("tenant1", -0.1)
 
     def test_audit_mode_always_requires_approval(self) -> None:
