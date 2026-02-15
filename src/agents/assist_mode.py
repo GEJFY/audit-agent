@@ -98,9 +98,7 @@ class AssistModeManager:
         config = self.get_config(tenant_id)
         config.auto_approve_threshold = threshold
 
-    def get_effective_threshold(
-        self, tenant_id: str, agent_name: str
-    ) -> float:
+    def get_effective_threshold(self, tenant_id: str, agent_name: str) -> float:
         """エージェントの実効閾値を取得（ティア別 or グローバル）"""
         config = self.get_config(tenant_id)
 
@@ -212,10 +210,7 @@ class AssistModeManager:
         if confidence < effective_threshold:
             return AutoExecuteDecision(
                 approved=False,
-                reason=(
-                    f"信頼度 {confidence:.2f} < 閾値 {effective_threshold:.2f} "
-                    f"(ティア: {tier.value})"
-                ),
+                reason=(f"信頼度 {confidence:.2f} < 閾値 {effective_threshold:.2f} (ティア: {tier.value})"),
                 mode=config.mode,
                 risk_tier=tier,
             )

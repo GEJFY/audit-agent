@@ -69,9 +69,7 @@ class TestGovernanceStats:
 class TestAutonomousGovernance:
     """AutonomousGovernance テスト"""
 
-    def _make_decision(
-        self, approved: bool = True, confidence: float = 0.9
-    ) -> AutoExecuteDecision:
+    def _make_decision(self, approved: bool = True, confidence: float = 0.9) -> AutoExecuteDecision:
         return AutoExecuteDecision(
             approved=approved,
             reason="テスト",

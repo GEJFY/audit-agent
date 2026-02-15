@@ -161,11 +161,7 @@ class AutonomousGovernance:
 
     def get_pending_reviews(self, tenant_id: str) -> list[GovernanceLogEntry]:
         """レビュー待ちエントリを取得"""
-        return [
-            e
-            for e in self._logs
-            if e.tenant_id == tenant_id and e.review_status == "pending"
-        ]
+        return [e for e in self._logs if e.tenant_id == tenant_id and e.review_status == "pending"]
 
     def mark_reviewed(
         self,
@@ -206,22 +202,16 @@ class AutonomousGovernance:
 
         # 自動承認率が高すぎる
         if stats.total_decisions >= 10 and stats.auto_approval_rate > 0.95:
-            anomalies.append(
-                f"自動承認率が異常に高い: {stats.auto_approval_rate:.1%}"
-            )
+            anomalies.append(f"自動承認率が異常に高い: {stats.auto_approval_rate:.1%}")
 
         # 平均信頼度が低い
         if stats.total_decisions >= 10 and stats.average_confidence < 0.7:
-            anomalies.append(
-                f"平均信頼度が低い: {stats.average_confidence:.2f}"
-            )
+            anomalies.append(f"平均信頼度が低い: {stats.average_confidence:.2f}")
 
         # HIGHティア判断が多い
         high_count = stats.decisions_by_tier.get("high", 0)
         if stats.total_decisions >= 10 and high_count / stats.total_decisions > 0.5:
-            anomalies.append(
-                f"HIGHティア判断の比率が高い: {high_count}/{stats.total_decisions}"
-            )
+            anomalies.append(f"HIGHティア判断の比率が高い: {high_count}/{stats.total_decisions}")
 
         return anomalies
 
@@ -250,9 +240,7 @@ class AutonomousGovernance:
 
         # 移動平均で信頼度を更新
         n = stats.total_decisions
-        stats.average_confidence = (
-            stats.average_confidence * (n - 1) + entry.confidence
-        ) / n
+        stats.average_confidence = (stats.average_confidence * (n - 1) + entry.confidence) / n
 
         # ティア別カウント
         tier = entry.risk_tier

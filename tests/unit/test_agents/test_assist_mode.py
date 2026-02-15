@@ -109,9 +109,7 @@ class TestAssistModeManager:
     def test_audit_mode_always_requires_approval(self) -> None:
         manager = AssistModeManager()
         manager.set_mode("tenant1", ExecutionMode.AUDIT)
-        decision = manager.can_auto_execute(
-            tenant_id="tenant1", agent_name="auditee_response", confidence=0.99
-        )
+        decision = manager.can_auto_execute(tenant_id="tenant1", agent_name="auditee_response", confidence=0.99)
         assert decision.approved is False
         assert "Auditモード" in decision.reason
         assert decision.mode == ExecutionMode.AUDIT
@@ -120,9 +118,7 @@ class TestAssistModeManager:
         """Autonomousモード — 通常エージェントは自動実行"""
         manager = AssistModeManager()
         manager.set_mode("tenant1", ExecutionMode.AUTONOMOUS)
-        decision = manager.can_auto_execute(
-            tenant_id="tenant1", agent_name="auditee_response", confidence=0.5
-        )
+        decision = manager.can_auto_execute(tenant_id="tenant1", agent_name="auditee_response", confidence=0.5)
         assert decision.approved is True
         assert decision.mode == ExecutionMode.AUTONOMOUS
 
@@ -173,18 +169,14 @@ class TestAssistModeManager:
     def test_assist_mode_high_confidence(self) -> None:
         manager = AssistModeManager()
         manager.set_mode("tenant1", ExecutionMode.ASSIST)
-        decision = manager.can_auto_execute(
-            tenant_id="tenant1", agent_name="auditee_response", confidence=0.90
-        )
+        decision = manager.can_auto_execute(tenant_id="tenant1", agent_name="auditee_response", confidence=0.90)
         assert decision.approved is True
         assert decision.confidence == 0.90
 
     def test_assist_mode_low_confidence(self) -> None:
         manager = AssistModeManager()
         manager.set_mode("tenant1", ExecutionMode.ASSIST)
-        decision = manager.can_auto_execute(
-            tenant_id="tenant1", agent_name="auditee_response", confidence=0.50
-        )
+        decision = manager.can_auto_execute(tenant_id="tenant1", agent_name="auditee_response", confidence=0.50)
         assert decision.approved is False
         assert "信頼度" in decision.reason
 
@@ -195,9 +187,7 @@ class TestAssistModeManager:
         config = manager.get_config("tenant1")
         config.allowed_auto_agents = ["auditee_response"]
 
-        decision = manager.can_auto_execute(
-            tenant_id="tenant1", agent_name="auditor_orchestrator", confidence=0.99
-        )
+        decision = manager.can_auto_execute(tenant_id="tenant1", agent_name="auditor_orchestrator", confidence=0.99)
         assert decision.approved is False
         assert "自動実行対象外" in decision.reason
 
@@ -250,18 +240,14 @@ class TestAssistModeManager:
         config = manager.get_config("tenant1")
         config.use_tiered_thresholds = False
 
-        decision = manager.can_auto_execute(
-            tenant_id="tenant1", agent_name="auditee_response", confidence=0.90
-        )
+        decision = manager.can_auto_execute(tenant_id="tenant1", agent_name="auditee_response", confidence=0.90)
         assert decision.approved is False
 
     def test_tiered_threshold_low_tier(self) -> None:
         """LOWティアエージェントは0.70で通過"""
         manager = AssistModeManager()
         manager.set_mode("tenant1", ExecutionMode.ASSIST)
-        decision = manager.can_auto_execute(
-            tenant_id="tenant1", agent_name="auditee_evidence_search", confidence=0.75
-        )
+        decision = manager.can_auto_execute(tenant_id="tenant1", agent_name="auditee_evidence_search", confidence=0.75)
         assert decision.approved is True
 
     def test_tiered_threshold_high_tier(self) -> None:
@@ -270,15 +256,11 @@ class TestAssistModeManager:
         manager.set_mode("tenant1", ExecutionMode.ASSIST)
 
         # 0.90 < 0.92 → 却下
-        decision = manager.can_auto_execute(
-            tenant_id="tenant1", agent_name="auditor_planner", confidence=0.90
-        )
+        decision = manager.can_auto_execute(tenant_id="tenant1", agent_name="auditor_planner", confidence=0.90)
         assert decision.approved is False
 
         # 0.95 >= 0.92 → 承認
-        decision2 = manager.can_auto_execute(
-            tenant_id="tenant1", agent_name="auditor_planner", confidence=0.95
-        )
+        decision2 = manager.can_auto_execute(tenant_id="tenant1", agent_name="auditor_planner", confidence=0.95)
         assert decision2.approved is True
 
     def test_get_effective_threshold(self) -> None:
@@ -334,9 +316,7 @@ class TestAssistModeManager:
         """判定結果にリスクティアが含まれる"""
         manager = AssistModeManager()
         manager.set_mode("tenant1", ExecutionMode.ASSIST)
-        decision = manager.can_auto_execute(
-            tenant_id="tenant1", agent_name="auditee_evidence_search", confidence=0.90
-        )
+        decision = manager.can_auto_execute(tenant_id="tenant1", agent_name="auditee_evidence_search", confidence=0.90)
         assert decision.risk_tier == RiskTier.LOW
 
 
