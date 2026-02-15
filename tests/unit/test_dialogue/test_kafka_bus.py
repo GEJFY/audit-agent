@@ -391,7 +391,7 @@ class TestCreateDialogueBusFactory:
         """デフォルトバックエンド（settings依存）"""
         from src.dialogue.bus import create_dialogue_bus
 
-        with patch("src.dialogue.bus.get_settings") as mock_settings:
+        with patch("src.config.settings.get_settings") as mock_settings:
             mock_settings.return_value = MagicMock(dialogue_bus_backend="memory")
             bus = create_dialogue_bus()
             assert isinstance(bus, type(bus))  # インスタンス生成成功

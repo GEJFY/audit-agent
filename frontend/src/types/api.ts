@@ -213,6 +213,87 @@ export interface RiskTrendPoint {
   count: number;
 }
 
+// ── Portfolio / Forecast / Benchmark ──────────────
+export interface PortfolioCompany {
+  company_id: string;
+  company_name: string;
+  industry: string;
+  region: string;
+  overall_score: number;
+  risk_level: "critical" | "high" | "medium" | "low";
+  category_scores: Record<string, number>;
+  trend: "improving" | "stable" | "worsening";
+  open_findings: number;
+}
+
+export interface PortfolioSummary {
+  total_companies: number;
+  avg_overall_score: number;
+  risk_distribution: Record<string, number>;
+  industry_distribution: Record<string, number>;
+  alerts_count: number;
+  alerts: PortfolioAlert[];
+  category_averages: Record<string, number>;
+}
+
+export interface PortfolioAlert {
+  alert_type: string;
+  severity: "critical" | "high" | "medium" | "low";
+  description: string;
+  affected_companies: string[];
+}
+
+export interface ForecastPoint {
+  month: string;
+  score: number;
+}
+
+export interface RiskForecast {
+  current_score: number;
+  predicted_scores: ForecastPoint[];
+  confidence: number;
+  risk_trend: "improving" | "stable" | "worsening";
+  category_forecasts: Record<string, { current: number; predicted: number }>;
+}
+
+export interface BenchmarkResult {
+  industry: string;
+  category: string;
+  avg_score: number;
+  median_score: number;
+  std_dev: number;
+  sample_size: number;
+}
+
+export interface BenchmarkComparison {
+  company_id: string;
+  company_name: string;
+  category: string;
+  company_score: number;
+  benchmark_avg: number;
+  deviation: number;
+  status: "above_average" | "average" | "below_average" | "critical";
+}
+
+export interface AutonomousDecision {
+  id: string;
+  agent_type: string;
+  action: string;
+  confidence: number;
+  auto_approved: boolean;
+  reason: string;
+  risk_level: string;
+  timestamp: string;
+}
+
+export interface AutonomousStats {
+  total_decisions: number;
+  auto_approved: number;
+  auto_approval_rate: number;
+  escalated: number;
+  errors: number;
+}
+
 // ── API Response ────────────────────────────────
 export interface PaginatedResponse<T> {
   items: T[];
