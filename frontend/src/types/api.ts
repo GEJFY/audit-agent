@@ -85,6 +85,27 @@ export interface DialogueMessage {
   timestamp: string;
 }
 
+export interface DialogueThread {
+  thread_id: string;
+  subject: string;
+  participants: string[];
+  message_count: number;
+  last_message_at: string;
+  status: "active" | "resolved" | "escalated";
+}
+
+// ── Human Override ─────────────────────────────
+export interface HumanOverride {
+  id: string;
+  decision_id: string;
+  agent_type: string;
+  original_action: string;
+  override_action: string;
+  reason: string;
+  overridden_by: string;
+  created_at: string;
+}
+
 // ── Approval ────────────────────────────────────
 export interface ApprovalQueueItem {
   id: string;
