@@ -66,6 +66,11 @@ class Settings(BaseSettings):
     sap_password: str = ""
     sap_client_id: str = ""
 
+    # ── Box ─────────────────────────────────────────
+    box_client_id: str = ""
+    box_client_secret: str = ""
+    box_enterprise_id: str = ""
+
     # ── Dialogue Bus ───────────────────────────────────
     dialogue_bus_backend: str = "memory"  # "memory" or "redis"
 
