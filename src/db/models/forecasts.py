@@ -16,9 +16,7 @@ class RiskForecast(TenantBaseModel):
 
     __tablename__ = "risk_forecasts"
 
-    project_id: Mapped[str | None] = mapped_column(
-        UUID(as_uuid=False), nullable=True, index=True
-    )
+    project_id: Mapped[str | None] = mapped_column(UUID(as_uuid=False), nullable=True, index=True)
     forecast_period: Mapped[str] = mapped_column(String(20), nullable=False)  # 2026-Q2, 2026-M04
     horizon_days: Mapped[int] = mapped_column(Integer, nullable=False)  # 30, 60, 90
     risk_category: Mapped[str] = mapped_column(String(100), nullable=False)

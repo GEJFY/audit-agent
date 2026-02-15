@@ -38,9 +38,7 @@ class RiskTemplateItem(TenantBaseModel):
 
     __tablename__ = "risk_template_items"
 
-    template_id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False), nullable=False, index=True
-    )
+    template_id: Mapped[str] = mapped_column(UUID(as_uuid=False), nullable=False, index=True)
     category: Mapped[str] = mapped_column(String(100), nullable=False)  # access_control, financial_process, etc.
     subcategory: Mapped[str | None] = mapped_column(String(100), nullable=True)
     risk_code: Mapped[str] = mapped_column(String(50), nullable=False)  # FIN-001, MFG-001
@@ -64,12 +62,8 @@ class ControlBaseline(TenantBaseModel):
 
     __tablename__ = "control_baselines"
 
-    template_id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False), nullable=False, index=True
-    )
-    risk_item_id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False), nullable=False, index=True
-    )
+    template_id: Mapped[str] = mapped_column(UUID(as_uuid=False), nullable=False, index=True)
+    risk_item_id: Mapped[str] = mapped_column(UUID(as_uuid=False), nullable=False, index=True)
     control_code: Mapped[str] = mapped_column(String(50), nullable=False)  # AC-001, FP-001
     control_name: Mapped[str] = mapped_column(String(500), nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)

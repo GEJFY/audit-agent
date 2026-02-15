@@ -212,8 +212,7 @@ def get_manufacturing_template() -> IndustryTemplateDefinition:
         industry_name="製造業",
         region="JP",
         version="1.0",
-        description="製造業向けリスク・統制テンプレート。"
-        "在庫管理・原価計算・品質管理・サプライチェーンに特化。",
+        description="製造業向けリスク・統制テンプレート。在庫管理・原価計算・品質管理・サプライチェーンに特化。",
         regulatory_framework="J-SOX",
         risks=_MANUFACTURING_RISKS,
         controls=_MANUFACTURING_CONTROLS,

@@ -251,8 +251,7 @@ def get_it_services_template() -> IndustryTemplateDefinition:
         industry_name="IT・SaaS",
         region="JP",
         version="1.0",
-        description="IT・SaaS事業者向けリスク・統制テンプレート。"
-        "クラウドセキュリティ・開発管理・サービス運用に特化。",
+        description="IT・SaaS事業者向けリスク・統制テンプレート。クラウドセキュリティ・開発管理・サービス運用に特化。",
         regulatory_framework="ISO 27001 / J-SOX",
         risks=_IT_RISKS,
         controls=_IT_CONTROLS,
