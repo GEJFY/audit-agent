@@ -153,7 +153,7 @@ def _route_after_prep(state: AuditeeState) -> str:
     return "end"
 
 
-def build_auditee_response_graph() -> StateGraph:
+def build_auditee_response_graph() -> StateGraph[AuditeeState]:
     """被監査側レスポンス StateGraph を構築
 
     質問受付 → 回答生成/証跡検索/準備 → 承認 → 完了
@@ -216,7 +216,7 @@ def build_auditee_response_graph() -> StateGraph:
     return graph
 
 
-def build_auditee_monitoring_graph() -> StateGraph:
+def build_auditee_monitoring_graph() -> StateGraph[AuditeeState]:
     """被監査側監視 StateGraph を構築
 
     統制監視 → リスクアラート → 完了

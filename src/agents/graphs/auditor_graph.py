@@ -186,7 +186,7 @@ def _route_after_report_approval(state: AuditorState) -> str:
     return "follow_up"
 
 
-def build_auditor_graph() -> StateGraph:
+def build_auditor_graph() -> StateGraph[AuditorState]:
     """監査側 StateGraph を構築
 
     Returns:
