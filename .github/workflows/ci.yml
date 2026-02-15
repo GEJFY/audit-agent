@@ -212,8 +212,8 @@ jobs:
           rate = float(root.attrib.get('line-rate', 0))
           pct = rate * 100
           print(f'Coverage: {pct:.1f}%')
-          if pct < 40:
-              print(f'FAIL: Coverage {pct:.1f}% is below 40% threshold')
+          if pct < 60:
+              print(f'FAIL: Coverage {pct:.1f}% is below 60% threshold')
               exit(1)
           print('PASS: Coverage meets threshold')
           "
