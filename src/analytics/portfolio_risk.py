@@ -110,9 +110,7 @@ class PortfolioRiskAggregator:
 
         # リスクレベル分類
         for company in self._companies:
-            company.risk_level = self._classify_risk_level(
-                company.overall_score
-            )
+            company.risk_level = self._classify_risk_level(company.overall_score)
 
         # 分布計算
         risk_dist = self._calc_risk_distribution()
@@ -120,9 +118,7 @@ class PortfolioRiskAggregator:
         region_dist = self._calc_region_distribution()
 
         # 全体平均
-        avg_score = sum(c.overall_score for c in self._companies) / len(
-            self._companies
-        )
+        avg_score = sum(c.overall_score for c in self._companies) / len(self._companies)
 
         # ヒートマップデータ
         heatmap = self._build_heatmap()
@@ -212,28 +208,20 @@ class PortfolioRiskAggregator:
                 )
         return cells
 
-    def _generate_alerts(
-        self, risk_dist: dict[str, int]
-    ) -> list[PortfolioAlert]:
+    def _generate_alerts(self, risk_dist: dict[str, int]) -> list[PortfolioAlert]:
         """ポートフォリオアラートを生成"""
         alerts: list[PortfolioAlert] = []
         total = len(self._companies)
 
         # 閾値超過アラート
-        critical_companies = [
-            c for c in self._companies if c.risk_level == "critical"
-        ]
+        critical_companies = [c for c in self._companies if c.risk_level == "critical"]
         if critical_companies:
             alerts.append(
                 PortfolioAlert(
                     alert_type="threshold_breach",
                     severity="critical",
-                    description=(
-                        f"{len(critical_companies)}社がクリティカルリスクレベル"
-                    ),
-                    affected_companies=[
-                        c.company_id for c in critical_companies
-                    ],
+                    description=(f"{len(critical_companies)}社がクリティカルリスクレベル"),
+                    affected_companies=[c.company_id for c in critical_companies],
                 )
             )
 
@@ -241,9 +229,7 @@ class PortfolioRiskAggregator:
         industry_risk: dict[str, list[str]] = {}
         for c in self._companies:
             if c.risk_level in ("critical", "high"):
-                industry_risk.setdefault(c.industry, []).append(
-                    c.company_id
-                )
+                industry_risk.setdefault(c.industry, []).append(c.company_id)
 
         for industry, company_ids in industry_risk.items():
             if len(company_ids) / max(total, 1) >= self._concentration_alert_pct:
@@ -251,26 +237,19 @@ class PortfolioRiskAggregator:
                     PortfolioAlert(
                         alert_type="concentration_risk",
                         severity="high",
-                        description=(
-                            f"'{industry}'業種に高リスク企業が集中"
-                            f"（{len(company_ids)}/{total}社）"
-                        ),
+                        description=(f"'{industry}'業種に高リスク企業が集中（{len(company_ids)}/{total}社）"),
                         affected_companies=company_ids,
                     )
                 )
 
         # トレンド悪化アラート
-        worsening = [
-            c for c in self._companies if c.trend == "worsening"
-        ]
+        worsening = [c for c in self._companies if c.trend == "worsening"]
         if len(worsening) >= 3:
             alerts.append(
                 PortfolioAlert(
                     alert_type="trend_change",
                     severity="medium",
-                    description=(
-                        f"{len(worsening)}社でリスクトレンドが悪化中"
-                    ),
+                    description=(f"{len(worsening)}社でリスクトレンドが悪化中"),
                     affected_companies=[c.company_id for c in worsening],
                 )
             )
@@ -284,10 +263,7 @@ class PortfolioRiskAggregator:
             for category, score in company.category_scores.items():
                 category_scores.setdefault(category, []).append(score)
 
-        return {
-            cat: round(sum(scores) / len(scores), 2)
-            for cat, scores in category_scores.items()
-        }
+        return {cat: round(sum(scores) / len(scores), 2) for cat, scores in category_scores.items()}
 
     def clear(self) -> None:
         """企業データをクリア"""

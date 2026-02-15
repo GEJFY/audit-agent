@@ -158,11 +158,7 @@ class CrossCompanyAnalyzer:
                 categories.update(p.risk_scores.keys())
 
             for category in categories:
-                scores = [
-                    p.risk_scores[category]
-                    for p in profiles
-                    if category in p.risk_scores
-                ]
+                scores = [p.risk_scores[category] for p in profiles if category in p.risk_scores]
                 if not scores:
                     continue
 
@@ -170,15 +166,9 @@ class CrossCompanyAnalyzer:
                 sorted_scores = sorted(scores)
                 n = len(sorted_scores)
                 median = (
-                    sorted_scores[n // 2]
-                    if n % 2 == 1
-                    else (sorted_scores[n // 2 - 1] + sorted_scores[n // 2]) / 2
+                    sorted_scores[n // 2] if n % 2 == 1 else (sorted_scores[n // 2 - 1] + sorted_scores[n // 2]) / 2
                 )
-                variance = (
-                    sum((s - avg) ** 2 for s in scores) / len(scores)
-                    if len(scores) > 0
-                    else 0
-                )
+                variance = sum((s - avg) ** 2 for s in scores) / len(scores) if len(scores) > 0 else 0
                 std_dev = variance**0.5
 
                 benchmarks.append(
@@ -196,9 +186,7 @@ class CrossCompanyAnalyzer:
 
         return benchmarks
 
-    def _compare_to_benchmarks(
-        self, benchmarks: list[IndustryBenchmark]
-    ) -> list[BenchmarkComparison]:
+    def _compare_to_benchmarks(self, benchmarks: list[IndustryBenchmark]) -> list[BenchmarkComparison]:
         """各企業をベンチマークと比較"""
         comparisons: list[BenchmarkComparison] = []
 
@@ -209,21 +197,15 @@ class CrossCompanyAnalyzer:
 
         for profile in self._profiles:
             for category, score in profile.risk_scores.items():
-                bm: IndustryBenchmark | None = bm_index.get((profile.industry, category))
-                if not bm:
+                matched_bm = bm_index.get((profile.industry, category))
+                if not matched_bm:
                     continue
 
                 # 偏差計算
-                deviation = (
-                    (score - bm.avg_score) / bm.std_dev
-                    if bm.std_dev > 0
-                    else 0.0
-                )
+                deviation = (score - matched_bm.avg_score) / matched_bm.std_dev if matched_bm.std_dev > 0 else 0.0
 
                 # パーセンタイル（簡易）
-                percentile = self._calc_percentile(
-                    score, profile.industry, category
-                )
+                percentile = self._calc_percentile(score, profile.industry, category)
 
                 # ステータス判定
                 if deviation > 2.0:
@@ -241,8 +223,8 @@ class CrossCompanyAnalyzer:
                         company_name=profile.company_name,
                         category=category,
                         company_score=round(score, 2),
-                        benchmark_avg=bm.avg_score,
-                        benchmark_median=bm.median_score,
+                        benchmark_avg=matched_bm.avg_score,
+                        benchmark_median=matched_bm.median_score,
                         percentile=round(percentile, 1),
                         deviation=round(deviation, 2),
                         status=status,
@@ -251,14 +233,10 @@ class CrossCompanyAnalyzer:
 
         return comparisons
 
-    def _calc_percentile(
-        self, score: float, industry: str, category: str
-    ) -> float:
+    def _calc_percentile(self, score: float, industry: str, category: str) -> float:
         """スコアのパーセンタイルを計算"""
         scores = [
-            p.risk_scores[category]
-            for p in self._profiles
-            if p.industry == industry and category in p.risk_scores
+            p.risk_scores[category] for p in self._profiles if p.industry == industry and category in p.risk_scores
         ]
         if not scores:
             return 50.0
@@ -278,7 +256,7 @@ class CrossCompanyAnalyzer:
 
         # 企業ペアごとに相関を計算
         for i, p1 in enumerate(self._profiles):
-            for p2 in self._profiles[i + 1:]:
+            for p2 in self._profiles[i + 1 :]:
                 for category in categories:
                     if category not in p1.risk_scores or category not in p2.risk_scores:
                         continue
@@ -294,19 +272,12 @@ class CrossCompanyAnalyzer:
                                 company_a=p1.company_id,
                                 company_b=p2.company_id,
                                 category=category,
-                                correlation=round(
-                                    min(s1, s2) / max(s1, s2), 2
-                                ),
+                                correlation=round(min(s1, s2) / max(s1, s2), 2),
                                 pattern="co_occurrence",
-                                description=(
-                                    f"{p1.company_name}と{p2.company_name}の"
-                                    f"'{category}'リスクが同時に高い"
-                                ),
+                                description=(f"{p1.company_name}と{p2.company_name}の'{category}'リスクが同時に高い"),
                             )
                         )
-                    elif (s1 > threshold and s2 < 30) or (
-                        s2 > threshold and s1 < 30
-                    ):
+                    elif (s1 > threshold and s2 < 30) or (s2 > threshold and s1 < 30):
                         correlations.append(
                             AnomalyCorrelation(
                                 company_a=p1.company_id,
@@ -314,10 +285,7 @@ class CrossCompanyAnalyzer:
                                 category=category,
                                 correlation=-0.5,
                                 pattern="inverse",
-                                description=(
-                                    f"{p1.company_name}と{p2.company_name}の"
-                                    f"'{category}'リスクが逆方向"
-                                ),
+                                description=(f"{p1.company_name}と{p2.company_name}の'{category}'リスクが逆方向"),
                             )
                         )
 

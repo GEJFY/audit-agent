@@ -152,9 +152,7 @@ class TestBenchmarkCalculation:
         analyzer.add_profiles(_finance_profiles())
         result = analyzer.analyze()
 
-        fp_bm = next(
-            b for b in result.benchmarks if b.category == "financial_process"
-        )
+        fp_bm = next(b for b in result.benchmarks if b.category == "financial_process")
         # (75 + 45 + 85) / 3 ≈ 68.33
         assert fp_bm.avg_score == pytest.approx(68.33, abs=0.1)
         assert fp_bm.sample_size == 3
@@ -165,9 +163,7 @@ class TestBenchmarkCalculation:
         analyzer.add_profiles(_finance_profiles())
         result = analyzer.analyze()
 
-        fp_bm = next(
-            b for b in result.benchmarks if b.category == "financial_process"
-        )
+        fp_bm = next(b for b in result.benchmarks if b.category == "financial_process")
         # sorted: [45, 75, 85] → median = 75
         assert fp_bm.median_score == 75.0
 
@@ -225,9 +221,7 @@ class TestBenchmarkComparison:
         result = analyzer.analyze()
 
         # F002は低スコア → above_average (リスクが低い)
-        f002_comps = [
-            c for c in result.comparisons if c.company_id == "F002"
-        ]
+        f002_comps = [c for c in result.comparisons if c.company_id == "F002"]
         assert len(f002_comps) > 0
 
     def test_comparison_deviation(self) -> None:
@@ -272,69 +266,70 @@ class TestAnomalyCorrelation:
     def test_co_occurrence_detected(self) -> None:
         """両方高スコア → co_occurrence検出"""
         analyzer = CrossCompanyAnalyzer()
-        analyzer.add_profiles([
-            CompanyRiskProfile(
-                company_id="A",
-                company_name="A社",
-                industry="finance",
-                risk_scores={"cat1": 80.0},
-            ),
-            CompanyRiskProfile(
-                company_id="B",
-                company_name="B社",
-                industry="finance",
-                risk_scores={"cat1": 90.0},
-            ),
-        ])
+        analyzer.add_profiles(
+            [
+                CompanyRiskProfile(
+                    company_id="A",
+                    company_name="A社",
+                    industry="finance",
+                    risk_scores={"cat1": 80.0},
+                ),
+                CompanyRiskProfile(
+                    company_id="B",
+                    company_name="B社",
+                    industry="finance",
+                    risk_scores={"cat1": 90.0},
+                ),
+            ]
+        )
         result = analyzer.analyze()
 
-        co_occs = [
-            c for c in result.anomaly_correlations
-            if c.pattern == "co_occurrence"
-        ]
+        co_occs = [c for c in result.anomaly_correlations if c.pattern == "co_occurrence"]
         assert len(co_occs) >= 1
 
     def test_inverse_detected(self) -> None:
         """片方高・片方低 → inverse検出"""
         analyzer = CrossCompanyAnalyzer()
-        analyzer.add_profiles([
-            CompanyRiskProfile(
-                company_id="A",
-                company_name="A社",
-                industry="finance",
-                risk_scores={"cat1": 85.0},
-            ),
-            CompanyRiskProfile(
-                company_id="B",
-                company_name="B社",
-                industry="finance",
-                risk_scores={"cat1": 20.0},
-            ),
-        ])
+        analyzer.add_profiles(
+            [
+                CompanyRiskProfile(
+                    company_id="A",
+                    company_name="A社",
+                    industry="finance",
+                    risk_scores={"cat1": 85.0},
+                ),
+                CompanyRiskProfile(
+                    company_id="B",
+                    company_name="B社",
+                    industry="finance",
+                    risk_scores={"cat1": 20.0},
+                ),
+            ]
+        )
         result = analyzer.analyze()
 
-        inverse = [
-            c for c in result.anomaly_correlations if c.pattern == "inverse"
-        ]
+        inverse = [c for c in result.anomaly_correlations if c.pattern == "inverse"]
         assert len(inverse) >= 1
 
     def test_no_anomaly_average_scores(self) -> None:
         """平均的なスコアでは相関なし"""
         analyzer = CrossCompanyAnalyzer()
-        analyzer.add_profiles([
-            CompanyRiskProfile(
-                company_id="A",
-                company_name="A社",
-                industry="finance",
-                risk_scores={"cat1": 50.0},
-            ),
-            CompanyRiskProfile(
-                company_id="B",
-                company_name="B社",
-                industry="finance",
-                risk_scores={"cat1": 55.0},
-            ),
-        ])
+        analyzer.add_profiles(
+            [
+                CompanyRiskProfile(
+                    company_id="A",
+                    company_name="A社",
+                    industry="finance",
+                    risk_scores={"cat1": 50.0},
+                ),
+                CompanyRiskProfile(
+                    company_id="B",
+                    company_name="B社",
+                    industry="finance",
+                    risk_scores={"cat1": 55.0},
+                ),
+            ]
+        )
         result = analyzer.analyze()
 
         assert len(result.anomaly_correlations) == 0

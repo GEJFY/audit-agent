@@ -248,9 +248,7 @@ class TestAlerts:
         agg.add_companies(_sample_companies())
         result = agg.aggregate()
 
-        threshold_alerts = [
-            a for a in result.alerts if a.alert_type == "threshold_breach"
-        ]
+        threshold_alerts = [a for a in result.alerts if a.alert_type == "threshold_breach"]
         assert len(threshold_alerts) >= 1
         assert "C001" in threshold_alerts[0].affected_companies
 
@@ -277,9 +275,7 @@ class TestAlerts:
         agg.add_companies(companies)
         result = agg.aggregate()
 
-        conc_alerts = [
-            a for a in result.alerts if a.alert_type == "concentration_risk"
-        ]
+        conc_alerts = [a for a in result.alerts if a.alert_type == "concentration_risk"]
         assert len(conc_alerts) >= 1
 
     def test_trend_worsening_alert(self) -> None:
@@ -298,9 +294,7 @@ class TestAlerts:
         agg.add_companies(companies)
         result = agg.aggregate()
 
-        trend_alerts = [
-            a for a in result.alerts if a.alert_type == "trend_change"
-        ]
+        trend_alerts = [a for a in result.alerts if a.alert_type == "trend_change"]
         assert len(trend_alerts) >= 1
 
     def test_no_alerts_low_risk(self) -> None:
