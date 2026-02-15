@@ -12,6 +12,10 @@ import {
   ShieldCheck,
   AlertTriangle,
   LogOut,
+  Building2,
+  TrendingUp,
+  BarChart3,
+  Cpu,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -28,6 +32,13 @@ const navigation = [
   { name: "Approvals", href: "/approvals", icon: CheckCircle },
   { name: "Evidence", href: "/evidence", icon: FileText },
   { name: "Agents", href: "/agents", icon: Bot },
+];
+
+const executiveNavigation = [
+  { name: "Portfolio", href: "/portfolio", icon: Building2 },
+  { name: "Forecast", href: "/forecast", icon: TrendingUp },
+  { name: "Benchmark", href: "/benchmark", icon: BarChart3 },
+  { name: "Autonomous", href: "/autonomous", icon: Cpu },
 ];
 
 export function Sidebar() {
@@ -68,6 +79,31 @@ export function Sidebar() {
             </Link>
           );
         })}
+
+        {/* Executive Section */}
+        <div className="mt-4 border-t pt-4">
+          <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Executive
+          </p>
+          {executiveNavigation.map((item) => {
+            const isActive = pathname.startsWith(item.href);
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                className={cn(
+                  "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                  isActive
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                )}
+              >
+                <item.icon className="h-5 w-5" />
+                {item.name}
+              </Link>
+            );
+          })}
+        </div>
       </nav>
 
       {/* User info */}
