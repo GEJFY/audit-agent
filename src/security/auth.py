@@ -4,9 +4,9 @@ from datetime import UTC, datetime, timedelta
 from typing import Any
 from uuid import UUID
 
+import bcrypt
 import jwt
 from loguru import logger
-from passlib.context import CryptContext
 from pydantic import BaseModel
 
 from src.config.settings import get_settings
@@ -37,21 +37,19 @@ class AuthService:
     """認証サービス — パスワードハッシュ化 + JWT管理"""
 
     def __init__(self) -> None:
-        self._pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
         self._settings = get_settings()
-
-    @staticmethod
-    def _truncate_password(password: str) -> str:
-        """bcrypt 72バイト制限に合わせてパスワードを切り詰め"""
-        return password.encode("utf-8")[:72].decode("utf-8", errors="ignore")
 
     def hash_password(self, password: str) -> str:
         """パスワードをbcryptハッシュ化"""
-        return self._pwd_context.hash(self._truncate_password(password))  # type: ignore[no-any-return]
+        pw_bytes = password.encode("utf-8")[:72]
+        salt = bcrypt.gensalt()
+        hashed = bcrypt.hashpw(pw_bytes, salt)
+        return hashed.decode("utf-8")
 
     def verify_password(self, plain_password: str, hashed_password: str) -> bool:
         """パスワード検証"""
-        return self._pwd_context.verify(self._truncate_password(plain_password), hashed_password)  # type: ignore[no-any-return]
+        pw_bytes = plain_password.encode("utf-8")[:72]
+        return bcrypt.checkpw(pw_bytes, hashed_password.encode("utf-8"))
 
     def create_token_pair(
         self,
