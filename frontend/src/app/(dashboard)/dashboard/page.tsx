@@ -7,6 +7,7 @@ import {
   CheckCircle,
   Bot,
   AlertTriangle,
+  ShieldCheck,
 } from "lucide-react";
 
 import {
@@ -16,13 +17,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import { useAuthStore } from "@/stores/auth-store";
 import {
   getDashboardStats,
   getProjects,
   type DashboardStats,
 } from "@/lib/api/projects";
-import type { AuditProject } from "@/types/api";
+import { getControlScorecard, getRiskDashboard } from "@/lib/api/controls";
+import type { AuditProject, ControlScorecard, RiskDashboardData } from "@/types/api";
 
 export default function DashboardPage() {
   const user = useAuthStore((state) => state.user);
@@ -33,18 +36,33 @@ export default function DashboardPage() {
     riskAlerts: 0,
   });
   const [recentProjects, setRecentProjects] = useState<AuditProject[]>([]);
+  const [scorecard, setScorecard] = useState<ControlScorecard | null>(null);
+  const [riskData, setRiskData] = useState<RiskDashboardData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [statsData, projectsData] = await Promise.allSettled([
-          getDashboardStats(),
-          getProjects({ limit: 5 }),
-        ]);
-        if (statsData.status === "fulfilled") setStats(statsData.value);
+        const [statsData, projectsData, controlsData, riskResult] =
+          await Promise.allSettled([
+            getDashboardStats(),
+            getProjects({ limit: 5 }),
+            getControlScorecard(),
+            getRiskDashboard(),
+          ]);
+        if (statsData.status === "fulfilled") {
+          const s = statsData.value;
+          // Risk Alertsを実データで更新
+          if (riskResult.status === "fulfilled") {
+            s.riskAlerts = riskResult.value.open_risks;
+          }
+          setStats(s);
+        }
         if (projectsData.status === "fulfilled")
           setRecentProjects(projectsData.value.projects);
+        if (controlsData.status === "fulfilled")
+          setScorecard(controlsData.value);
+        if (riskResult.status === "fulfilled") setRiskData(riskResult.value);
       } finally {
         setLoading(false);
       }
@@ -75,7 +93,7 @@ export default function DashboardPage() {
       title: "Risk Alerts",
       value: stats.riskAlerts,
       icon: AlertTriangle,
-      href: "/dashboard",
+      href: "/risk",
     },
   ];
 
@@ -122,6 +140,109 @@ export default function DashboardPage() {
             </Card>
           </Link>
         ))}
+      </div>
+
+      {/* Controls & Risk Summary Row */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <Link href="/controls">
+          <Card className="transition-shadow hover:shadow-md">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <div>
+                <CardTitle className="text-base">Controls Score</CardTitle>
+                <CardDescription>Overall control effectiveness</CardDescription>
+              </div>
+              <ShieldCheck className="h-5 w-5 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              {loading || !scorecard ? (
+                <p className="text-sm text-muted-foreground">Loading...</p>
+              ) : (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-4">
+                    <span className="text-3xl font-bold">
+                      {scorecard.overall_score}%
+                    </span>
+                    <div className="flex-1">
+                      <Progress
+                        value={scorecard.overall_score}
+                        indicatorClassName={
+                          scorecard.overall_score >= 80
+                            ? "bg-green-500"
+                            : scorecard.overall_score >= 60
+                              ? "bg-yellow-500"
+                              : "bg-red-500"
+                        }
+                      />
+                    </div>
+                  </div>
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span className="text-green-600">
+                      {scorecard.effective} Effective
+                    </span>
+                    <span className="text-yellow-600">
+                      {scorecard.partially_effective} Partial
+                    </span>
+                    <span className="text-red-600">
+                      {scorecard.ineffective} Ineffective
+                    </span>
+                    <span>{scorecard.not_tested} Untested</span>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Link href="/risk">
+          <Card className="transition-shadow hover:shadow-md">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <div>
+                <CardTitle className="text-base">Risk Overview</CardTitle>
+                <CardDescription>AI-detected risk summary</CardDescription>
+              </div>
+              <AlertTriangle className="h-5 w-5 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              {loading || !riskData ? (
+                <p className="text-sm text-muted-foreground">Loading...</p>
+              ) : (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-6">
+                    <div>
+                      <span className="text-3xl font-bold">
+                        {riskData.total_risks}
+                      </span>
+                      <span className="text-sm text-muted-foreground ml-1">
+                        risks
+                      </span>
+                    </div>
+                    <div className="flex gap-3">
+                      {riskData.critical > 0 && (
+                        <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
+                          {riskData.critical} Critical
+                        </span>
+                      )}
+                      {riskData.high > 0 && (
+                        <span className="rounded-full bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-700">
+                          {riskData.high} High
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>{riskData.open_risks} Open</span>
+                    <span className="text-green-600">
+                      {riskData.mitigated_risks} Mitigated
+                    </span>
+                    <span>
+                      {riskData.medium} Medium / {riskData.low} Low
+                    </span>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </Link>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">

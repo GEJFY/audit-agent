@@ -132,6 +132,66 @@ export interface BoxSearchResult {
   source: "box";
 }
 
+// ── Controls ───────────────────────────────────
+export interface ControlScore {
+  id: string;
+  control_id: string;
+  control_name: string;
+  category: string;
+  description: string;
+  score: number;
+  status: "effective" | "partially_effective" | "ineffective" | "not_tested";
+  last_tested: string | null;
+  tester_agent: string | null;
+  findings_count: number;
+  remediation_status: "none" | "in_progress" | "completed" | "overdue";
+  project_id: string | null;
+}
+
+export interface ControlScorecard {
+  overall_score: number;
+  total_controls: number;
+  effective: number;
+  partially_effective: number;
+  ineffective: number;
+  not_tested: number;
+  by_category: Record<string, { score: number; count: number }>;
+  controls: ControlScore[];
+}
+
+// ── Risk ───────────────────────────────────────
+export interface RiskItem {
+  id: string;
+  title: string;
+  description: string;
+  risk_level: "critical" | "high" | "medium" | "low";
+  risk_score: number;
+  category: string;
+  source: string;
+  detected_at: string;
+  status: "open" | "mitigated" | "accepted" | "closed";
+  project_id: string | null;
+}
+
+export interface RiskDashboardData {
+  total_risks: number;
+  critical: number;
+  high: number;
+  medium: number;
+  low: number;
+  open_risks: number;
+  mitigated_risks: number;
+  risk_trend: RiskTrendPoint[];
+  by_category: Record<string, number>;
+  recent_risks: RiskItem[];
+}
+
+export interface RiskTrendPoint {
+  date: string;
+  score: number;
+  count: number;
+}
+
 // ── API Response ────────────────────────────────
 export interface PaginatedResponse<T> {
   items: T[];

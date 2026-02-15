@@ -9,6 +9,8 @@ import {
   CheckCircle,
   FileText,
   Bot,
+  ShieldCheck,
+  AlertTriangle,
   LogOut,
 } from "lucide-react";
 
@@ -20,6 +22,8 @@ import { Button } from "@/components/ui/button";
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Projects", href: "/projects", icon: FolderKanban },
+  { name: "Controls", href: "/controls", icon: ShieldCheck },
+  { name: "Risk", href: "/risk", icon: AlertTriangle },
   { name: "Dialogue", href: "/dialogue", icon: MessageSquare },
   { name: "Approvals", href: "/approvals", icon: CheckCircle },
   { name: "Evidence", href: "/evidence", icon: FileText },
