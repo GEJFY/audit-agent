@@ -97,6 +97,41 @@ export interface ApprovalQueueItem {
   created_at: string | null;
 }
 
+// ── Evidence ────────────────────────────────────
+export interface EvidenceItem {
+  id: string;
+  name: string;
+  type: "document" | "spreadsheet" | "screenshot" | "email" | "log" | "other";
+  source: "upload" | "box" | "sharepoint" | "manual";
+  file_size: number;
+  mime_type: string;
+  project_id: string | null;
+  uploaded_by: string | null;
+  description: string;
+  tags: string[];
+  status: "pending" | "verified" | "rejected";
+  created_at: string;
+  updated_at: string;
+}
+
+export interface EvidenceUploadRequest {
+  file: File;
+  description: string;
+  project_id?: string;
+  tags?: string[];
+}
+
+export interface BoxSearchResult {
+  id: string;
+  name: string;
+  type: string;
+  size: number;
+  created_at: string;
+  modified_at: string;
+  parent_folder: string | null;
+  source: "box";
+}
+
 // ── API Response ────────────────────────────────
 export interface PaginatedResponse<T> {
   items: T[];

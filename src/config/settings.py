@@ -66,6 +66,11 @@ class Settings(BaseSettings):
     sap_password: str = ""
     sap_client_id: str = ""
 
+    # ── Box ─────────────────────────────────────────
+    box_client_id: str = ""
+    box_client_secret: str = ""
+    box_enterprise_id: str = ""
+
     # ── Kafka ────────────────────────────────────────
     kafka_bootstrap_servers: str = ""
     kafka_topic_dialogue: str = "audit-agent-dialogue"
