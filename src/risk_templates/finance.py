@@ -1,0 +1,256 @@
+"""金融業リスクテンプレート — J-SOX対応
+
+金融庁の内部統制報告制度（J-SOX）に準拠した
+金融業向けリスク・統制テンプレート。
+"""
+
+from src.risk_templates import (
+    ControlItem,
+    IndustryTemplateDefinition,
+    RiskItem,
+)
+
+_FINANCE_RISKS: list[RiskItem] = [
+    # ── 財務プロセス ──
+    RiskItem(
+        risk_code="FIN-001",
+        risk_name="売上計上の期間帰属誤り",
+        category="financial_process",
+        subcategory="revenue_recognition",
+        description="売上の計上時期が適切でないリスク。期末カットオフに特に注意。",
+        default_likelihood=3,
+        default_impact=4,
+        regulatory_ref="J-SOX 実施基準 II.2.(1)",
+        applicable_assertions=["存在性", "期間帰属", "完全性"],
+        tags=["j-sox", "revenue", "cutoff"],
+    ),
+    RiskItem(
+        risk_code="FIN-002",
+        risk_name="貸倒引当金の見積り不備",
+        category="financial_process",
+        subcategory="allowance_estimation",
+        description="債権の回収可能性評価と引当計上額の妥当性に関するリスク。",
+        default_likelihood=3,
+        default_impact=4,
+        regulatory_ref="J-SOX 実施基準 II.2.(2)",
+        applicable_assertions=["評価", "完全性"],
+        tags=["j-sox", "estimation", "allowance"],
+    ),
+    RiskItem(
+        risk_code="FIN-003",
+        risk_name="有価証券評価損の計上漏れ",
+        category="financial_process",
+        subcategory="securities_valuation",
+        description="保有有価証券の時価評価および減損処理の適切性に関するリスク。",
+        default_likelihood=2,
+        default_impact=5,
+        regulatory_ref="J-SOX 実施基準 II.2.(2)",
+        applicable_assertions=["評価", "表示"],
+        tags=["j-sox", "securities", "impairment"],
+    ),
+    RiskItem(
+        risk_code="FIN-004",
+        risk_name="関連当事者取引の未開示",
+        category="financial_process",
+        subcategory="related_party",
+        description="関連当事者との取引が適切に識別・開示されないリスク。",
+        default_likelihood=2,
+        default_impact=4,
+        regulatory_ref="J-SOX 実施基準 II.3.(4)",
+        applicable_assertions=["完全性", "表示"],
+        tags=["j-sox", "related_party", "disclosure"],
+    ),
+    # ── アクセス制御 ──
+    RiskItem(
+        risk_code="FIN-005",
+        risk_name="勘定系システムへの不正アクセス",
+        category="access_control",
+        subcategory="core_banking",
+        description="基幹業務システムへのアクセス権限管理の不備。職務分離違反。",
+        default_likelihood=3,
+        default_impact=5,
+        regulatory_ref="J-SOX IT統制基準 3.1",
+        applicable_assertions=["存在性", "権利と義務"],
+        tags=["j-sox", "it_gc", "access"],
+    ),
+    RiskItem(
+        risk_code="FIN-006",
+        risk_name="特権IDの管理不備",
+        category="access_control",
+        subcategory="privileged_access",
+        description="管理者権限の付与・レビュー・ログ監視の不備。",
+        default_likelihood=3,
+        default_impact=5,
+        regulatory_ref="J-SOX IT統制基準 3.2",
+        applicable_assertions=["権利と義務"],
+        tags=["j-sox", "it_gc", "privileged_id"],
+    ),
+    # ── コンプライアンス ──
+    RiskItem(
+        risk_code="FIN-007",
+        risk_name="マネーロンダリング対策の不備",
+        category="compliance",
+        subcategory="aml",
+        description="犯罪収益移転防止法に基づくKYC/AML手続きの不備。",
+        default_likelihood=2,
+        default_impact=5,
+        regulatory_ref="犯罪収益移転防止法",
+        applicable_assertions=["完全性"],
+        tags=["aml", "kyc", "compliance"],
+    ),
+    RiskItem(
+        risk_code="FIN-008",
+        risk_name="個人情報保護法対応の不備",
+        category="compliance",
+        subcategory="privacy",
+        description="顧客個人情報の取扱い・安全管理措置の不備。",
+        default_likelihood=3,
+        default_impact=4,
+        regulatory_ref="個人情報保護法",
+        applicable_assertions=["権利と義務"],
+        tags=["privacy", "pii", "compliance"],
+    ),
+    # ── IT全般統制 ──
+    RiskItem(
+        risk_code="FIN-009",
+        risk_name="変更管理プロセスの不備",
+        category="it_general",
+        subcategory="change_management",
+        description="システム変更の承認・テスト・本番反映プロセスの不備。",
+        default_likelihood=3,
+        default_impact=4,
+        regulatory_ref="J-SOX IT統制基準 4.1",
+        applicable_assertions=["存在性", "完全性"],
+        tags=["j-sox", "it_gc", "change_mgmt"],
+    ),
+    RiskItem(
+        risk_code="FIN-010",
+        risk_name="バックアップ・リカバリの不備",
+        category="it_general",
+        subcategory="backup_recovery",
+        description="データバックアップとシステム復旧手順の不備。BCP対応。",
+        default_likelihood=2,
+        default_impact=5,
+        regulatory_ref="J-SOX IT統制基準 4.3",
+        applicable_assertions=["完全性"],
+        tags=["j-sox", "it_gc", "bcp"],
+    ),
+]
+
+_FINANCE_CONTROLS: list[ControlItem] = [
+    # 売上計上
+    ControlItem(
+        control_code="FC-001",
+        control_name="売上計上カットオフチェック",
+        risk_code="FIN-001",
+        control_type="detective",
+        frequency="monthly",
+        test_approach="inspection",
+        recommended_sample_size=25,
+        description="月次クロージング時に売上計上日と出荷日のカットオフ検証。",
+    ),
+    ControlItem(
+        control_code="FC-002",
+        control_name="売上承認ワークフロー",
+        risk_code="FIN-001",
+        control_type="preventive",
+        frequency="daily",
+        test_approach="inspection",
+        recommended_sample_size=25,
+        description="一定金額以上の売上計上に対する上長承認。",
+    ),
+    # 貸倒引当金
+    ControlItem(
+        control_code="FC-003",
+        control_name="債権エイジング分析レビュー",
+        risk_code="FIN-002",
+        control_type="detective",
+        frequency="monthly",
+        test_approach="reperformance",
+        recommended_sample_size=0,
+        description="月次での債権年齢分析と引当率妥当性レビュー。",
+    ),
+    # 有価証券
+    ControlItem(
+        control_code="FC-004",
+        control_name="有価証券時価評価チェック",
+        risk_code="FIN-003",
+        control_type="detective",
+        frequency="quarterly",
+        test_approach="reperformance",
+        recommended_sample_size=0,
+        description="四半期末の有価証券時価評価と減損判定レビュー。",
+    ),
+    # アクセス制御
+    ControlItem(
+        control_code="FC-005",
+        control_name="アクセス権限棚卸",
+        risk_code="FIN-005",
+        control_type="detective",
+        frequency="quarterly",
+        test_approach="inspection",
+        recommended_sample_size=0,
+        description="四半期ごとのシステムアクセス権限棚卸とレビュー。",
+        automation_level="semi_auto",
+    ),
+    ControlItem(
+        control_code="FC-006",
+        control_name="特権IDモニタリング",
+        risk_code="FIN-006",
+        control_type="detective",
+        frequency="weekly",
+        test_approach="inspection",
+        recommended_sample_size=0,
+        description="特権IDの使用ログレビュー。不審な操作の検出。",
+        automation_level="semi_auto",
+    ),
+    # コンプライアンス
+    ControlItem(
+        control_code="FC-007",
+        control_name="疑わしい取引報告チェック",
+        risk_code="FIN-007",
+        control_type="detective",
+        frequency="daily",
+        test_approach="inquiry",
+        recommended_sample_size=25,
+        description="AMLシステムによる疑わしい取引の検知と報告。",
+        automation_level="full_auto",
+    ),
+    # IT統制
+    ControlItem(
+        control_code="FC-008",
+        control_name="変更管理承認プロセス",
+        risk_code="FIN-009",
+        control_type="preventive",
+        frequency="daily",
+        test_approach="inspection",
+        recommended_sample_size=25,
+        description="システム変更要求の承認フロー。テスト完了確認。",
+    ),
+    ControlItem(
+        control_code="FC-009",
+        control_name="バックアップ実行確認",
+        risk_code="FIN-010",
+        control_type="detective",
+        frequency="daily",
+        test_approach="observation",
+        recommended_sample_size=0,
+        description="日次バックアップジョブの実行結果確認。",
+        automation_level="full_auto",
+    ),
+]
+
+
+def get_finance_template() -> IndustryTemplateDefinition:
+    """金融業テンプレートを生成"""
+    return IndustryTemplateDefinition(
+        industry_code="finance",
+        industry_name="金融業",
+        region="JP",
+        version="1.0",
+        description="金融庁J-SOX対応の金融業向けリスク・統制テンプレート。"
+        "銀行・証券・保険業を対象とした標準リスク項目と統制手続き。",
+        regulatory_framework="J-SOX",
+        risks=_FINANCE_RISKS,
+        controls=_FINANCE_CONTROLS,
+    )
