@@ -1,0 +1,180 @@
+# ═══════════════════════════════════════════════════════
+# audit-agent セキュリティスキャン
+# ═══════════════════════════════════════════════════════
+name: Security
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  schedule:
+    # 毎週月曜 09:00 JST (日曜 00:00 UTC)
+    - cron: "0 0 * * 0"
+
+permissions:
+  contents: read
+  security-events: write
+
+env:
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  # ── 依存関係の脆弱性スキャン ──────────────────────────
+  dependency-audit:
+    name: Dependency Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ".[dev]"
+
+      - name: pip-audit
+        run: pip-audit --strict --desc
+
+      - name: Safety check
+        run: safety check --full-report
+        continue-on-error: true
+
+  # ── SAST (静的アプリケーションセキュリティテスト) ─────
+  sast:
+    name: SAST (Bandit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install bandit
+        run: pip install bandit[toml]
+
+      - name: Run Bandit
+        run: |
+          bandit -r src/ \
+            -f json \
+            -o bandit-report.json \
+            --severity-level medium
+        continue-on-error: true
+
+      - name: Upload Bandit report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bandit-report
+          path: bandit-report.json
+
+      - name: Bandit human-readable
+        if: always()
+        run: |
+          bandit -r src/ \
+            --severity-level medium
+        continue-on-error: true
+
+  # ── シークレットスキャン ──────────────────────────────
+  secrets-scan:
+    name: Secrets Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: TruffleHog scan
+        uses: trufflesecurity/trufflehog@main
+        with:
+          extra_args: --only-verified
+
+  # ── Dockerイメージスキャン ────────────────────────────
+  container-scan:
+    name: Container Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        run: |
+          docker build \
+            -f docker/Dockerfile \
+            --target production \
+            -t audit-agent:scan .
+
+      - name: Trivy vulnerability scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: "audit-agent:scan"
+          format: "sarif"
+          output: "trivy-results.sarif"
+          severity: "CRITICAL,HIGH"
+
+      - name: Upload Trivy SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        if: success()
+        continue-on-error: true
+        with:
+          sarif_file: trivy-results.sarif
+
+  # ── ライセンスコンプライアンス ────────────────────────
+  license-check:
+    name: License Compliance
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ".[dev]" pip-licenses
+
+      - name: Check licenses
+        run: |
+          pip-licenses --format=plain --with-urls --order=license
+          # 禁止ライセンスのチェック
+          pip-licenses --format=json | python -c "
+          import json, sys
+          data = json.load(sys.stdin)
+          banned = ['AGPL-3.0', 'GPL-3.0']
+          violations = [p for p in data if any(b in p.get('License', '') for b in banned)]
+          if violations:
+              print('LICENSE VIOLATIONS FOUND:')
+              for v in violations:
+                  print(f\"  {v['Name']}: {v['License']}\")
+              sys.exit(1)
+          print('All licenses are compliant')
+          "
+
+  # ── セキュリティサマリー ──────────────────────────────
+  security-summary:
+    name: Security Summary
+    needs: [dependency-audit, sast, secrets-scan, container-scan, license-check]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check results
+        run: |
+          echo "=== Security Scan Summary ==="
+          echo "Dependency Audit: ${{ needs.dependency-audit.result }}"
+          echo "SAST (Bandit): ${{ needs.sast.result }}"
+          echo "Secrets Scan: ${{ needs.secrets-scan.result }}"
+          echo "Container Scan: ${{ needs.container-scan.result }}"
+          echo "License Check: ${{ needs.license-check.result }}"
+
+          if [ "${{ needs.secrets-scan.result }}" = "failure" ]; then
+            echo "CRITICAL: Secrets detected in repository!"
+            exit 1
+          fi
