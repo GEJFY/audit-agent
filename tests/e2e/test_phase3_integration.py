@@ -35,9 +35,7 @@ class TestRegionIntegration:
     def test_data_residency_regions(self) -> None:
         """データレジデンシー要件のあるリージョン"""
         residency_required = [
-            code
-            for code in list_supported_regions()
-            if get_region_config(code).data_residency_required
+            code for code in list_supported_regions() if get_region_config(code).data_residency_required
         ]
         assert "JP" in residency_required
         assert "AU" in residency_required
@@ -202,20 +200,16 @@ class TestProcessAnalysisPipelineE2E:
         from src.ml.process_mining import ProcessMiner
 
         events = [
-            {"case_id": f"C{i:03d}", "activity": "入力", "timestamp": f"2025-01-{i:02d}T09:00:00"}
-            for i in range(1, 6)
+            {"case_id": f"C{i:03d}", "activity": "入力", "timestamp": f"2025-01-{i:02d}T09:00:00"} for i in range(1, 6)
         ]
         events += [
-            {"case_id": f"C{i:03d}", "activity": "承認", "timestamp": f"2025-01-{i:02d}T10:00:00"}
-            for i in range(1, 6)
+            {"case_id": f"C{i:03d}", "activity": "承認", "timestamp": f"2025-01-{i:02d}T10:00:00"} for i in range(1, 6)
         ]
         events += [
-            {"case_id": f"C{i:03d}", "activity": "転記", "timestamp": f"2025-01-{i:02d}T11:00:00"}
-            for i in range(1, 6)
+            {"case_id": f"C{i:03d}", "activity": "転記", "timestamp": f"2025-01-{i:02d}T11:00:00"} for i in range(1, 6)
         ]
         events += [
-            {"case_id": f"C{i:03d}", "activity": "完了", "timestamp": f"2025-01-{i:02d}T12:00:00"}
-            for i in range(1, 6)
+            {"case_id": f"C{i:03d}", "activity": "完了", "timestamp": f"2025-01-{i:02d}T12:00:00"} for i in range(1, 6)
         ]
         # 逸脱ケース: 承認スキップ
         events += [

@@ -144,9 +144,7 @@ def get_region_config(region_code: str) -> RegionConfig:
     config = REGION_CONFIGS.get(region_code.upper())
     if not config:
         supported = ", ".join(REGION_CONFIGS.keys())
-        raise ValueError(
-            f"Unsupported region: {region_code}. Supported: {supported}"
-        )
+        raise ValueError(f"Unsupported region: {region_code}. Supported: {supported}")
     return config
 
 

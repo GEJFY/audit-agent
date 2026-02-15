@@ -148,9 +148,7 @@ class TestRegionConfigsMaster:
     def test_all_have_regulatory_bodies(self) -> None:
         """全リージョンに規制当局"""
         for code, config in REGION_CONFIGS.items():
-            assert len(config.regulatory_bodies) > 0, (
-                f"{code} has no regulatory bodies"
-            )
+            assert len(config.regulatory_bodies) > 0, f"{code} has no regulatory bodies"
 
     def test_all_have_currency(self) -> None:
         """全リージョンに通貨"""
