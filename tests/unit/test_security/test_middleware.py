@@ -95,7 +95,8 @@ class TestRequestValidationMiddleware:
         app = _create_test_app(RequestValidationMiddleware)
         client = TestClient(app, raise_server_exceptions=False)
 
-        response = client.get("/test/../../etc/passwd")
+        # クエリパラメータでパストラバーサルパターンを検出
+        response = client.get("/test", params={"path": "../../etc/passwd"})
         assert response.status_code == 403
 
     def test_safe_query_params(self) -> None:

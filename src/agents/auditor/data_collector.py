@@ -38,7 +38,7 @@ class DataCollectorAgent(BaseAuditAgent[AuditorState]):
             collected_data.append(data)
 
             confidence = 0.9 if data.get("record_count", 0) > 0 else 0.3
-            self.record_decision(
+            self.record_decision(  # type: ignore[call-arg]
                 tenant_id=state.tenant_id,
                 decision="data_collected",
                 reasoning=(

@@ -100,12 +100,14 @@ class TestKafkaBus:
     async def test_disconnect(self) -> None:
         """切断テスト"""
         bus = KafkaBus()
-        bus._producer = AsyncMock()
-        bus._consumer = AsyncMock()
+        mock_producer = AsyncMock()
+        mock_consumer = AsyncMock()
+        bus._producer = mock_producer
+        bus._consumer = mock_consumer
 
         await bus.disconnect()
 
-        bus._producer.stop.assert_awaited_once()
-        bus._consumer.stop.assert_awaited_once()
+        mock_producer.stop.assert_awaited_once()
+        mock_consumer.stop.assert_awaited_once()
         assert bus._producer is None
         assert bus._consumer is None

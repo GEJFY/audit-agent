@@ -77,6 +77,6 @@ class RiskAlertAgent(BaseAuditAgent[AuditeeState]):
 """
         response = await self.call_llm(prompt, use_fast_model=True)
         try:
-            return json.loads(response)
+            return json.loads(response)  # type: ignore[no-any-return]
         except json.JSONDecodeError:
             return []

@@ -79,7 +79,7 @@ class VectorStore:
                 )
                 if response.status_code == 200:
                     data = response.json()
-                    return data["data"][0]["embedding"]
+                    return data["data"][0]["embedding"]  # type: ignore[no-any-return]
 
             return self._fallback_embedding(text_content)
         except Exception as e:
@@ -246,4 +246,4 @@ class VectorStore:
             query_str += " AND doc_type = :doc_type"
             params["doc_type"] = doc_type
         result = await session.execute(text(query_str), params)
-        return result.scalar_one()
+        return result.scalar_one()  # type: ignore[no-any-return]

@@ -70,7 +70,7 @@ async def list_messages(
     if message_type:
         query = query.where(DialogueMessage.message_type == message_type)
 
-    count_q = select(func.count()).select_from(query.subquery())
+    count_q = select(func.count()).select_from(query.subquery())  # type: ignore[attr-defined]
     total = (await session.execute(count_q)).scalar_one()
 
     query = query.order_by(DialogueMessage.created_at.desc()).offset(offset).limit(limit)
@@ -134,7 +134,7 @@ async def get_pending_approvals(
     """承認待ちメッセージ一覧"""
     query = (
         select(DialogueMessage)
-        .where(
+        .where(  # type: ignore[call-arg]
             or_(
                 DialogueMessage.from_tenant_id == user.tenant_id,
                 DialogueMessage.to_tenant_id == user.tenant_id,
@@ -190,7 +190,7 @@ async def get_thread(
     """スレッド詳細 — 時系列順のメッセージ一覧"""
     result = await session.execute(
         select(DialogueMessage)
-        .where(
+        .where(  # type: ignore[call-arg]
             DialogueMessage.thread_id == thread_id,
             or_(
                 DialogueMessage.from_tenant_id == user.tenant_id,

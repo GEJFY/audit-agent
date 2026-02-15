@@ -136,7 +136,7 @@ async def list_agent_decisions(
     elif decision_status == "approved":
         query = query.where(AgentDecision.human_approved.is_(True))
 
-    count_q = select(func.count()).select_from(query.subquery())
+    count_q = select(func.count()).select_from(query.subquery())  # type: ignore[attr-defined]
     total = (await session.execute(count_q)).scalar_one()
 
     query = query.order_by(AgentDecision.created_at.desc()).offset(offset).limit(limit)
@@ -171,7 +171,7 @@ async def approve_decision(
 ) -> dict[str, str]:
     """Agent判断を承認 / 却下"""
     result = await session.execute(
-        select(AgentDecision).where(
+        select(AgentDecision).where(  # type: ignore[call-arg]
             AgentDecision.id == decision_id,
             AgentDecision.tenant_id == user.tenant_id,
         )
@@ -203,7 +203,7 @@ async def list_approval_queue(
     priority: str | None = None,
 ) -> list[ApprovalQueueItem]:
     """承認キュー一覧"""
-    query = select(ApprovalQueue).where(
+    query = select(ApprovalQueue).where(  # type: ignore[call-arg]
         ApprovalQueue.tenant_id == user.tenant_id,
         ApprovalQueue.status == "pending",
     )

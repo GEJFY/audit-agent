@@ -71,7 +71,7 @@ async def list_projects(
         query = query.where(AuditProject.fiscal_year == fiscal_year)
 
     # 総数
-    count_q = select(func.count()).select_from(query.subquery())
+    count_q = select(func.count()).select_from(query.subquery())  # type: ignore[attr-defined]
     total = (await session.execute(count_q)).scalar_one()
 
     # ページネーション
@@ -123,7 +123,7 @@ async def get_project(
 ) -> ProjectResponse:
     """監査プロジェクト詳細"""
     result = await session.execute(
-        select(AuditProject).where(
+        select(AuditProject).where(  # type: ignore[call-arg]
             AuditProject.id == project_id,
             AuditProject.tenant_id == user.tenant_id,
         )
@@ -144,7 +144,7 @@ async def update_project(
 ) -> ProjectResponse:
     """監査プロジェクト更新"""
     result = await session.execute(
-        select(AuditProject).where(
+        select(AuditProject).where(  # type: ignore[call-arg]
             AuditProject.id == project_id,
             AuditProject.tenant_id == user.tenant_id,
         )
@@ -174,7 +174,7 @@ async def delete_project(
 ) -> None:
     """監査プロジェクト削除"""
     result = await session.execute(
-        select(AuditProject).where(
+        select(AuditProject).where(  # type: ignore[call-arg]
             AuditProject.id == project_id,
             AuditProject.tenant_id == user.tenant_id,
         )
@@ -199,7 +199,7 @@ async def list_findings(
     """プロジェクトの検出事項一覧"""
     result = await session.execute(
         select(Finding)
-        .where(
+        .where(  # type: ignore[call-arg]
             Finding.project_id == project_id,
             Finding.tenant_id == user.tenant_id,
         )
@@ -239,7 +239,7 @@ async def create_finding(
     """検出事項を追加"""
     # 採番
     count_result = await session.execute(
-        select(func.count()).select_from(Finding).where(Finding.project_id == project_id)
+        select(func.count()).select_from(Finding).where(Finding.project_id == project_id)  # type: ignore[arg-type]
     )
     seq = (count_result.scalar_one() or 0) + 1
     finding_ref = f"F-{project_id[:8].upper()}-{seq:03d}"
@@ -290,7 +290,7 @@ async def list_anomalies(
     """プロジェクトの異常検知結果一覧"""
     result = await session.execute(
         select(Anomaly)
-        .where(
+        .where(  # type: ignore[call-arg]
             Anomaly.project_id == project_id,
             Anomaly.tenant_id == user.tenant_id,
         )
@@ -326,7 +326,7 @@ async def list_reports(
     """プロジェクトの報告書一覧"""
     result = await session.execute(
         select(Report)
-        .where(
+        .where(  # type: ignore[call-arg]
             Report.project_id == project_id,
             Report.tenant_id == user.tenant_id,
         )
@@ -362,8 +362,8 @@ async def list_remediations(
     """プロジェクトの改善措置一覧"""
     result = await session.execute(
         select(RemediationAction)
-        .join(Finding, Finding.id == RemediationAction.finding_id)
-        .where(
+        .join(Finding, Finding.id == RemediationAction.finding_id)  # type: ignore[arg-type]
+        .where(  # type: ignore[attr-defined]
             Finding.project_id == project_id,
             RemediationAction.tenant_id == user.tenant_id,
         )

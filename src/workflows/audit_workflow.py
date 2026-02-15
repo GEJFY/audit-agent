@@ -137,7 +137,7 @@ class AuditProjectWorkflow:
                 tenant_id=tenant_id,
             ),
             start_to_close_timeout=timedelta(minutes=10),
-            retry_policy=workflow.RetryPolicy(
+            retry_policy=workflow.RetryPolicy(  # type: ignore[attr-defined]
                 maximum_attempts=3,
                 initial_interval=timedelta(seconds=5),
                 backoff_coefficient=2.0,

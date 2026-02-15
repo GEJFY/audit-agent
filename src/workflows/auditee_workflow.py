@@ -94,7 +94,7 @@ class AuditeeResponseWorkflow:
 
     async def _run_agent(self, agent_name: str, tenant_id: str) -> AgentActivityOutput:
         """Agent Activityを実行"""
-        return await workflow.execute_activity(
+        return await workflow.execute_activity(  # type: ignore[no-any-return,call-overload]
             run_auditee_agent,
             arg=AgentActivityInput(
                 agent_name=agent_name,
@@ -102,7 +102,7 @@ class AuditeeResponseWorkflow:
                 tenant_id=tenant_id,
             ),
             start_to_close_timeout=timedelta(minutes=5),
-            retry_policy=workflow.RetryPolicy(
+            retry_policy=workflow.RetryPolicy(  # type: ignore[attr-defined]
                 maximum_attempts=3,
                 initial_interval=timedelta(seconds=5),
             ),
@@ -155,7 +155,7 @@ class ControlsMonitoringWorkflow:
                 tenant_id=tenant_id,
             ),
             start_to_close_timeout=timedelta(minutes=10),
-            retry_policy=workflow.RetryPolicy(maximum_attempts=2),
+            retry_policy=workflow.RetryPolicy(maximum_attempts=2),  # type: ignore[attr-defined]
         )
 
         if monitor_result.success:
@@ -182,7 +182,7 @@ class ControlsMonitoringWorkflow:
                 tenant_id=tenant_id,
             ),
             start_to_close_timeout=timedelta(minutes=5),
-            retry_policy=workflow.RetryPolicy(maximum_attempts=2),
+            retry_policy=workflow.RetryPolicy(maximum_attempts=2),  # type: ignore[attr-defined]
         )
 
         if alert_result.success:

@@ -202,7 +202,7 @@ class KnowledgeAgent(BaseAuditAgent[AuditorState]):
 
         result["sources_used"] = len(context_docs)
         result["search_method"] = "rag"
-        return result
+        return result  # type: ignore[no-any-return]
 
     async def _generate_direct_answer(self, query: str) -> dict[str, Any]:
         """フォールバック: VectorStore結果なしのLLM直接回答"""
@@ -238,4 +238,4 @@ class KnowledgeAgent(BaseAuditAgent[AuditorState]):
         if result.get("confidence", 0) > 0.7:
             result["confidence"] = 0.7
 
-        return result
+        return result  # type: ignore[no-any-return]

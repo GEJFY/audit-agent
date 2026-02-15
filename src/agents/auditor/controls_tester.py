@@ -80,7 +80,7 @@ JSON形式で結果を返してください:
             resource_id=state.project_id,
         )
 
-        return result
+        return result  # type: ignore[no-any-return]
 
     async def _summarize_results(self, results: list[dict[str, Any]]) -> dict[str, Any]:
         """テスト結果サマリー"""

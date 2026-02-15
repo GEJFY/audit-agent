@@ -85,9 +85,9 @@ class EvidenceSearchAgent(BaseAuditAgent[AuditeeState]):
             if isinstance(result, Exception):
                 logger.error("証跡検索エラー ({}): {}", source, str(result))
                 continue
-            for item in result:
+            for item in result:  # type: ignore[union-attr]
                 item["relevance_score"] = self._calculate_relevance(item, query)
-            all_results.extend(result)
+            all_results.extend(result)  # type: ignore[arg-type]
 
         # 関連度スコアで降順ソート
         all_results.sort(key=lambda x: x.get("relevance_score", 0), reverse=True)

@@ -110,7 +110,7 @@ class ResponseAgent(BaseAuditAgent[AuditeeState]):
         if past_responses:
             draft["reused_source_ids"] = [r.get("source_id", "") for r in past_responses if r.get("source_id")]
 
-        return draft
+        return draft  # type: ignore[no-any-return]
 
     async def _search_past_responses(self, question: dict[str, Any], tenant_id: str) -> list[dict[str, Any]]:
         """過去の類似回答をVectorStoreとDBから検索"""
@@ -159,7 +159,7 @@ class ResponseAgent(BaseAuditAgent[AuditeeState]):
         """DBから過去の回答履歴を取得"""
         result = await session.execute(
             select(AuditeeResponse)
-            .where(
+            .where(  # type: ignore[call-arg]
                 AuditeeResponse.tenant_id == tenant_id,
                 AuditeeResponse.quality_score >= 0.7,  # 品質スコア70%以上のみ
             )

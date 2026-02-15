@@ -1,6 +1,7 @@
 """Anomaly Detective Agent テスト"""
 
 from unittest.mock import AsyncMock, MagicMock
+from uuid import uuid4
 
 import pytest
 
@@ -39,8 +40,8 @@ class TestAnomalyDetectiveAgent:
         )
 
         state = AuditorState(
-            project_id="test-project",
-            tenant_id="test-tenant",
+            project_id=str(uuid4()),
+            tenant_id=str(uuid4()),
             metadata={"collected_data": []},
         )
 
@@ -75,8 +76,8 @@ class TestAnomalyDetectiveAgent:
         )
 
         state = AuditorState(
-            project_id="test-project",
-            tenant_id="test-tenant",
+            project_id=str(uuid4()),
+            tenant_id=str(uuid4()),
             metadata={"collected_data": sample_journal_entries},
         )
 
@@ -86,7 +87,7 @@ class TestAnomalyDetectiveAgent:
 
     def test_promote_to_findings(self, anomaly_agent: AnomalyDetectiveAgent) -> None:
         """重大異常のFinding昇格テスト"""
-        state = AuditorState(project_id="test", tenant_id="test-tenant")
+        state = AuditorState(project_id=str(uuid4()), tenant_id=str(uuid4()))
         anomalies = [
             {"severity": "critical", "confidence": 0.9, "description": "重大な異常"},
             {"severity": "low", "confidence": 0.3, "description": "軽微な異常"},

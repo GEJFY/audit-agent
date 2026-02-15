@@ -94,7 +94,7 @@ class S3Storage:
         expiration: int = 3600,
     ) -> str:
         """署名付きダウンロードURL生成"""
-        return self._client.generate_presigned_url(
+        return self._client.generate_presigned_url(  # type: ignore[no-any-return]
             "get_object",
             Params={"Bucket": self._evidence_bucket, "Key": s3_key},
             ExpiresIn=expiration,

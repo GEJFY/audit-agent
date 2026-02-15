@@ -139,7 +139,7 @@ class TimeSeriesAnalyzer:
 
         # 移動平均 (window=7 or データ長の1/4)
         window = min(7, max(3, n // 4))
-        ma = pd.Series(values).rolling(window=window, center=True).mean().fillna(method="bfill").fillna(method="ffill")
+        ma = pd.Series(values).rolling(window=window, center=True).mean().bfill().ffill()
 
         # トレンド: 線形回帰
         x = np.arange(n)

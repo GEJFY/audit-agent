@@ -1,6 +1,7 @@
 """Response Agent テスト"""
 
 from unittest.mock import AsyncMock, MagicMock
+from uuid import uuid4
 
 import pytest
 
@@ -46,7 +47,7 @@ class TestResponseAgent:
         )
 
         state = AuditeeState(
-            tenant_id="test-tenant",
+            tenant_id=str(uuid4()),
             department="購買部",
             incoming_questions=[sample_dialogue_question],
         )
@@ -60,7 +61,7 @@ class TestResponseAgent:
     async def test_execute_no_questions(self, response_agent: ResponseAgent) -> None:
         """質問なしの実行テスト"""
         state = AuditeeState(
-            tenant_id="test-tenant",
+            tenant_id=str(uuid4()),
             department="経理部",
             incoming_questions=[],
         )

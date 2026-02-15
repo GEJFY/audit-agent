@@ -60,7 +60,7 @@ async def list_evidence(
     if file_type:
         query = query.where(EvidenceRegistry.file_type == file_type)
 
-    count_q = select(func.count()).select_from(query.subquery())
+    count_q = select(func.count()).select_from(query.subquery())  # type: ignore[attr-defined]
     total = (await session.execute(count_q)).scalar_one()
 
     query = query.order_by(EvidenceRegistry.created_at.desc()).offset(offset).limit(limit)
@@ -166,7 +166,7 @@ async def get_evidence(
 ) -> EvidenceResponse:
     """証跡詳細"""
     result = await session.execute(
-        select(EvidenceRegistry).where(
+        select(EvidenceRegistry).where(  # type: ignore[call-arg]
             EvidenceRegistry.id == evidence_id,
             EvidenceRegistry.tenant_id == user.tenant_id,
         )
@@ -186,7 +186,7 @@ async def download_evidence(
 ) -> EvidenceDownloadResponse:
     """証跡ダウンロード — 署名付きURL生成"""
     result = await session.execute(
-        select(EvidenceRegistry).where(
+        select(EvidenceRegistry).where(  # type: ignore[call-arg]
             EvidenceRegistry.id == evidence_id,
             EvidenceRegistry.tenant_id == user.tenant_id,
         )
@@ -219,7 +219,7 @@ async def delete_evidence(
 ) -> None:
     """証跡削除"""
     result = await session.execute(
-        select(EvidenceRegistry).where(
+        select(EvidenceRegistry).where(  # type: ignore[call-arg]
             EvidenceRegistry.id == evidence_id,
             EvidenceRegistry.tenant_id == user.tenant_id,
         )

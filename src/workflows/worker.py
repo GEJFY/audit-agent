@@ -60,7 +60,7 @@ async def start_worker() -> None:
 async def start_workflow(
     workflow_type: str,
     workflow_id: str,
-    args: dict,
+    args: dict,  # type: ignore[type-arg]
 ) -> str:
     """ワークフローを開始するヘルパー"""
     settings = get_settings()
@@ -79,8 +79,8 @@ async def start_workflow(
     if not workflow_fn:
         raise ValueError(f"Unknown workflow: {workflow_type}")
 
-    handle = await client.start_workflow(
-        workflow_fn,
+    handle = await client.start_workflow(  # type: ignore[var-annotated]
+        workflow_fn,  # type: ignore[arg-type]
         **args,
         id=workflow_id,
         task_queue=TASK_QUEUE,

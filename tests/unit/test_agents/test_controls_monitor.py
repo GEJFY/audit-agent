@@ -1,6 +1,7 @@
 """Controls Monitor Agent テスト"""
 
 from unittest.mock import AsyncMock, MagicMock
+from uuid import uuid4
 
 import pytest
 
@@ -42,7 +43,7 @@ class TestControlsMonitorAgent:
         )
 
         state = AuditeeState(
-            tenant_id="test-tenant",
+            tenant_id=str(uuid4()),
             department="経理部",
             current_phase="monitoring",
         )
@@ -75,7 +76,7 @@ class TestControlsMonitorAgent:
         )
 
         state = AuditeeState(
-            tenant_id="test-tenant",
+            tenant_id=str(uuid4()),
             department="購買部",
         )
 

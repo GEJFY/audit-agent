@@ -24,7 +24,10 @@ class Tenant(BaseModel):
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # リレーション
-    users: Mapped[list["User"]] = relationship(back_populates="tenant")
+    users: Mapped[list["User"]] = relationship(
+        back_populates="tenant",
+        primaryjoin="Tenant.id == foreign(User.tenant_id)",
+    )
 
 
 class User(TenantBaseModel):

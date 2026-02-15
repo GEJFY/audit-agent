@@ -91,7 +91,14 @@ class TestQualityEvaluator:
             from_agent="test",
             message_type=DialogueMessageType.ANSWER,
             content="回答",
-            attachments=[Attachment(file_name="file1.pdf", file_type="pdf", s3_path="s3://bucket/file1.pdf")],
+            attachments=[
+                Attachment(
+                    file_name="file1.pdf",
+                    file_type="pdf",
+                    s3_path="s3://bucket/file1.pdf",
+                    file_hash="abc123def456",
+                )
+            ],
         )
 
         score = evaluator._check_evidence(msg)

@@ -37,7 +37,11 @@ class AuthService:
     """認証サービス — パスワードハッシュ化 + JWT管理"""
 
     def __init__(self) -> None:
-        self._pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+        self._pwd_context = CryptContext(
+            schemes=["bcrypt"],
+            deprecated="auto",
+            bcrypt__truncate_error=False,
+        )
         self._settings = get_settings()
 
     def hash_password(self, password: str) -> str:

@@ -70,7 +70,7 @@ JSON形式で以下を含むリスク評価結果を返してください:
         response = await self.call_llm(prompt, system_prompt="あなたは内部監査のリスク評価専門AIです。")
 
         try:
-            return json.loads(response)
+            return json.loads(response)  # type: ignore[no-any-return]
         except json.JSONDecodeError:
             return {"raw_assessment": response, "confidence": 0.5}
 
@@ -95,6 +95,6 @@ JSON形式で以下を含む監査計画を返してください:
         )
 
         try:
-            return json.loads(response)
+            return json.loads(response)  # type: ignore[no-any-return]
         except json.JSONDecodeError:
             return {"raw_plan": response, "confidence": 0.5}

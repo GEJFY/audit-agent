@@ -61,14 +61,14 @@ class AnthropicProvider(BaseLLMProvider):
                 max_tokens=max_tokens,
                 temperature=temperature,
                 system=system_prompt or "",
-                messages=messages,
+                messages=messages,  # type: ignore[arg-type]
                 **kwargs,
             )
 
             latency_ms = (time.monotonic() - start) * 1000
             input_tokens = response.usage.input_tokens
             output_tokens = response.usage.output_tokens
-            content = response.content[0].text if response.content else ""
+            content = response.content[0].text if response.content else ""  # type: ignore[union-attr]
 
             logger.debug(
                 "LLM生成完了",

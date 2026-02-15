@@ -1,6 +1,7 @@
 """Evidence Search Agent テスト"""
 
 from unittest.mock import AsyncMock, MagicMock
+from uuid import uuid4
 
 import pytest
 
@@ -38,7 +39,7 @@ class TestEvidenceSearchAgent:
         )
 
         state = AuditeeState(
-            tenant_id="test-tenant",
+            tenant_id=str(uuid4()),
             department="経理部",
             evidence_queue=[
                 {
@@ -57,7 +58,7 @@ class TestEvidenceSearchAgent:
     async def test_execute_empty_queue(self, evidence_agent: EvidenceSearchAgent) -> None:
         """空キューでの実行テスト"""
         state = AuditeeState(
-            tenant_id="test-tenant",
+            tenant_id=str(uuid4()),
             department="総務部",
             evidence_queue=[],
         )

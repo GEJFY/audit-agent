@@ -59,7 +59,7 @@ async def login(
     session: AsyncSession = Depends(get_db_session),
 ) -> TokenResponse:
     """ログイン — DB認証 + JWTトークンペア発行"""
-    result = await session.execute(select(User).where(User.email == request.email, User.is_active.is_(True)))
+    result = await session.execute(select(User).where(User.email == request.email, User.is_active.is_(True)))  # type: ignore[call-arg]
     user = result.scalar_one_or_none()
 
     if user is None:

@@ -1,6 +1,7 @@
 """Knowledge Agent テスト"""
 
 from unittest.mock import AsyncMock, MagicMock
+from uuid import uuid4
 
 import pytest
 
@@ -41,8 +42,8 @@ class TestKnowledgeAgent:
         )
 
         state = AuditorState(
-            project_id="test-project",
-            tenant_id="test-tenant",
+            project_id=str(uuid4()),
+            tenant_id=str(uuid4()),
             pending_questions=[
                 {
                     "id": "q-001",
@@ -59,8 +60,8 @@ class TestKnowledgeAgent:
     async def test_execute_no_questions(self, knowledge_agent: KnowledgeAgent) -> None:
         """質問なしでの実行テスト"""
         state = AuditorState(
-            project_id="test-project",
-            tenant_id="test-tenant",
+            project_id=str(uuid4()),
+            tenant_id=str(uuid4()),
             pending_questions=[],
         )
 
