@@ -172,9 +172,7 @@ class RiskGraphAnalyzer:
                     node_id=node_id,
                     label=label,
                     degree_centrality=round(degree.get(node_id, 0), 4),
-                    betweenness_centrality=round(
-                        betweenness.get(node_id, 0), 4
-                    ),
+                    betweenness_centrality=round(betweenness.get(node_id, 0), 4),
                     pagerank=round(pagerank.get(node_id, 0), 4),
                 )
             )
@@ -183,16 +181,12 @@ class RiskGraphAnalyzer:
         centrality.sort(key=lambda c: c.pagerank, reverse=True)
 
         # リスク伝播パス
-        risk_nodes = [
-            n for n, d in g.nodes(data=True) if d.get("type") == "risk"
-        ]
+        risk_nodes = [n for n, d in g.nodes(data=True) if d.get("type") == "risk"]
         propagation_paths = self._find_propagation_paths(g, risk_nodes)
 
         # クラスタリング（無向グラフに変換）
         ug = g.to_undirected()
-        clusters = [
-            list(c) for c in nx.connected_components(ug) if len(c) > 1
-        ]
+        clusters = [list(c) for c in nx.connected_components(ug) if len(c) > 1]
 
         density = nx.density(g)
         is_connected = nx.is_weakly_connected(g) if g.number_of_nodes() > 0 else True
@@ -214,19 +208,15 @@ class RiskGraphAnalyzer:
             is_connected=is_connected,
         )
 
-    def _find_propagation_paths(
-        self, g: Any, risk_nodes: list[str]
-    ) -> list[RiskPropagationPath]:
+    def _find_propagation_paths(self, g: Any, risk_nodes: list[str]) -> list[RiskPropagationPath]:
         """リスクノード間の伝播パスを発見"""
         paths: list[RiskPropagationPath] = []
 
         for i, source in enumerate(risk_nodes):
-            for target in risk_nodes[i + 1:]:
+            for target in risk_nodes[i + 1 :]:
                 try:
                     path = nx.shortest_path(g, source, target, weight="weight")
-                    weight = nx.shortest_path_length(
-                        g, source, target, weight="weight"
-                    )
+                    weight = nx.shortest_path_length(g, source, target, weight="weight")
                     paths.append(
                         RiskPropagationPath(
                             source_risk=source,
@@ -257,18 +247,12 @@ class RiskGraphAnalyzer:
         centrality = [
             CentralityResult(
                 node_id=node_id,
-                label=self._nodes.get(
-                    node_id, GraphNode(node_id, "", "")
-                ).label,
-                degree_centrality=round(
-                    degree_count.get(node_id, 0) / n, 4
-                ),
+                label=self._nodes.get(node_id, GraphNode(node_id, "", "")).label,
+                degree_centrality=round(degree_count.get(node_id, 0) / n, 4),
             )
             for node_id in self._nodes
         ]
-        centrality.sort(
-            key=lambda c: c.degree_centrality, reverse=True
-        )
+        centrality.sort(key=lambda c: c.degree_centrality, reverse=True)
 
         return GraphAnalysisResult(
             total_nodes=len(self._nodes),

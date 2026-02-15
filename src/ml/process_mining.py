@@ -130,10 +130,7 @@ class ProcessMiner:
         conformance_rate = 1.0
         if standard_path:
             deviations = self._detect_deviations(cases, standard_path)
-            conforming = sum(
-                1 for case_id, events in cases.items()
-                if self._is_conforming(events, standard_path)
-            )
+            conforming = sum(1 for case_id, events in cases.items() if self._is_conforming(events, standard_path))
             conformance_rate = conforming / max(len(cases), 1)
 
         unique_activities = set()
@@ -144,8 +141,7 @@ class ProcessMiner:
         total_activities = sum(len(events) for events in cases.values())
 
         logger.info(
-            "プロセスマイニング完了: cases={}, variants={}, bottlenecks={}, "
-            "deviations={}",
+            "プロセスマイニング完了: cases={}, variants={}, bottlenecks={}, deviations={}",
             len(cases),
             len(variants),
             len(bottlenecks),
@@ -163,9 +159,7 @@ class ProcessMiner:
             edges=edges,
         )
 
-    def _group_by_case(
-        self, event_log: list[dict[str, Any]]
-    ) -> dict[str, list[dict[str, Any]]]:
+    def _group_by_case(self, event_log: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
         """ケース別にイベントをグループ化し、タイムスタンプ順にソート"""
         cases: dict[str, list[dict[str, Any]]] = defaultdict(list)
         for event in event_log:
@@ -177,9 +171,7 @@ class ProcessMiner:
 
         return dict(cases)
 
-    def _build_activity_graph(
-        self, cases: dict[str, list[dict[str, Any]]]
-    ) -> list[ActivityEdge]:
+    def _build_activity_graph(self, cases: dict[str, list[dict[str, Any]]]) -> list[ActivityEdge]:
         """アクティビティ遷移グラフを構築"""
         edge_counts: Counter[tuple[str, str]] = Counter()
         edge_durations: dict[tuple[str, str], list[float]] = defaultdict(list)
@@ -216,9 +208,7 @@ class ProcessMiner:
 
         return edges
 
-    def _extract_variants(
-        self, cases: dict[str, list[dict[str, Any]]]
-    ) -> list[ProcessVariant]:
+    def _extract_variants(self, cases: dict[str, list[dict[str, Any]]]) -> list[ProcessVariant]:
         """プロセスバリアント（実行パスのパターン）を抽出"""
         path_counter: Counter[tuple[str, ...]] = Counter()
 
@@ -239,9 +229,7 @@ class ProcessMiner:
 
         return variants
 
-    def _detect_bottlenecks(
-        self, edges: list[ActivityEdge]
-    ) -> list[Bottleneck]:
+    def _detect_bottlenecks(self, edges: list[ActivityEdge]) -> list[Bottleneck]:
         """ボトルネック（閾値超過の遅延遷移）を検出"""
         bottlenecks: list[Bottleneck] = []
         for edge in edges:
@@ -324,9 +312,7 @@ class ProcessMiner:
 
         return deviations
 
-    def _is_conforming(
-        self, events: list[dict[str, Any]], standard_path: list[str]
-    ) -> bool:
+    def _is_conforming(self, events: list[dict[str, Any]], standard_path: list[str]) -> bool:
         """ケースが標準パスに適合しているか"""
         actual = [e["activity"] for e in events]
         return actual == standard_path

@@ -285,10 +285,7 @@ class TestBottleneckDetection:
         result = miner.analyze(events)
 
         assert len(result.bottlenecks) == 2
-        assert (
-            result.bottlenecks[0].avg_duration_hours
-            >= result.bottlenecks[1].avg_duration_hours
-        )
+        assert result.bottlenecks[0].avg_duration_hours >= result.bottlenecks[1].avg_duration_hours
 
 
 @pytest.mark.unit
@@ -344,9 +341,7 @@ class TestDeviationDetection:
         miner = ProcessMiner()
         result = miner.analyze(events, standard_path=STANDARD_PATH)
 
-        unexpected_devs = [
-            d for d in result.deviations if d.deviation_type == "unexpected_path"
-        ]
+        unexpected_devs = [d for d in result.deviations if d.deviation_type == "unexpected_path"]
         assert len(unexpected_devs) >= 1
         assert "特別承認" in unexpected_devs[0].affected_activities
 
@@ -380,16 +375,12 @@ class TestDurationCalculation:
 
     def test_calc_duration_hours(self) -> None:
         """正常なタイムスタンプの時間差計算"""
-        duration = ProcessMiner._calc_duration_hours(
-            "2025-01-01T09:00:00", "2025-01-01T12:00:00"
-        )
+        duration = ProcessMiner._calc_duration_hours("2025-01-01T09:00:00", "2025-01-01T12:00:00")
         assert duration == 3.0
 
     def test_calc_duration_with_timezone(self) -> None:
         """Zサフィックス付きタイムスタンプ"""
-        duration = ProcessMiner._calc_duration_hours(
-            "2025-01-01T09:00:00Z", "2025-01-01T12:00:00Z"
-        )
+        duration = ProcessMiner._calc_duration_hours("2025-01-01T09:00:00Z", "2025-01-01T12:00:00Z")
         assert duration == 3.0
 
     def test_calc_duration_invalid(self) -> None:
