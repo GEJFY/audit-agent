@@ -96,6 +96,10 @@ class Settings(BaseSettings):
     langchain_api_key: str = ""
     langchain_project: str = "audit-agent"
 
+    # ── Region / APAC ────────────────────────────────
+    default_region: str = "JP"
+    supported_regions: list[str] = ["JP", "SG", "HK", "AU", "TW", "KR", "TH"]
+
     # ── AWS ───────────────────────────────────────────
     aws_region: str = "ap-northeast-1"
     aws_access_key_id: str = ""
