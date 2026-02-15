@@ -71,8 +71,12 @@ class Settings(BaseSettings):
     box_client_secret: str = ""
     box_enterprise_id: str = ""
 
+    # ── Notifications ─────────────────────────────────
+    slack_webhook_url: str = ""
+    teams_webhook_url: str = ""
+
     # ── Dialogue Bus ───────────────────────────────────
-    dialogue_bus_backend: str = "memory"  # "memory" or "redis"
+    dialogue_bus_backend: str = "memory"  # "memory", "redis", or "kafka"
 
     # ── Kafka ────────────────────────────────────────
     kafka_bootstrap_servers: str = ""
