@@ -209,7 +209,7 @@ class CrossCompanyAnalyzer:
 
         for profile in self._profiles:
             for category, score in profile.risk_scores.items():
-                bm = bm_index.get((profile.industry, category))
+                bm: IndustryBenchmark | None = bm_index.get((profile.industry, category))
                 if not bm:
                     continue
 
