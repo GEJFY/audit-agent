@@ -92,7 +92,7 @@ class TestRedisStreamsIntegration:
         messages = await redis_bus.read_as_consumer(auditee_id, f"test-consumer-{uuid4()}")
 
         assert len(messages) >= 1
-        entry_id, read_msg = messages[0]
+        entry_id, _read_msg = messages[0]
         assert entry_id is not None
 
         # ACK
