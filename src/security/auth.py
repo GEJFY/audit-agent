@@ -37,20 +37,21 @@ class AuthService:
     """認証サービス — パスワードハッシュ化 + JWT管理"""
 
     def __init__(self) -> None:
-        self._pwd_context = CryptContext(
-            schemes=["bcrypt"],
-            deprecated="auto",
-            bcrypt__truncate_error=False,
-        )
+        self._pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
         self._settings = get_settings()
+
+    @staticmethod
+    def _truncate_password(password: str) -> str:
+        """bcrypt 72バイト制限に合わせてパスワードを切り詰め"""
+        return password.encode("utf-8")[:72].decode("utf-8", errors="ignore")
 
     def hash_password(self, password: str) -> str:
         """パスワードをbcryptハッシュ化"""
-        return self._pwd_context.hash(password)  # type: ignore[no-any-return]
+        return self._pwd_context.hash(self._truncate_password(password))  # type: ignore[no-any-return]
 
     def verify_password(self, plain_password: str, hashed_password: str) -> bool:
         """パスワード検証"""
-        return self._pwd_context.verify(plain_password, hashed_password)  # type: ignore[no-any-return]
+        return self._pwd_context.verify(self._truncate_password(plain_password), hashed_password)  # type: ignore[no-any-return]
 
     def create_token_pair(
         self,

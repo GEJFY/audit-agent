@@ -88,7 +88,7 @@ class TestDialogueAPIIntegration:
         """対話エンドポイントが存在する"""
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as client:
-            response = await client.get("/api/v1/dialogue/threads")
+            response = await client.get("/api/v1/dialogue/messages")
 
         # 認証エラーまたは正常応答（エンドポイントの存在確認）
         assert response.status_code in (200, 401, 403)

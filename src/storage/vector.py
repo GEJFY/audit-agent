@@ -223,7 +223,7 @@ class VectorStore:
             {"tenant_id": tenant_id},
         )
         await session.commit()
-        count = result.rowcount or 0
+        count = result.rowcount or 0  # type: ignore[attr-defined]
         logger.info("テナント文書削除: {}件 (tenant: {})", count, tenant_id)
         return count
 
@@ -235,7 +235,7 @@ class VectorStore:
             {"tenant_id": tenant_id, "source_id": source_id},
         )
         await session.commit()
-        return result.rowcount or 0
+        return result.rowcount or 0  # type: ignore[attr-defined]
 
     async def count(self, tenant_id: str, doc_type: str | None = None) -> int:
         """文書数をカウント"""

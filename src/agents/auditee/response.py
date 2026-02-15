@@ -159,7 +159,7 @@ class ResponseAgent(BaseAuditAgent[AuditeeState]):
         """DBから過去の回答履歴を取得"""
         result = await session.execute(
             select(AuditeeResponse)
-            .where(  # type: ignore[call-arg]
+            .where(
                 AuditeeResponse.tenant_id == tenant_id,
                 AuditeeResponse.quality_score >= 0.7,  # 品質スコア70%以上のみ
             )

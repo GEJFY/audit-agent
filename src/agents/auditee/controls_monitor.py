@@ -115,7 +115,7 @@ class ControlsMonitorAgent(BaseAuditAgent[AuditeeState]):
                     func.count(TestResult.id).label("total_tests"),
                     func.sum(TestResult.exceptions_found).label("total_exceptions"),
                     func.sum(TestResult.sample_tested).label("total_samples"),
-                ).where(  # type: ignore[call-arg]
+                ).where(
                     TestResult.rcm_id == str(rcm_id),
                     TestResult.tenant_id == tenant_id,
                 )
@@ -222,7 +222,7 @@ class ControlsMonitorAgent(BaseAuditAgent[AuditeeState]):
                 now = datetime.now(UTC).isoformat()
                 for card in scorecard:
                     existing = await session.execute(
-                        select(ControlsStatus).where(  # type: ignore[call-arg]
+                        select(ControlsStatus).where(
                             ControlsStatus.tenant_id == tenant_id,
                             ControlsStatus.control_id == card.get("control_id", ""),
                         )

@@ -24,16 +24,21 @@ class Tenant(BaseModel):
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # リレーション
-    users: Mapped[list["User"]] = relationship(
-        back_populates="tenant",
-        primaryjoin="Tenant.id == foreign(User.tenant_id)",
-    )
+    users: Mapped[list["User"]] = relationship(back_populates="tenant")
 
 
 class User(TenantBaseModel):
     """ユーザー"""
 
     __tablename__ = "users"
+
+    # tenant_id を FK 付きで再定義
+    tenant_id: Mapped[str] = mapped_column(  # type: ignore[assignment]
+        UUID(as_uuid=False),
+        ForeignKey("tenants.id"),
+        nullable=False,
+        index=True,
+    )
 
     email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
     hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
@@ -44,8 +49,4 @@ class User(TenantBaseModel):
     last_login_at: Mapped[str | None] = mapped_column(String(50), nullable=True)
 
     # リレーション
-    tenant: Mapped["Tenant"] = relationship(
-        back_populates="users",
-        foreign_keys=[TenantBaseModel.tenant_id],
-        primaryjoin="User.tenant_id == Tenant.id",
-    )
+    tenant: Mapped["Tenant"] = relationship(back_populates="users")

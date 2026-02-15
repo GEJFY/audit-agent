@@ -135,7 +135,7 @@ async def check_approval_status(tenant_id: str, decision_id: str) -> dict[str, A
     try:
         async for session in get_session():
             result = await session.execute(
-                select(ApprovalQueue).where(  # type: ignore[call-arg]
+                select(ApprovalQueue).where(
                     ApprovalQueue.tenant_id == tenant_id,
                     ApprovalQueue.decision_id == decision_id,
                 )

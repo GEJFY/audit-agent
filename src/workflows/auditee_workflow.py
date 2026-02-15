@@ -94,7 +94,7 @@ class AuditeeResponseWorkflow:
 
     async def _run_agent(self, agent_name: str, tenant_id: str) -> AgentActivityOutput:
         """Agent Activityを実行"""
-        return await workflow.execute_activity(  # type: ignore[no-any-return,call-overload]
+        return await workflow.execute_activity(  # type: ignore[call-overload]
             run_auditee_agent,
             arg=AgentActivityInput(
                 agent_name=agent_name,
