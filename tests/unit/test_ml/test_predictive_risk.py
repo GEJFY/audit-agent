@@ -256,7 +256,7 @@ class TestPredictiveTrendDetection:
 
     def test_predict_trend_stable(self) -> None:
         model = PredictiveRiskModel()
-        score, direction = model._predict_trend(
+        _, direction = model._predict_trend(
             [50.0, 50.2, 49.8, 50.1, 50.0, 49.9, 50.1], 90
         )
         assert direction == "stable"
@@ -271,7 +271,7 @@ class TestPredictiveTrendDetection:
 
     def test_predict_trend_decreasing(self) -> None:
         model = PredictiveRiskModel()
-        score, direction = model._predict_trend(
+        _, direction = model._predict_trend(
             [80.0, 75.0, 70.0, 65.0, 60.0, 55.0, 50.0], 90
         )
         assert direction == "decreasing"
