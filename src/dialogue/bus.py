@@ -183,3 +183,36 @@ class DialogueBus:
             )
         except Exception:
             logger.debug("WebSocket未起動のためスキップ")
+
+
+def create_dialogue_bus(
+    backend: str | None = None,
+    quality_evaluator: QualityEvaluator | None = None,
+    escalation_engine: EscalationEngine | None = None,
+) -> DialogueBus:
+    """Dialogue Busファクトリ — 設定に基づきバックエンドを選択
+
+    Args:
+        backend: "memory" or "redis"（Noneの場合は設定から取得）
+        quality_evaluator: 品質評価エンジン
+        escalation_engine: エスカレーションエンジン
+    """
+    if backend is None:
+        from src.config.settings import get_settings
+
+        backend = get_settings().dialogue_bus_backend
+
+    if backend == "redis":
+        from src.dialogue.redis_bus import RedisStreamsBus
+
+        logger.info("Dialogue Bus: Redis Streams バックエンド")
+        return RedisStreamsBus(  # type: ignore[return-value]
+            quality_evaluator=quality_evaluator,
+            escalation_engine=escalation_engine,
+        )
+
+    logger.info("Dialogue Bus: インメモリバックエンド")
+    return DialogueBus(
+        quality_evaluator=quality_evaluator,
+        escalation_engine=escalation_engine,
+    )

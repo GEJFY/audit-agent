@@ -66,6 +66,9 @@ class Settings(BaseSettings):
     sap_password: str = ""
     sap_client_id: str = ""
 
+    # ── Dialogue Bus ───────────────────────────────────
+    dialogue_bus_backend: str = "memory"  # "memory" or "redis"
+
     # ── Kafka ────────────────────────────────────────
     kafka_bootstrap_servers: str = ""
     kafka_topic_dialogue: str = "audit-agent-dialogue"
