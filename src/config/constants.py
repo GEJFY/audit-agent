@@ -10,6 +10,7 @@ class UserRole(StrEnum):
     AUDITEE_MANAGER = "auditee_manager"
     AUDITEE_USER = "auditee_user"
     VIEWER = "viewer"
+    EXECUTIVE = "executive"  # CFO/CLO向けポートフォリオビュー
 
 
 # ── 監査プロジェクトステータス ────────────────────────
