@@ -1,6 +1,8 @@
-"""異常検知MLモデル — Isolation Forest (Phase 0 MVP)"""
+"""異常検知MLモデル — Isolation Forest"""
 
+import pickle
 from dataclasses import dataclass, field
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -136,3 +138,59 @@ class AnomalyDetector:
                 features[col] = data[col].fillna(0)
 
         return features.fillna(0)
+
+    @property
+    def is_fitted(self) -> bool:
+        """モデルが学習済みか"""
+        return self._is_fitted
+
+    @property
+    def feature_names(self) -> list[str]:
+        """学習済み特徴量名"""
+        return self._feature_names.copy()
+
+    def save(self, path: str) -> None:
+        """モデルを保存"""
+        data = {
+            "model": self._model,
+            "scaler": self._scaler,
+            "is_fitted": self._is_fitted,
+            "feature_names": self._feature_names,
+        }
+        with open(path, "wb") as f:
+            pickle.dump(data, f)
+        logger.info("異常検知モデル保存: {}", path)
+
+    def load(self, path: str) -> None:
+        """モデルを読み込み"""
+        if not Path(path).exists():
+            raise FileNotFoundError(f"モデルファイルが見つかりません: {path}")
+        with open(path, "rb") as f:
+            data = pickle.load(f)  # noqa: S301
+        self._model = data["model"]
+        self._scaler = data["scaler"]
+        self._is_fitted = data["is_fitted"]
+        self._feature_names = data["feature_names"]
+        logger.info("異常検知モデル読込: {}", path)
+
+    def get_anomaly_summary(self, results: list[AnomalyResult]) -> dict[str, float]:
+        """異常検知結果のサマリー統計を生成"""
+        if not results:
+            return {
+                "total": 0,
+                "anomaly_count": 0,
+                "anomaly_rate": 0.0,
+                "avg_anomaly_score": 0.0,
+                "max_anomaly_score": 0.0,
+            }
+
+        anomalies = [r for r in results if r.is_anomaly]
+        anomaly_scores = [r.anomaly_score for r in results]
+
+        return {
+            "total": float(len(results)),
+            "anomaly_count": float(len(anomalies)),
+            "anomaly_rate": len(anomalies) / len(results),
+            "avg_anomaly_score": float(np.mean(anomaly_scores)),
+            "max_anomaly_score": float(np.max(anomaly_scores)),
+        }
