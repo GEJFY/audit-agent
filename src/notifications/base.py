@@ -1,13 +1,13 @@
 """通知プロバイダ基底クラス"""
 
 from abc import ABC, abstractmethod
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from pydantic import BaseModel
 
 
-class NotificationPriority(str, Enum):
+class NotificationPriority(StrEnum):
     """通知優先度"""
 
     LOW = "low"

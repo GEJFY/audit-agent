@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from enum import Enum
+from enum import StrEnum
 
 from loguru import logger
 from pydantic import BaseModel
 
 
-class ExecutionMode(str, Enum):
+class ExecutionMode(StrEnum):
     """エージェント実行モード"""
 
     AUDIT = "audit"  # 全て人間承認必須

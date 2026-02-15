@@ -11,7 +11,7 @@ from typing import Any
 from loguru import logger
 
 try:
-    import networkx as nx
+    import networkx as nx  # type: ignore[import-untyped]
 
     HAS_NETWORKX = True
 except ImportError:
