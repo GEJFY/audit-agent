@@ -265,7 +265,7 @@ class PredictiveRiskModel:
         ) > 10:
             base_score += 10
 
-        return min(100.0, max(0.0, base_score))
+        return float(min(100.0, max(0.0, base_score)))
 
     def _predict_seasonal(
         self,
