@@ -103,3 +103,28 @@ MAX_RETRY_ATTEMPTS = 3
 EVIDENCE_MAX_SIZE_MB = 50
 DIALOGUE_TIMEOUT_HOURS = 24
 API_VERSION = "v1"
+
+# ── Autonomous モード閾値 ──────────────────────────────
+# エージェント別信頼度閾値（リスクティアに連動）
+AGENT_CONFIDENCE_THRESHOLDS: dict[str, float] = {
+    # LOW ティア (0.70)
+    "auditor_data_collector": 0.70,
+    "auditor_knowledge": 0.70,
+    "auditee_evidence_search": 0.70,
+    "auditee_prep": 0.70,
+    "auditee_controls_monitor": 0.70,
+    # MEDIUM ティア (0.85)
+    "auditor_controls_tester": 0.85,
+    "auditor_anomaly_detective": 0.85,
+    "auditor_follow_up": 0.85,
+    "auditee_orchestrator": 0.85,
+    "auditee_response": 0.85,
+    # HIGH ティア (0.92)
+    "auditor_orchestrator": 0.92,
+    "auditor_planner": 0.92,
+    "auditor_report_writer": 0.92,
+    "auditee_risk_alert": 0.92,
+}
+
+AUTONOMOUS_MAX_CONSECUTIVE_ERRORS = 5  # 自動停止閾値
+AUTONOMOUS_AUTO_REVIEW_SAMPLE_RATE = 0.1  # 自動レビューサンプル率（10%）
