@@ -76,10 +76,13 @@ class DialogueBus:
             thread_id=str(message.thread_id),
         )
 
-        # 回答メッセージの品質評価
+        # 回答メッセージの品質評価（多次元スコアリング）
         if message.message_type == DialogueMessageType.ANSWER:
-            quality_score = await self._quality_evaluator.evaluate(message, self._threads[message.thread_id])
-            message.quality_score = quality_score
+            result = await self._quality_evaluator.evaluate_detailed(message, self._threads[message.thread_id])
+            message.quality_score = result.score
+            message.metadata["quality_breakdown"] = result.breakdown.model_dump()
+            if result.issues:
+                message.metadata["quality_issues"] = result.issues
 
         # エスカレーション判定
         should_escalate = self._escalation_engine.should_escalate(message)
