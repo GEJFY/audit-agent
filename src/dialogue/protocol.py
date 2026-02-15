@@ -83,6 +83,12 @@ class AnswerMessage(DialogueMessageSchema):
     source_response_id: UUID | None = None
 
 
+class ClarificationMessage(DialogueMessageSchema):
+    """明確化依頼メッセージ — 追加情報を求める"""
+
+    message_type: DialogueMessageType = DialogueMessageType.CLARIFICATION
+
+
 class EvidenceRequestMessage(DialogueMessageSchema):
     """証跡依頼メッセージ — Auditor → Auditee"""
 
