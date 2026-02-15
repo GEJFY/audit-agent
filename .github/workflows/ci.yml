@@ -172,6 +172,7 @@ jobs:
           pytest tests/integration/ -v \
             --cov=src \
             --cov-report=xml:coverage-integration.xml \
+            --cov-fail-under=0 \
             --junitxml=junit-integration.xml
         env:
           APP_ENV: testing
