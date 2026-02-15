@@ -1,13 +1,20 @@
 """Kafka Bus — Dialogue Busのエンタープライズ版メッセージブローカー"""
 
 import json
+from collections import defaultdict
 from collections.abc import Callable
+from datetime import UTC, datetime
 from typing import Any
+from uuid import UUID
 
 from loguru import logger
 
+from src.config.constants import DialogueMessageType
 from src.config.settings import get_settings
-from src.dialogue.protocol import DialogueMessageSchema
+from src.dialogue.escalation import EscalationEngine
+from src.dialogue.protocol import DialogueMessageSchema, EscalationMessage
+from src.dialogue.quality import QualityEvaluator
+from src.monitoring.metrics import dialogue_messages_total
 
 
 class KafkaBus:
@@ -176,6 +183,118 @@ class KafkaBus:
             )
         except Exception:
             logger.debug("WebSocket未起動のためスキップ")
+
+
+class KafkaDialogueBus:
+    """DialogueBusインターフェース互換のKafkaバックエンド
+
+    DialogueBusと同じsend/subscribe/get_thread APIを提供しつつ、
+    メッセージ永続化にKafkaを使用する。ローカルキャッシュ付き。
+    """
+
+    def __init__(
+        self,
+        quality_evaluator: QualityEvaluator | None = None,
+        escalation_engine: EscalationEngine | None = None,
+    ) -> None:
+        self._kafka = KafkaBus()
+        self._message_log: list[DialogueMessageSchema] = []
+        self._subscribers: dict[str, list[Callable[..., Any]]] = defaultdict(list)
+        self._threads: dict[UUID, list[DialogueMessageSchema]] = defaultdict(list)
+        self._quality_evaluator = quality_evaluator or QualityEvaluator()
+        self._escalation_engine = escalation_engine or EscalationEngine()
+
+    async def send(self, message: DialogueMessageSchema) -> DialogueMessageSchema:
+        """メッセージをKafka経由で送信"""
+        self._validate_message(message)
+
+        if message.thread_id is None:
+            message.thread_id = message.id
+        self._threads[message.thread_id].append(message)
+        self._message_log.append(message)
+
+        dialogue_messages_total.labels(
+            message_type=message.message_type.value,
+            direction="auditor_to_auditee",
+        ).inc()
+
+        logger.info(
+            "Kafka対話メッセージ送信",
+            message_id=str(message.id),
+            from_agent=message.from_agent,
+            to_agent=message.to_agent,
+        )
+
+        # 回答メッセージの品質評価
+        if message.message_type == DialogueMessageType.ANSWER:
+            result = await self._quality_evaluator.evaluate_detailed(message, self._threads[message.thread_id])
+            message.quality_score = result.score
+            message.metadata["quality_breakdown"] = result.breakdown.model_dump()
+            if result.issues:
+                message.metadata["quality_issues"] = result.issues
+
+        # エスカレーション判定
+        if self._escalation_engine.should_escalate(message):
+            reason = self._escalation_engine.get_reason(message)
+            escalation = EscalationMessage(
+                from_tenant_id=message.from_tenant_id,
+                to_tenant_id=message.to_tenant_id,
+                from_agent=message.from_agent,
+                content=f"エスカレーション: {reason.value} — 原メッセージ: {message.content[:200]}",
+                project_id=message.project_id,
+                parent_message_id=message.id,
+                thread_id=message.thread_id,
+                escalation_reason=reason,
+            )
+            self._message_log.append(escalation)
+
+        # Kafkaに永続化
+        await self._kafka.publish(message)
+
+        # ローカルサブスクライバーに通知
+        tenant_id = str(message.to_tenant_id)
+        for callback in self._subscribers.get(tenant_id, []):
+            try:
+                await callback(message)
+            except Exception as e:
+                logger.error(f"サブスクライバー通知エラー: {e}")
+
+        return message
+
+    def subscribe(self, tenant_id: str, callback: Callable[..., Any]) -> None:
+        """テナント単位でメッセージサブスクライブ"""
+        self._subscribers[tenant_id].append(callback)
+        self._kafka.on_message(tenant_id, callback)
+
+    def get_thread(self, thread_id: UUID) -> list[DialogueMessageSchema]:
+        """スレッド内の全メッセージを取得"""
+        return self._threads.get(thread_id, [])
+
+    def get_messages_for_tenant(self, tenant_id: UUID) -> list[DialogueMessageSchema]:
+        """テナント宛メッセージを取得"""
+        return [m for m in self._message_log if m.to_tenant_id == tenant_id or m.from_tenant_id == tenant_id]
+
+    def get_pending_approvals(self, tenant_id: UUID) -> list[DialogueMessageSchema]:
+        """承認待ちメッセージを取得"""
+        return [m for m in self._message_log if m.from_tenant_id == tenant_id and m.human_approved is None]
+
+    def approve_message(self, message_id: UUID, approver_id: UUID) -> bool:
+        """メッセージを承認"""
+        for msg in self._message_log:
+            if msg.id == message_id:
+                msg.human_approved = True
+                msg.approved_by = approver_id
+                msg.approved_at = datetime.now(UTC)
+                logger.info(f"メッセージ承認: {message_id}")
+                return True
+        return False
+
+    def _validate_message(self, message: DialogueMessageSchema) -> None:
+        """メッセージバリデーション"""
+        if message.from_tenant_id == message.to_tenant_id:
+            raise ValueError("送信元と送信先が同一テナント")
+        if not message.content:
+            raise ValueError("メッセージ内容が空")
 
 
 # シングルトン

@@ -196,7 +196,7 @@ def create_dialogue_bus(
     """Dialogue Busファクトリ — 設定に基づきバックエンドを選択
 
     Args:
-        backend: "memory" or "redis"（Noneの場合は設定から取得）
+        backend: "memory", "redis", or "kafka"（Noneの場合は設定から取得）
         quality_evaluator: 品質評価エンジン
         escalation_engine: エスカレーションエンジン
     """
@@ -204,6 +204,15 @@ def create_dialogue_bus(
         from src.config.settings import get_settings
 
         backend = get_settings().dialogue_bus_backend
+
+    if backend == "kafka":
+        from src.dialogue.kafka_bus import KafkaDialogueBus
+
+        logger.info("Dialogue Bus: Kafka バックエンド")
+        return KafkaDialogueBus(  # type: ignore[return-value]
+            quality_evaluator=quality_evaluator,
+            escalation_engine=escalation_engine,
+        )
 
     if backend == "redis":
         from src.dialogue.redis_bus import RedisStreamsBus

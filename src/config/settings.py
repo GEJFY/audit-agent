@@ -72,7 +72,7 @@ class Settings(BaseSettings):
     box_enterprise_id: str = ""
 
     # ── Dialogue Bus ───────────────────────────────────
-    dialogue_bus_backend: str = "memory"  # "memory" or "redis"
+    dialogue_bus_backend: str = "memory"  # "memory", "redis", or "kafka"
 
     # ── Kafka ────────────────────────────────────────
     kafka_bootstrap_servers: str = ""
