@@ -4,6 +4,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
+pytest.importorskip("temporalio")
+
 from src.workflows.activities import (
     AgentActivityInput,
     AgentActivityOutput,
