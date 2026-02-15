@@ -160,7 +160,8 @@ class BoxConnector(BaseConnector):
                 params={"fields": "id,name,size,created_at,modified_at,parent,path_collection,shared_link"},
             )
             response.raise_for_status()
-            return response.json()
+            result: dict[str, Any] = response.json()
+            return result
         except Exception as e:
             logger.error(f"Box: ファイル情報取得エラー — {e}")
             return None
@@ -179,15 +180,14 @@ class BoxConnector(BaseConnector):
                 follow_redirects=False,
             )
             if response.status_code == 302:
-                return response.headers.get("location")
+                url: str | None = response.headers.get("location")
+                return url
             return None
         except Exception as e:
             logger.error(f"Box: ダウンロードURL取得エラー — {e}")
             return None
 
-    async def list_folder(
-        self, folder_id: str = "0", limit: int = 100
-    ) -> list[dict[str, Any]]:
+    async def list_folder(self, folder_id: str = "0", limit: int = 100) -> list[dict[str, Any]]:
         """フォルダ内アイテム一覧"""
         if not self._client or not self._access_token:
             return []
@@ -202,7 +202,8 @@ class BoxConnector(BaseConnector):
             )
             response.raise_for_status()
             data = response.json()
-            return data.get("entries", [])
+            entries: list[dict[str, Any]] = data.get("entries", [])
+            return entries
         except Exception as e:
             logger.error(f"Box: フォルダ一覧エラー — {e}")
             return []

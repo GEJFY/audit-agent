@@ -92,9 +92,7 @@ class TestBoxConnector:
         mock_response.raise_for_status = MagicMock()
         conn._client.get = AsyncMock(return_value=mock_response)
 
-        await conn.search(
-            "test", folder_id="12345", file_extensions=["pdf", "xlsx"], limit=5
-        )
+        await conn.search("test", folder_id="12345", file_extensions=["pdf", "xlsx"], limit=5)
 
         call_kwargs = conn._client.get.call_args
         params = call_kwargs.kwargs.get("params", {})
