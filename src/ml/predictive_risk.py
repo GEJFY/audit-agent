@@ -120,20 +120,14 @@ class PredictiveRiskModel:
         trend_score, trend_direction = self._predict_trend(scores, horizon_days)
 
         # 2. 特徴量ベーススコア
-        feature_score = self._predict_feature_based(
-            current_features or {}, risk_category
-        )
+        feature_score = self._predict_feature_based(current_features or {}, risk_category)
 
         # 3. 季節性パターン
         seasonal_score = self._predict_seasonal(dates, scores, horizon_days)
 
         # アンサンブル結合
         w = self._ensemble_weights
-        predicted = (
-            w["trend"] * trend_score
-            + w["feature"] * feature_score
-            + w["seasonal"] * seasonal_score
-        )
+        predicted = w["trend"] * trend_score + w["feature"] * feature_score + w["seasonal"] * seasonal_score
         predicted = min(100.0, max(0.0, predicted))
 
         # 業種別重み付け
@@ -147,9 +141,7 @@ class PredictiveRiskModel:
         ci_upper = min(100.0, predicted + uncertainty)
 
         # 寄与要因
-        factors = self._identify_factors(
-            trend_score, feature_score, seasonal_score, current_features
-        )
+        factors = self._identify_factors(trend_score, feature_score, seasonal_score, current_features)
 
         return RiskForecastResult(
             risk_category=risk_category,
@@ -179,9 +171,7 @@ class PredictiveRiskModel:
         """
         forecasts: list[RiskForecastResult] = []
         for category, data in category_data.items():
-            result = self.forecast(
-                data, category, horizon_days, current_features
-            )
+            result = self.forecast(data, category, horizon_days, current_features)
             forecasts.append(result)
 
         # 全体トレンド判定
@@ -194,9 +184,7 @@ class PredictiveRiskModel:
             overall_trend = "stable"
 
         # 高リスクカテゴリ
-        high_risk = [
-            f.risk_category for f in forecasts if f.predicted_score > 70
-        ]
+        high_risk = [f.risk_category for f in forecasts if f.predicted_score > 70]
 
         # 推奨事項
         recommendations = self._generate_recommendations(forecasts)
@@ -209,9 +197,7 @@ class PredictiveRiskModel:
             recommendations=recommendations,
         )
 
-    def _predict_trend(
-        self, scores: list[float], horizon_days: int
-    ) -> tuple[float, str]:
+    def _predict_trend(self, scores: list[float], horizon_days: int) -> tuple[float, str]:
         """時系列トレンド予測"""
         arr = np.array(scores)
         n = len(arr)
@@ -236,9 +222,7 @@ class PredictiveRiskModel:
 
         return predicted, direction
 
-    def _predict_feature_based(
-        self, features: dict[str, Any], risk_category: str
-    ) -> float:
+    def _predict_feature_based(self, features: dict[str, Any], risk_category: str) -> float:
         """特徴量ベースのリスクスコア予測"""
         base_score = 40.0
 
@@ -260,9 +244,7 @@ class PredictiveRiskModel:
         base_score += min(15.0, incidents * 3.0)
 
         # カテゴリ別調整
-        if risk_category == "access_control" and features.get(
-            "privileged_access_count", 0
-        ) > 10:
+        if risk_category == "access_control" and features.get("privileged_access_count", 0) > 10:
             base_score += 10
 
         return float(min(100.0, max(0.0, base_score)))
@@ -309,59 +291,61 @@ class PredictiveRiskModel:
         factors: list[dict[str, Any]] = []
 
         if trend_score > 60:
-            factors.append({
-                "factor": "上昇トレンド",
-                "contribution": "high",
-                "description": "過去データに上昇傾向",
-            })
+            factors.append(
+                {
+                    "factor": "上昇トレンド",
+                    "contribution": "high",
+                    "description": "過去データに上昇傾向",
+                }
+            )
 
         if feature_score > 60:
-            factors.append({
-                "factor": "現在のリスク指標",
-                "contribution": "high",
-                "description": "統制逸脱・異常検知等の現在指標が高い",
-            })
+            factors.append(
+                {
+                    "factor": "現在のリスク指標",
+                    "contribution": "high",
+                    "description": "統制逸脱・異常検知等の現在指標が高い",
+                }
+            )
 
         if seasonal_score > 60:
-            factors.append({
-                "factor": "季節性パターン",
-                "contribution": "medium",
-                "description": "過去同月のリスクスコアが高い傾向",
-            })
+            factors.append(
+                {
+                    "factor": "季節性パターン",
+                    "contribution": "medium",
+                    "description": "過去同月のリスクスコアが高い傾向",
+                }
+            )
 
         if features:
             if features.get("control_deviation_rate", 0) > 10:
-                factors.append({
-                    "factor": "統制逸脱率",
-                    "contribution": "high",
-                    "description": f"逸脱率 {features['control_deviation_rate']}%",
-                })
+                factors.append(
+                    {
+                        "factor": "統制逸脱率",
+                        "contribution": "high",
+                        "description": f"逸脱率 {features['control_deviation_rate']}%",
+                    }
+                )
             if features.get("anomaly_rate", 0) > 0.1:
-                factors.append({
-                    "factor": "異常検知率",
-                    "contribution": "medium",
-                    "description": f"異常率 {features['anomaly_rate']:.1%}",
-                })
+                factors.append(
+                    {
+                        "factor": "異常検知率",
+                        "contribution": "medium",
+                        "description": f"異常率 {features['anomaly_rate']:.1%}",
+                    }
+                )
 
         return factors
 
-    def _generate_recommendations(
-        self, forecasts: list[RiskForecastResult]
-    ) -> list[str]:
+    def _generate_recommendations(self, forecasts: list[RiskForecastResult]) -> list[str]:
         """予測結果から推奨事項を生成"""
         recs: list[str] = []
 
         for f in forecasts:
             if f.predicted_score > 80:
-                recs.append(
-                    f"[緊急] {f.risk_category}: 予測スコア {f.predicted_score:.0f} — "
-                    "即座の統制強化が必要"
-                )
+                recs.append(f"[緊急] {f.risk_category}: 予測スコア {f.predicted_score:.0f} — 即座の統制強化が必要")
             elif f.predicted_score > 60 and f.trend == "increasing":
-                recs.append(
-                    f"[注意] {f.risk_category}: 上昇トレンド — "
-                    "モニタリング頻度の増加を推奨"
-                )
+                recs.append(f"[注意] {f.risk_category}: 上昇トレンド — モニタリング頻度の増加を推奨")
 
         if not recs:
             recs.append("全カテゴリのリスクスコアが安定しています")

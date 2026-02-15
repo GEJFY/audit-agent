@@ -10,9 +10,7 @@ from src.ml.predictive_risk import (
 )
 
 
-def _make_historical_data(
-    n: int = 30, base: float = 50.0, trend: float = 0.0
-) -> list[dict]:
+def _make_historical_data(n: int = 30, base: float = 50.0, trend: float = 0.0) -> list[dict]:
     """テスト用の過去スコアデータ生成"""
     import numpy as np
 
@@ -155,9 +153,7 @@ class TestPredictiveRiskModel:
             "anomaly_rate": 0.15,
             "past_incidents": 3,
         }
-        result = model.forecast(
-            data, "financial_process", horizon_days=90, current_features=features
-        )
+        result = model.forecast(data, "financial_process", horizon_days=90, current_features=features)
         assert result.predicted_score > 0
         # 寄与要因が含まれる
         assert isinstance(result.contributing_factors, list)
@@ -256,22 +252,16 @@ class TestPredictiveTrendDetection:
 
     def test_predict_trend_stable(self) -> None:
         model = PredictiveRiskModel()
-        _, direction = model._predict_trend(
-            [50.0, 50.2, 49.8, 50.1, 50.0, 49.9, 50.1], 90
-        )
+        _, direction = model._predict_trend([50.0, 50.2, 49.8, 50.1, 50.0, 49.9, 50.1], 90)
         assert direction == "stable"
 
     def test_predict_trend_increasing(self) -> None:
         model = PredictiveRiskModel()
-        score, direction = model._predict_trend(
-            [30.0, 35.0, 40.0, 45.0, 50.0, 55.0, 60.0], 90
-        )
+        score, direction = model._predict_trend([30.0, 35.0, 40.0, 45.0, 50.0, 55.0, 60.0], 90)
         assert direction == "increasing"
         assert score > 60
 
     def test_predict_trend_decreasing(self) -> None:
         model = PredictiveRiskModel()
-        _, direction = model._predict_trend(
-            [80.0, 75.0, 70.0, 65.0, 60.0, 55.0, 50.0], 90
-        )
+        _, direction = model._predict_trend([80.0, 75.0, 70.0, 65.0, 60.0, 55.0, 50.0], 90)
         assert direction == "decreasing"
