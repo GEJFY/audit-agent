@@ -22,6 +22,8 @@ class AuditProject(TenantBaseModel):
     auditee_tenant_id: Mapped[str | None] = mapped_column(UUID(as_uuid=False), nullable=True)
     start_date: Mapped[str | None] = mapped_column(String(20), nullable=True)
     end_date: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    region: Mapped[str] = mapped_column(String(20), default="JP")  # JP, SG, HK, AU
+    industry: Mapped[str | None] = mapped_column(String(50), nullable=True)  # finance, manufacturing, it_services
     agent_mode: Mapped[str] = mapped_column(String(20), default="audit")  # AgentMode
     metadata_: Mapped[dict | None] = mapped_column("metadata", JSONB, default=dict)
 
@@ -183,6 +185,8 @@ class AgentDecision(TenantBaseModel):
     model_used: Mapped[str] = mapped_column(String(100), nullable=False)
     tokens_used: Mapped[int | None] = mapped_column(Integer, nullable=True)
     cost_usd: Mapped[float | None] = mapped_column(Float, nullable=True)
+    execution_mode: Mapped[str] = mapped_column(String(20), default="assist")  # assist, autonomous
+    auto_approved_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
     human_approved: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
     approved_by: Mapped[str | None] = mapped_column(UUID(as_uuid=False), nullable=True)
 

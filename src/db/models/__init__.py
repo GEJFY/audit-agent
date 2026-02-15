@@ -20,6 +20,12 @@ from src.db.models.auditor import (
     TestResult,
 )
 from src.db.models.dialogue import DialogueMessage
+from src.db.models.forecasts import CrossCompanyPattern, RiskForecast
+from src.db.models.risk_templates import (
+    ControlBaseline,
+    IndustryTemplate,
+    RiskTemplateItem,
+)
 from src.db.models.tenant import Tenant, User
 
 __all__ = [
@@ -30,14 +36,19 @@ __all__ = [
     "AuditPlan",
     "AuditProject",
     "AuditeeResponse",
+    "ControlBaseline",
     "ControlsStatus",
+    "CrossCompanyPattern",
     "DialogueMessage",
     "EvidenceRegistry",
     "Finding",
+    "IndustryTemplate",
     "PrepChecklist",
     "RemediationAction",
     "Report",
     "RiskAlert",
+    "RiskForecast",
+    "RiskTemplateItem",
     "RiskUniverse",
     "SelfAssessment",
     "Tenant",
