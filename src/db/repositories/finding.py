@@ -39,4 +39,4 @@ class FindingRepository(BaseRepository[Finding]):
             .group_by(Finding.risk_level)
         )
         result = await self._session.execute(query)
-        return dict(result.all())
+        return {row[0]: row[1] for row in result.all()}

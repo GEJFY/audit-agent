@@ -33,7 +33,7 @@ class PredictiveRiskWorkflow:
         self._current_step: str = "init"
         self._is_cancelled: bool = False
 
-    @workflow.run
+    @workflow.run  # type: ignore[misc]
     async def run(
         self,
         tenant_id: str,
@@ -101,7 +101,7 @@ class PredictiveRiskWorkflow:
                 tenant_id=tenant_id,
             ),
             start_to_close_timeout=timedelta(minutes=10),
-            retry_policy=workflow.RetryPolicy(  # type: ignore[attr-defined]
+            retry_policy=workflow.RetryPolicy(
                 maximum_attempts=2,
                 initial_interval=timedelta(seconds=5),
                 backoff_coefficient=2.0,
@@ -146,17 +146,17 @@ class PredictiveRiskWorkflow:
                 start_to_close_timeout=timedelta(seconds=30),
             )
 
-    @workflow.query
+    @workflow.query  # type: ignore[misc]
     def get_current_step(self) -> str:
         """現在のステップを返す"""
         return self._current_step
 
-    @workflow.query
+    @workflow.query  # type: ignore[misc]
     def get_state(self) -> dict[str, Any]:
         """現在のステートを返す"""
         return self._state
 
-    @workflow.signal
+    @workflow.signal  # type: ignore[misc]
     async def cancel_workflow(self) -> None:
         """ワークフローキャンセル"""
         self._is_cancelled = True

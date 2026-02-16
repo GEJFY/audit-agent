@@ -1,5 +1,7 @@
 """テナント・ユーザーモデル"""
 
+from typing import Any
+
 from sqlalchemy import Boolean, ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -20,7 +22,7 @@ class Tenant(BaseModel):
         nullable=True,
     )
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
-    settings: Mapped[dict | None] = mapped_column(JSONB, default=dict)
+    settings: Mapped[dict[str, Any] | None] = mapped_column(JSONB, default=dict)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # リレーション
@@ -33,7 +35,7 @@ class User(TenantBaseModel):
     __tablename__ = "users"
 
     # tenant_id を FK 付きで再定義
-    tenant_id: Mapped[str] = mapped_column(  # type: ignore[assignment]
+    tenant_id: Mapped[str] = mapped_column(
         UUID(as_uuid=False),
         ForeignKey("tenants.id"),
         nullable=False,

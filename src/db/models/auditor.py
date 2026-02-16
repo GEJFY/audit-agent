@@ -1,5 +1,7 @@
 """監査側モデル — 11テーブル"""
 
+from typing import Any
+
 from sqlalchemy import Boolean, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
@@ -25,7 +27,7 @@ class AuditProject(TenantBaseModel):
     region: Mapped[str] = mapped_column(String(20), default="JP")  # JP, SG, HK, AU
     industry: Mapped[str | None] = mapped_column(String(50), nullable=True)  # finance, manufacturing, it_services
     agent_mode: Mapped[str] = mapped_column(String(20), default="audit")  # AgentMode
-    metadata_: Mapped[dict | None] = mapped_column("metadata", JSONB, default=dict)
+    metadata_: Mapped[dict[str, Any] | None] = mapped_column("metadata", JSONB, default=dict)
 
 
 class RiskUniverse(TenantBaseModel):
@@ -42,7 +44,7 @@ class RiskUniverse(TenantBaseModel):
     likelihood: Mapped[int] = mapped_column(Integer, default=3)  # 1-5
     impact: Mapped[int] = mapped_column(Integer, default=3)  # 1-5
     risk_owner: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    related_controls: Mapped[list | None] = mapped_column(ARRAY(String), nullable=True)
+    related_controls: Mapped[list[str] | None] = mapped_column(ARRAY(String), nullable=True)
 
 
 class AuditPlan(TenantBaseModel):
@@ -53,10 +55,10 @@ class AuditPlan(TenantBaseModel):
     project_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("audit_projects.id"), nullable=False)
     plan_type: Mapped[str] = mapped_column(String(50), nullable=False)  # annual, engagement, test
     scope: Mapped[str | None] = mapped_column(Text, nullable=True)
-    objectives: Mapped[list | None] = mapped_column(JSONB, default=list)
-    risk_assessment: Mapped[dict | None] = mapped_column(JSONB, default=dict)
-    resource_allocation: Mapped[dict | None] = mapped_column(JSONB, default=dict)
-    timeline: Mapped[dict | None] = mapped_column(JSONB, default=dict)
+    objectives: Mapped[list[Any] | None] = mapped_column(JSONB, default=list)
+    risk_assessment: Mapped[dict[str, Any] | None] = mapped_column(JSONB, default=dict)
+    resource_allocation: Mapped[dict[str, Any] | None] = mapped_column(JSONB, default=dict)
+    timeline: Mapped[dict[str, Any] | None] = mapped_column(JSONB, default=dict)
     approved_by: Mapped[str | None] = mapped_column(UUID(as_uuid=False), nullable=True)
     approved_at: Mapped[str | None] = mapped_column(String(50), nullable=True)
     generated_by_agent: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -92,8 +94,8 @@ class TestResult(TenantBaseModel):
     result: Mapped[str] = mapped_column(String(50), nullable=False)  # ControlTestResult
     sample_tested: Mapped[int] = mapped_column(Integer, default=0)
     exceptions_found: Mapped[int] = mapped_column(Integer, default=0)
-    details: Mapped[dict | None] = mapped_column(JSONB, default=dict)
-    evidence_refs: Mapped[list | None] = mapped_column(ARRAY(String), nullable=True)
+    details: Mapped[dict[str, Any] | None] = mapped_column(JSONB, default=dict)
+    evidence_refs: Mapped[list[str] | None] = mapped_column(ARRAY(String), nullable=True)
     tested_by_agent: Mapped[bool] = mapped_column(Boolean, default=False)
     agent_confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
     reviewed_by: Mapped[str | None] = mapped_column(UUID(as_uuid=False), nullable=True)
@@ -108,7 +110,7 @@ class Anomaly(TenantBaseModel):
     anomaly_type: Mapped[str] = mapped_column(String(100), nullable=False)
     severity: Mapped[str] = mapped_column(String(20), nullable=False)  # RiskLevel
     description: Mapped[str] = mapped_column(Text, nullable=False)
-    source_data: Mapped[dict | None] = mapped_column(JSONB, default=dict)
+    source_data: Mapped[dict[str, Any] | None] = mapped_column(JSONB, default=dict)
     detection_method: Mapped[str] = mapped_column(String(100), nullable=False)  # isolation_forest, rule_based, llm
     confidence_score: Mapped[float] = mapped_column(Float, nullable=False)
     is_confirmed: Mapped[bool | None] = mapped_column(Boolean, nullable=True)  # None=未レビュー
@@ -133,7 +135,7 @@ class Finding(TenantBaseModel):
     effect: Mapped[str | None] = mapped_column(Text, nullable=True)  # 影響
     recommendation: Mapped[str | None] = mapped_column(Text, nullable=True)  # 推奨事項
     management_response: Mapped[str | None] = mapped_column(Text, nullable=True)  # 経営者回答
-    evidence_refs: Mapped[list | None] = mapped_column(ARRAY(String), nullable=True)
+    evidence_refs: Mapped[list[str] | None] = mapped_column(ARRAY(String), nullable=True)
     generated_by_agent: Mapped[bool] = mapped_column(Boolean, default=False)
 
 
@@ -146,9 +148,9 @@ class Report(TenantBaseModel):
     report_type: Mapped[str] = mapped_column(String(50), nullable=False)  # draft, final, executive_summary
     title: Mapped[str] = mapped_column(String(500), nullable=False)
     content: Mapped[str | None] = mapped_column(Text, nullable=True)
-    content_structured: Mapped[dict | None] = mapped_column(JSONB, default=dict)
+    content_structured: Mapped[dict[str, Any] | None] = mapped_column(JSONB, default=dict)
     status: Mapped[str] = mapped_column(String(50), default="draft")
-    finding_ids: Mapped[list | None] = mapped_column(ARRAY(String), nullable=True)
+    finding_ids: Mapped[list[str] | None] = mapped_column(ARRAY(String), nullable=True)
     approved_by: Mapped[str | None] = mapped_column(UUID(as_uuid=False), nullable=True)
     approved_at: Mapped[str | None] = mapped_column(String(50), nullable=True)
     s3_path: Mapped[str | None] = mapped_column(String(1000), nullable=True)
@@ -178,8 +180,8 @@ class AgentDecision(TenantBaseModel):
     project_id: Mapped[str | None] = mapped_column(UUID(as_uuid=False), ForeignKey("audit_projects.id"), nullable=True)
     agent_type: Mapped[str] = mapped_column(String(100), nullable=False)  # AuditorAgentType / AuditeeAgentType
     decision_type: Mapped[str] = mapped_column(String(100), nullable=False)
-    input_summary: Mapped[dict | None] = mapped_column(JSONB, default=dict)
-    output_summary: Mapped[dict | None] = mapped_column(JSONB, default=dict)
+    input_summary: Mapped[dict[str, Any] | None] = mapped_column(JSONB, default=dict)
+    output_summary: Mapped[dict[str, Any] | None] = mapped_column(JSONB, default=dict)
     reasoning: Mapped[str | None] = mapped_column(Text, nullable=True)
     confidence: Mapped[float] = mapped_column(Float, nullable=False)
     model_used: Mapped[str] = mapped_column(String(100), nullable=False)
@@ -201,7 +203,7 @@ class ApprovalQueue(TenantBaseModel):
     priority: Mapped[str] = mapped_column(String(20), default="medium")  # critical, high, medium, low
     status: Mapped[str] = mapped_column(String(50), default="pending")  # pending, approved, rejected, deferred
     requested_by_agent: Mapped[str] = mapped_column(String(100), nullable=False)
-    context: Mapped[dict | None] = mapped_column(JSONB, default=dict)
+    context: Mapped[dict[str, Any] | None] = mapped_column(JSONB, default=dict)
     assigned_to: Mapped[str | None] = mapped_column(UUID(as_uuid=False), nullable=True)
     resolved_at: Mapped[str | None] = mapped_column(String(50), nullable=True)
     resolution_comment: Mapped[str | None] = mapped_column(Text, nullable=True)

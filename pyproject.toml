@@ -169,6 +169,7 @@ module = [
     "botocore.*",
     "orjson.*",
     "statsmodels.*",
+    "redis.*",
 ]
 ignore_missing_imports = true
 
@@ -179,7 +180,6 @@ module = [
     "src.db.migrations.*",
 ]
 disallow_untyped_defs = false
-ignore_errors = true
 
 [[tool.mypy.overrides]]
 module = [

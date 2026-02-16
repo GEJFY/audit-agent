@@ -36,7 +36,7 @@ class AuditProjectWorkflow:
         self._is_cancelled: bool = False
         self._approval_pending: bool = False
 
-    @workflow.run
+    @workflow.run  # type: ignore[misc]
     async def run(
         self,
         project_id: str,
@@ -137,7 +137,7 @@ class AuditProjectWorkflow:
                 tenant_id=tenant_id,
             ),
             start_to_close_timeout=timedelta(minutes=10),
-            retry_policy=workflow.RetryPolicy(  # type: ignore[attr-defined]
+            retry_policy=workflow.RetryPolicy(
                 maximum_attempts=3,
                 initial_interval=timedelta(seconds=5),
                 backoff_coefficient=2.0,
@@ -189,23 +189,23 @@ class AuditProjectWorkflow:
             self._state["workflow_error_detail"] = detail
         return self._state
 
-    @workflow.query
+    @workflow.query  # type: ignore[misc]
     def get_current_phase(self) -> str:
         """現在フェーズを返す"""
         return self._current_phase
 
-    @workflow.query
+    @workflow.query  # type: ignore[misc]
     def get_state(self) -> dict[str, Any]:
         """現在ステートを返す"""
         return self._state
 
-    @workflow.signal
+    @workflow.signal  # type: ignore[misc]
     async def cancel_workflow(self) -> None:
         """ワークフローキャンセル"""
         self._is_cancelled = True
         workflow.logger.info("ワークフローキャンセルリクエスト受信")
 
-    @workflow.signal
+    @workflow.signal  # type: ignore[misc]
     async def approve(self) -> None:
         """外部からの承認シグナル"""
         self._state["requires_approval"] = False
