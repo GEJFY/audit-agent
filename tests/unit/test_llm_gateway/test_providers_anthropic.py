@@ -114,9 +114,7 @@ class TestAnthropicProvider:
 
         provider._client.messages.create = AsyncMock(return_value=mock_response)
 
-        result = await provider.generate_structured(
-            "テスト", response_schema={"type": "object"}
-        )
+        result = await provider.generate_structured("テスト", response_schema={"type": "object"})
 
         assert result.content == '{"key": "value"}'
         call_kwargs = provider._client.messages.create.call_args

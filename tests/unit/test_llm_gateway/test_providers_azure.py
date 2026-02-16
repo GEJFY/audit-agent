@@ -87,9 +87,7 @@ class TestAzureOpenAIProvider:
     async def test_generate_api_error(self, provider: "AzureOpenAIProvider") -> None:  # noqa: F821
         """APIエラー時に例外を伝播"""
         mock_client = AsyncMock()
-        mock_client.chat.completions.create = AsyncMock(
-            side_effect=RuntimeError("Azure API error")
-        )
+        mock_client.chat.completions.create = AsyncMock(side_effect=RuntimeError("Azure API error"))
         provider._client = mock_client
 
         with pytest.raises(RuntimeError, match="Azure API error"):
@@ -129,9 +127,7 @@ class TestAzureOpenAIProvider:
         mock_client.chat.completions.create = AsyncMock(return_value=mock_response)
         provider._client = mock_client
 
-        result = await provider.generate_structured(
-            "テスト", response_schema={"type": "object"}
-        )
+        result = await provider.generate_structured("テスト", response_schema={"type": "object"})
         assert result.content == '{"result": true}'
 
     async def test_health_check_no_credentials(self) -> None:

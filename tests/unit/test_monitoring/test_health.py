@@ -123,9 +123,7 @@ class TestHealthChecker:
         """全コンポーネント正常"""
         checker = HealthChecker()
 
-        with patch.object(checker, "check_database") as mock_db, patch.object(
-            checker, "check_redis"
-        ) as mock_redis:
+        with patch.object(checker, "check_database") as mock_db, patch.object(checker, "check_redis") as mock_redis:
             mock_db.return_value = ComponentHealth(name="db", status=HealthStatus.HEALTHY)
             mock_redis.return_value = ComponentHealth(name="redis", status=HealthStatus.HEALTHY)
 
@@ -138,9 +136,7 @@ class TestHealthChecker:
         """一部コンポーネント異常"""
         checker = HealthChecker()
 
-        with patch.object(checker, "check_database") as mock_db, patch.object(
-            checker, "check_redis"
-        ) as mock_redis:
+        with patch.object(checker, "check_database") as mock_db, patch.object(checker, "check_redis") as mock_redis:
             mock_db.return_value = ComponentHealth(name="db", status=HealthStatus.HEALTHY)
             mock_redis.return_value = ComponentHealth(name="redis", status=HealthStatus.UNHEALTHY)
 
