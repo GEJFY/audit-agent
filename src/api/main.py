@@ -17,7 +17,7 @@ from src.api.middleware.security import (
     RequestValidationMiddleware,
     SecurityHeadersMiddleware,
 )
-from src.api.routes import agents, auth, compliance, dialogue, evidence, health, notifications, projects, reports, risk_templates, websocket
+from src.api.routes import agents, analytics, auth, compliance, dialogue, evidence, health, notifications, projects, reports, risk_templates, websocket
 from src.config.settings import get_settings
 from src.monitoring.logging import setup_logging
 from src.monitoring.metrics import app_info
@@ -131,6 +131,7 @@ def create_app() -> FastAPI:
     app.include_router(notifications.router, prefix=f"{api_prefix}/notifications", tags=["notifications"])
     app.include_router(reports.router, prefix=f"{api_prefix}/reports", tags=["reports"])
     app.include_router(risk_templates.router, prefix=f"{api_prefix}/risk-templates", tags=["risk-templates"])
+    app.include_router(analytics.router, prefix=f"{api_prefix}/analytics", tags=["analytics"])
 
     # WebSocket
     app.include_router(websocket.router, prefix=f"{api_prefix}", tags=["websocket"])
