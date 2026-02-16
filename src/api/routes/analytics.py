@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
 from src.analytics.cross_company import (
     CompanyRiskProfile,
@@ -12,6 +12,7 @@ from src.analytics.portfolio_risk import (
     CompanyRiskSummary,
     PortfolioRiskAggregator,
 )
+from src.api.middleware.auth import require_permission
 
 router = APIRouter()
 
@@ -19,6 +20,7 @@ router = APIRouter()
 @router.post("/benchmark")
 async def run_benchmark(
     companies: list[dict[str, Any]],
+    user: Any = Depends(require_permission("analytics:benchmark")),
 ) -> dict[str, Any]:
     """業種ベンチマーク分析を実行
 
@@ -66,6 +68,7 @@ async def run_benchmark(
 @router.post("/portfolio")
 async def run_portfolio(
     companies: list[dict[str, Any]],
+    user: Any = Depends(require_permission("analytics:portfolio")),
 ) -> dict[str, Any]:
     """ポートフォリオリスク集約を実行
 
