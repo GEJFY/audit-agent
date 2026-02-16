@@ -59,7 +59,7 @@ class SelfAssessmentWorkflow:
         self._approved: bool = False
         self._rejection_reason: str = ""
 
-    @workflow.run
+    @workflow.run  # type: ignore[misc]
     async def run(
         self,
         tenant_id: str,
@@ -117,7 +117,7 @@ class SelfAssessmentWorkflow:
                     tenant_id=tenant_id,
                 ),
                 start_to_close_timeout=timedelta(minutes=10),
-                retry_policy=workflow.RetryPolicy(  # type: ignore[attr-defined]
+                retry_policy=workflow.RetryPolicy(
                     maximum_attempts=3,
                     initial_interval=timedelta(seconds=5),
                 ),
@@ -204,28 +204,28 @@ class SelfAssessmentWorkflow:
                 tenant_id=tenant_id,
             ),
             start_to_close_timeout=timedelta(minutes=10),
-            retry_policy=workflow.RetryPolicy(  # type: ignore[attr-defined]
+            retry_policy=workflow.RetryPolicy(
                 maximum_attempts=3,
                 initial_interval=timedelta(seconds=5),
             ),
         )
 
-    @workflow.signal
+    @workflow.signal  # type: ignore[misc]
     async def approve(self) -> None:
         """承認シグナル"""
         self._approved = True
 
-    @workflow.signal
+    @workflow.signal  # type: ignore[misc]
     async def reject(self, reason: str = "") -> None:
         """却下シグナル"""
         self._rejection_reason = reason or "却下理由未記入"
 
-    @workflow.query
+    @workflow.query  # type: ignore[misc]
     def get_state(self) -> dict[str, Any]:
         """現在のステートを返す"""
         return self._state
 
-    @workflow.query
+    @workflow.query  # type: ignore[misc]
     def get_progress(self) -> dict[str, Any]:
         """進捗情報を返す"""
         completed_depts = sum(

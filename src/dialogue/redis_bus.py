@@ -60,7 +60,7 @@ class RedisStreamsBus:
             import redis.asyncio as aioredis
 
             settings = get_settings()
-            self._redis = aioredis.from_url(
+            self._redis = aioredis.from_url(  # type: ignore[no-untyped-call]
                 settings.redis_url,
                 max_connections=settings.redis_max_connections,
                 decode_responses=False,

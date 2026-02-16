@@ -89,7 +89,7 @@ class BaseRepository(Generic[ModelT]):
             stmt = stmt.where(self._model.tenant_id == str(tenant_id))  # type: ignore[attr-defined]
 
         result = await self._session.execute(stmt)
-        return result.rowcount > 0  # type: ignore[union-attr]
+        return (result.rowcount or 0) > 0  # type: ignore[attr-defined]
 
     async def count(self, tenant_id: str | UUID | None = None, **filters: Any) -> int:
         """レコード数取得"""
