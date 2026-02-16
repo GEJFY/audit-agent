@@ -4,14 +4,15 @@ from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
 import pytest
+from httpx import AsyncClient
 
 
 @pytest.mark.unit
 class TestProjectRoutes:
     async def test_list_projects_empty(
         self,
-        client: "AsyncClient",
-        mock_db_session: AsyncMock,  # noqa: F821
+        client: AsyncClient,
+        mock_db_session: AsyncMock,
     ) -> None:
         """プロジェクト一覧 — 空"""
         # count query
@@ -33,8 +34,8 @@ class TestProjectRoutes:
 
     async def test_create_project_invalid_body(
         self,
-        client: "AsyncClient",
-        mock_db_session: AsyncMock,  # noqa: F821
+        client: AsyncClient,
+        mock_db_session: AsyncMock,
     ) -> None:
         """プロジェクト作成 — バリデーションエラー（必須フィールド不足）"""
         resp = await client.post(
@@ -45,8 +46,8 @@ class TestProjectRoutes:
 
     async def test_get_project_not_found(
         self,
-        client: "AsyncClient",
-        mock_db_session: AsyncMock,  # noqa: F821
+        client: AsyncClient,
+        mock_db_session: AsyncMock,
     ) -> None:
         """存在しないプロジェクト取得"""
         mock_result = MagicMock()

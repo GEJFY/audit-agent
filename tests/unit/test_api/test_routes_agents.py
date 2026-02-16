@@ -3,14 +3,15 @@
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
+from httpx import AsyncClient
 
 
 @pytest.mark.unit
 class TestAgentRoutes:
     async def test_list_agents(
         self,
-        client: "AsyncClient",
-        mock_db_session: AsyncMock,  # noqa: F821
+        client: AsyncClient,
+        mock_db_session: AsyncMock,
     ) -> None:
         """エージェント一覧"""
         resp = await client.get("/api/v1/agents/")
@@ -20,8 +21,8 @@ class TestAgentRoutes:
 
     async def test_execute_agent_invalid_body(
         self,
-        client: "AsyncClient",
-        mock_db_session: AsyncMock,  # noqa: F821
+        client: AsyncClient,
+        mock_db_session: AsyncMock,
     ) -> None:
         """エージェント実行 — バリデーションエラー（必須フィールド不足）"""
         resp = await client.post(
@@ -32,8 +33,8 @@ class TestAgentRoutes:
 
     async def test_list_decisions(
         self,
-        client: "AsyncClient",
-        mock_db_session: AsyncMock,  # noqa: F821
+        client: AsyncClient,
+        mock_db_session: AsyncMock,
     ) -> None:
         """意思決定一覧"""
         mock_count = MagicMock()

@@ -3,14 +3,15 @@
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
+from httpx import AsyncClient
 
 
 @pytest.mark.unit
 class TestEvidenceRoutes:
     async def test_list_evidence_empty(
         self,
-        client: "AsyncClient",
-        mock_db_session: AsyncMock,  # noqa: F821
+        client: AsyncClient,
+        mock_db_session: AsyncMock,
     ) -> None:
         """証跡一覧 — 空"""
         mock_count = MagicMock()
@@ -28,8 +29,8 @@ class TestEvidenceRoutes:
 
     async def test_get_evidence_not_found(
         self,
-        client: "AsyncClient",
-        mock_db_session: AsyncMock,  # noqa: F821
+        client: AsyncClient,
+        mock_db_session: AsyncMock,
     ) -> None:
         """存在しない証跡取得"""
         mock_result = MagicMock()
@@ -41,8 +42,8 @@ class TestEvidenceRoutes:
 
     async def test_delete_evidence_not_found(
         self,
-        client: "AsyncClient",
-        mock_db_session: AsyncMock,  # noqa: F821
+        client: AsyncClient,
+        mock_db_session: AsyncMock,
     ) -> None:
         """存在しない証跡削除"""
         mock_result = MagicMock()

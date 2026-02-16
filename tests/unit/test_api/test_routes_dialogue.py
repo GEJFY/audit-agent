@@ -3,14 +3,15 @@
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
+from httpx import AsyncClient
 
 
 @pytest.mark.unit
 class TestDialogueRoutes:
     async def test_list_messages_empty(
         self,
-        client: "AsyncClient",
-        mock_db_session: AsyncMock,  # noqa: F821
+        client: AsyncClient,
+        mock_db_session: AsyncMock,
     ) -> None:
         """メッセージ一覧 — 空"""
         mock_count = MagicMock()
@@ -28,8 +29,8 @@ class TestDialogueRoutes:
 
     async def test_send_message_invalid_body(
         self,
-        client: "AsyncClient",
-        mock_db_session: AsyncMock,  # noqa: F821
+        client: AsyncClient,
+        mock_db_session: AsyncMock,
     ) -> None:
         """メッセージ送信 — バリデーションエラー"""
         resp = await client.post(
@@ -40,8 +41,8 @@ class TestDialogueRoutes:
 
     async def test_get_thread(
         self,
-        client: "AsyncClient",
-        mock_db_session: AsyncMock,  # noqa: F821
+        client: AsyncClient,
+        mock_db_session: AsyncMock,
     ) -> None:
         """スレッド取得"""
         mock_count = MagicMock()
