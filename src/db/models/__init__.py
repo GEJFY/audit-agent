@@ -1,3 +1,4 @@
+from src.db.models.audit_event import AuditEvent
 from src.db.models.auditee import (
     AuditeeResponse,
     ControlsStatus,
@@ -21,6 +22,7 @@ from src.db.models.auditor import (
 )
 from src.db.models.dialogue import DialogueMessage
 from src.db.models.forecasts import CrossCompanyPattern, RiskForecast
+from src.db.models.notification import Notification, NotificationSetting
 from src.db.models.risk_templates import (
     ControlBaseline,
     IndustryTemplate,
@@ -33,6 +35,7 @@ __all__ = [
     "AgentDecision",
     "Anomaly",
     "ApprovalQueue",
+    "AuditEvent",
     "AuditPlan",
     "AuditProject",
     "AuditeeResponse",
@@ -43,6 +46,8 @@ __all__ = [
     "EvidenceRegistry",
     "Finding",
     "IndustryTemplate",
+    "Notification",
+    "NotificationSetting",
     "PrepChecklist",
     "RemediationAction",
     "Report",
