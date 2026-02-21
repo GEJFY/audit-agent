@@ -16,6 +16,7 @@ import {
   TrendingUp,
   BarChart3,
   Cpu,
+  Plug,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -32,6 +33,7 @@ const navigation = [
   { name: "Approvals", href: "/approvals", icon: CheckCircle },
   { name: "Evidence", href: "/evidence", icon: FileText },
   { name: "Agents", href: "/agents", icon: Bot },
+  { name: "Connectors", href: "/connectors", icon: Plug },
 ];
 
 const executiveNavigation = [
