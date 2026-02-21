@@ -6,7 +6,12 @@ import httpx
 from loguru import logger
 
 from src.config.settings import get_settings
-from src.connectors.base import BaseConnector
+from src.connectors.base import (
+    RETRYABLE_EXCEPTIONS,
+    BaseConnector,
+    connector_retry,
+    with_circuit_breaker,
+)
 
 
 class EmailConnector(BaseConnector):
@@ -17,6 +22,7 @@ class EmailConnector(BaseConnector):
     """
 
     def __init__(self) -> None:
+        super().__init__()
         settings = get_settings()
         self._tenant_id = settings.azure_tenant_id
         self._client_id = settings.azure_client_id
@@ -61,6 +67,8 @@ class EmailConnector(BaseConnector):
             self._client = None
         self._access_token = None
 
+    @connector_retry
+    @with_circuit_breaker
     async def search(self, query: str, **kwargs: Any) -> list[dict[str, Any]]:
         """メール検索 — Microsoft Graph Messages API
 
@@ -156,6 +164,8 @@ class EmailConnector(BaseConnector):
                 return await self.search(query, **kwargs)
             logger.error("Email検索エラー: {}", str(e))
             return []
+        except RETRYABLE_EXCEPTIONS:
+            raise
         except Exception as e:
             logger.error("Email検索エラー: {}", str(e))
             return []
@@ -223,5 +233,6 @@ class EmailConnector(BaseConnector):
                 headers=headers,
             )
             return response.status_code == 200
-        except Exception:
+        except Exception as e:
+            logger.warning("Email health_check 失敗: {}", str(e))
             return False

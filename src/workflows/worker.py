@@ -1,6 +1,7 @@
 """Temporal Worker — Activity/Workflowを実行するワーカープロセス"""
 
 import asyncio
+from typing import Any
 
 from loguru import logger
 from temporalio.client import Client
@@ -82,7 +83,7 @@ async def start_workflow(
     if not workflow_fn:
         raise ValueError(f"Unknown workflow: {workflow_type}")
 
-    handle = await client.start_workflow(
+    handle: Any = await client.start_workflow(
         workflow_fn,
         **args,
         id=workflow_id,
@@ -90,7 +91,7 @@ async def start_workflow(
     )
 
     logger.info("ワークフロー開始: type={}, id={}", workflow_type, handle.id)
-    return handle.id
+    return str(handle.id)
 
 
 def main() -> None:

@@ -32,9 +32,7 @@ def _mock_scalars(items: list) -> MagicMock:
 
 @pytest.mark.unit
 class TestAuditEventRepository:
-    async def test_create(
-        self, repo: AuditEventRepository, mock_session: AsyncMock
-    ) -> None:
+    async def test_create(self, repo: AuditEventRepository, mock_session: AsyncMock) -> None:
         result = await repo.create(
             event_type="create",
             resource_type="project",
@@ -43,43 +41,27 @@ class TestAuditEventRepository:
         assert mock_session.add.called
         assert isinstance(result, AuditEvent)
 
-    async def test_get_by_resource(
-        self, repo: AuditEventRepository, mock_session: AsyncMock
-    ) -> None:
-        mock_session.execute.return_value = _mock_scalars(
-            [MagicMock(spec=AuditEvent)]
-        )
+    async def test_get_by_resource(self, repo: AuditEventRepository, mock_session: AsyncMock) -> None:
+        mock_session.execute.return_value = _mock_scalars([MagicMock(spec=AuditEvent)])
         results = await repo.get_by_resource("t-001", "project", "proj-001")
         assert len(results) == 1
 
-    async def test_get_by_resource_empty(
-        self, repo: AuditEventRepository, mock_session: AsyncMock
-    ) -> None:
+    async def test_get_by_resource_empty(self, repo: AuditEventRepository, mock_session: AsyncMock) -> None:
         mock_session.execute.return_value = _mock_scalars([])
         results = await repo.get_by_resource("t-001", "finding", "f-999")
         assert len(results) == 0
 
-    async def test_get_by_actor(
-        self, repo: AuditEventRepository, mock_session: AsyncMock
-    ) -> None:
-        mock_session.execute.return_value = _mock_scalars(
-            [MagicMock(spec=AuditEvent), MagicMock(spec=AuditEvent)]
-        )
+    async def test_get_by_actor(self, repo: AuditEventRepository, mock_session: AsyncMock) -> None:
+        mock_session.execute.return_value = _mock_scalars([MagicMock(spec=AuditEvent), MagicMock(spec=AuditEvent)])
         results = await repo.get_by_actor("t-001", "user-001")
         assert len(results) == 2
 
-    async def test_get_by_project(
-        self, repo: AuditEventRepository, mock_session: AsyncMock
-    ) -> None:
-        mock_session.execute.return_value = _mock_scalars(
-            [MagicMock(spec=AuditEvent)]
-        )
+    async def test_get_by_project(self, repo: AuditEventRepository, mock_session: AsyncMock) -> None:
+        mock_session.execute.return_value = _mock_scalars([MagicMock(spec=AuditEvent)])
         results = await repo.get_by_project("t-001", "proj-001")
         assert len(results) == 1
 
-    async def test_get_by_actor_with_limit(
-        self, repo: AuditEventRepository, mock_session: AsyncMock
-    ) -> None:
+    async def test_get_by_actor_with_limit(self, repo: AuditEventRepository, mock_session: AsyncMock) -> None:
         mock_session.execute.return_value = _mock_scalars([])
         results = await repo.get_by_actor("t-001", "user-001", limit=10)
         assert len(results) == 0

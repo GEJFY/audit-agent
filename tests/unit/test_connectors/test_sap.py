@@ -228,6 +228,13 @@ class TestSAPConnector:
         conn._client.get = AsyncMock(side_effect=[error_response, ok_response])
         conn._client.post = AsyncMock(return_value=token_response)
 
+        # connectがネットワークアクセスしないようモック
+        async def mock_connect() -> bool:
+            conn._access_token = "refreshed_token"
+            return True
+
+        conn.connect = mock_connect  # type: ignore[assignment]
+
         results = await conn.search("test")
         assert results == []
 

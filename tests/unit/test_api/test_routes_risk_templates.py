@@ -72,18 +72,14 @@ class TestGetTemplateDetail:
         assert len(data["risks"]) > 0
         assert len(data["controls"]) > 0
 
-    async def test_get_manufacturing_template(
-        self, tmpl_client: AsyncClient
-    ) -> None:
+    async def test_get_manufacturing_template(self, tmpl_client: AsyncClient) -> None:
         """製造業テンプレート詳細取得"""
         resp = await tmpl_client.get("/api/v1/risk-templates/manufacturing")
         assert resp.status_code == 200
         data = resp.json()
         assert data["industry_code"] == "manufacturing"
 
-    async def test_get_nonexistent_template(
-        self, tmpl_client: AsyncClient
-    ) -> None:
+    async def test_get_nonexistent_template(self, tmpl_client: AsyncClient) -> None:
         """存在しないテンプレート → 404"""
         resp = await tmpl_client.get("/api/v1/risk-templates/nonexistent")
         assert resp.status_code == 404
@@ -104,29 +100,21 @@ class TestGetTemplateRisks:
 
     async def test_get_risks_by_category(self, tmpl_client: AsyncClient) -> None:
         """カテゴリでフィルタ"""
-        resp = await tmpl_client.get(
-            "/api/v1/risk-templates/finance/risks?category=compliance"
-        )
+        resp = await tmpl_client.get("/api/v1/risk-templates/finance/risks?category=compliance")
         assert resp.status_code == 200
         data = resp.json()
         assert data["category_filter"] == "compliance"
         for risk in data["risks"]:
             assert risk["category"] == "compliance"
 
-    async def test_get_risks_nonexistent_category(
-        self, tmpl_client: AsyncClient
-    ) -> None:
+    async def test_get_risks_nonexistent_category(self, tmpl_client: AsyncClient) -> None:
         """存在しないカテゴリ → 空リスト"""
-        resp = await tmpl_client.get(
-            "/api/v1/risk-templates/finance/risks?category=nonexistent"
-        )
+        resp = await tmpl_client.get("/api/v1/risk-templates/finance/risks?category=nonexistent")
         assert resp.status_code == 200
         data = resp.json()
         assert data["count"] == 0
 
-    async def test_get_risks_nonexistent_template(
-        self, tmpl_client: AsyncClient
-    ) -> None:
+    async def test_get_risks_nonexistent_template(self, tmpl_client: AsyncClient) -> None:
         """存在しないテンプレート → 404"""
         resp = await tmpl_client.get("/api/v1/risk-templates/nonexistent/risks")
         assert resp.status_code == 404
