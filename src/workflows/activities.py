@@ -70,7 +70,8 @@ def _get_or_create_agent(agent_name: str) -> Any:
 # ── Auditor側 Activities ──────────────────────────────
 
 
-@activity.defn(name="run_auditor_agent")async def run_auditor_agent(activity_input: AgentActivityInput) -> AgentActivityOutput:
+@activity.defn(name="run_auditor_agent")
+async def run_auditor_agent(activity_input: AgentActivityInput) -> AgentActivityOutput:
     """監査側Agent実行Activity"""
     logger.info("Activity実行: agent={}, tenant={}", activity_input.agent_name, activity_input.tenant_id)
     try:
@@ -92,7 +93,8 @@ def _get_or_create_agent(agent_name: str) -> Any:
         )
 
 
-@activity.defn(name="run_auditee_agent")async def run_auditee_agent(activity_input: AgentActivityInput) -> AgentActivityOutput:
+@activity.defn(name="run_auditee_agent")
+async def run_auditee_agent(activity_input: AgentActivityInput) -> AgentActivityOutput:
     """被監査側Agent実行Activity"""
     logger.info("Activity実行: agent={}, tenant={}", activity_input.agent_name, activity_input.tenant_id)
     try:
@@ -114,14 +116,16 @@ def _get_or_create_agent(agent_name: str) -> Any:
         )
 
 
-@activity.defn(name="send_notification")async def send_notification(tenant_id: str, message: str, channel: str = "slack") -> bool:
+@activity.defn(name="send_notification")
+async def send_notification(tenant_id: str, message: str, channel: str = "slack") -> bool:
     """通知送信Activity（Slack, Email等）"""
     logger.info("通知送信: tenant={}, channel={}", tenant_id, channel)
     # Phase 1+で実装: Slack API, SendGrid等
     return True
 
 
-@activity.defn(name="check_approval_status")async def check_approval_status(tenant_id: str, decision_id: str) -> dict[str, Any]:
+@activity.defn(name="check_approval_status")
+async def check_approval_status(tenant_id: str, decision_id: str) -> dict[str, Any]:
     """承認ステータス確認Activity"""
     from sqlalchemy import select
 
