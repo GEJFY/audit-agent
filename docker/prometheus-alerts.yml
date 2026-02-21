@@ -1,0 +1,97 @@
+groups:
+  - name: audit-agent-api
+    rules:
+      # 5xx エラー率が5%超を5分継続
+      - alert: HighErrorRate
+        expr: |
+          100 * sum(rate(http_requests_total{status_code=~"5.."}[5m]))
+          / sum(rate(http_requests_total[5m])) > 5
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "API 5xxエラー率 {{ $value | printf \"%.1f\" }}%"
+          description: "5分間の5xxエラー率が5%を超えています"
+
+      # API レイテンシ p95 が 2s 超を5分継続
+      - alert: HighLatency
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(http_request_duration_seconds_bucket[5m])) by (le)
+          ) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "API p95レイテンシ {{ $value | printf \"%.2f\" }}s"
+          description: "p95レスポンスタイムが2秒を超えています"
+
+      # リクエスト数がゼロ（APIダウンの可能性）
+      - alert: NoTraffic
+        expr: sum(rate(http_requests_total[5m])) == 0
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "APIトラフィックなし（10分間）"
+          description: "10分間リクエストが検出されていません"
+
+  - name: audit-agent-connectors
+    rules:
+      # サーキットブレーカーがオープン
+      - alert: CircuitBreakerOpen
+        expr: connector_circuit_breaker_state == 1
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "コネクタ {{ $labels.connector }} サーキットブレーカーOPEN"
+          description: "外部コネクタが遮断状態です。接続先の障害を確認してください"
+
+      # コネクタ連続失敗数が閾値の80%
+      - alert: CircuitBreakerWarning
+        expr: connector_circuit_breaker_failures >= 4
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "コネクタ {{ $labels.connector }} 失敗数 {{ $value }}/5"
+          description: "サーキットブレーカーのオープン間近です"
+
+  - name: audit-agent-llm
+    rules:
+      # LLMコスト急増（1時間あたり$50超）
+      - alert: HighLLMCost
+        expr: sum(rate(llm_cost_total[1h])) * 3600 > 50
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "LLMコスト高騰 ${{ $value | printf \"%.2f\" }}/h"
+          description: "LLM API使用コストが$50/hを超えています"
+
+      # LLM応答タイムアウト（p95が30s超）
+      - alert: LLMSlowResponse
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(llm_request_duration_seconds_bucket[5m])) by (le)
+          ) > 30
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "LLM応答遅延 p95={{ $value | printf \"%.1f\" }}s"
+          description: "LLM APIのp95レスポンスタイムが30秒を超えています"
+
+  - name: audit-agent-db
+    rules:
+      # DBコネクションプール使用率90%超
+      - alert: DBPoolExhaustion
+        expr: |
+          db_pool_checked_out / db_pool_size > 0.9
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "DBプール使用率 {{ $value | printf \"%.0f\" }}%"
+          description: "データベースコネクションプールの使用率が90%を超えています"

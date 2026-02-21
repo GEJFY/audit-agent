@@ -1,0 +1,19 @@
+# ═══════════════════════════════════════════════════════
+# audit-agent Terraform 変数（サンプル）
+# ═══════════════════════════════════════════════════════
+# このファイルをコピーして terraform.tfvars を作成してください。
+# terraform.tfvars は .gitignore に含まれています。
+#
+# 使い方:
+#   cp terraform.tfvars.example terraform.tfvars
+#   # 値を環境に合わせて編集
+#   terraform plan -var-file=terraform.tfvars
+
+# デプロイ環境 (dev / staging / prod)
+environment = "dev"
+
+# AWSリージョン
+aws_region = "ap-northeast-1"
+
+# アプリケーション名（リソース名のプレフィックス）
+app_name = "audit-agent"
