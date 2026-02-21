@@ -83,7 +83,7 @@ async def start_workflow(
     if not workflow_fn:
         raise ValueError(f"Unknown workflow: {workflow_type}")
 
-    handle: Any = await client.start_workflow(  # type: ignore[arg-type]
+    handle: Any = await client.start_workflow(
         workflow_fn,
         **args,
         id=workflow_id,

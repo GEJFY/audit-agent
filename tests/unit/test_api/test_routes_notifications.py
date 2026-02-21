@@ -120,9 +120,7 @@ class TestRiskAlert:
         data = resp.json()
         assert "sent" in data
 
-    async def test_send_risk_alert_default_priority(
-        self, notif_client: AsyncClient
-    ) -> None:
+    async def test_send_risk_alert_default_priority(self, notif_client: AsyncClient) -> None:
         """デフォルト優先度（high）でアラート送信"""
         resp = await notif_client.post(
             "/api/v1/notifications/risk-alert",
@@ -151,9 +149,7 @@ class TestProvidersHealth:
         "src.api.routes.notifications._dispatcher.health_check_all",
         new_callable=AsyncMock,
     )
-    async def test_health_with_providers(
-        self, mock_health: AsyncMock, notif_client: AsyncClient
-    ) -> None:
+    async def test_health_with_providers(self, mock_health: AsyncMock, notif_client: AsyncClient) -> None:
         """プロバイダ登録時のヘルスチェック"""
         mock_health.return_value = {"slack": True, "teams": False}
         resp = await notif_client.get("/api/v1/notifications/health")

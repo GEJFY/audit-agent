@@ -1,5 +1,7 @@
 """通知モデル — 通知履歴・通知設定"""
 
+from typing import Any
+
 from sqlalchemy import Boolean, Integer, String, Text
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
@@ -23,7 +25,7 @@ class Notification(TenantBaseModel):
     channel: Mapped[str] = mapped_column(String(255), default="")
     status: Mapped[str] = mapped_column(String(20), default="sent")  # sent, failed, pending
     action_url: Mapped[str | None] = mapped_column(String(1000), nullable=True)
-    metadata_: Mapped[dict | None] = mapped_column("metadata", JSONB, default=dict)
+    metadata_: Mapped[dict[str, Any] | None] = mapped_column("metadata", JSONB, default=dict)
     project_id: Mapped[str | None] = mapped_column(UUID(as_uuid=False), nullable=True, index=True)
     retry_count: Mapped[int] = mapped_column(Integer, default=0)
 
@@ -41,4 +43,4 @@ class NotificationSetting(TenantBaseModel):
     is_enabled: Mapped[bool] = mapped_column(Boolean, default=True)
     min_priority: Mapped[str] = mapped_column(String(20), default="low")  # 最低通知優先度
     webhook_url: Mapped[str | None] = mapped_column(String(1000), nullable=True)
-    config: Mapped[dict | None] = mapped_column(JSONB, default=dict)
+    config: Mapped[dict[str, Any] | None] = mapped_column(JSONB, default=dict)
