@@ -6,7 +6,12 @@ import httpx
 from loguru import logger
 
 from src.config.settings import get_settings
-from src.connectors.base import BaseConnector
+from src.connectors.base import (
+    RETRYABLE_EXCEPTIONS,
+    BaseConnector,
+    connector_retry,
+    with_circuit_breaker,
+)
 
 
 class SharePointConnector(BaseConnector):
@@ -18,6 +23,7 @@ class SharePointConnector(BaseConnector):
     """
 
     def __init__(self) -> None:
+        super().__init__()
         settings = get_settings()
         self._tenant_id = settings.azure_tenant_id
         self._client_id = settings.azure_client_id
@@ -62,6 +68,8 @@ class SharePointConnector(BaseConnector):
             self._client = None
         self._access_token = None
 
+    @connector_retry
+    @with_circuit_breaker
     async def search(self, query: str, **kwargs: Any) -> list[dict[str, Any]]:
         """SharePoint全文検索 — Microsoft Graph Search API
 
@@ -132,6 +140,8 @@ class SharePointConnector(BaseConnector):
                 return await self.search(query, **kwargs)
             logger.error("SharePoint検索エラー: {}", str(e))
             return []
+        except RETRYABLE_EXCEPTIONS:
+            raise
         except Exception as e:
             logger.error("SharePoint検索エラー: {}", str(e))
             return []
@@ -189,5 +199,6 @@ class SharePointConnector(BaseConnector):
                 headers=headers,
             )
             return response.status_code == 200
-        except Exception:
+        except Exception as e:
+            logger.warning("SharePoint health_check 失敗: {}", str(e))
             return False

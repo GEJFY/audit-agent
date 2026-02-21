@@ -17,7 +17,12 @@ import httpx
 from loguru import logger
 
 from src.config.settings import get_settings
-from src.connectors.base import BaseConnector
+from src.connectors.base import (
+    RETRYABLE_EXCEPTIONS,
+    BaseConnector,
+    connector_retry,
+    with_circuit_breaker,
+)
 
 
 class BoxConnector(BaseConnector):
@@ -31,6 +36,7 @@ class BoxConnector(BaseConnector):
     """
 
     def __init__(self) -> None:
+        super().__init__()
         settings = get_settings()
         self._client_id = settings.box_client_id
         self._client_secret = settings.box_client_secret
@@ -77,6 +83,8 @@ class BoxConnector(BaseConnector):
         self._access_token = None
         logger.info("Box: 切断")
 
+    @connector_retry
+    @with_circuit_breaker
     async def search(self, query: str, **kwargs: Any) -> list[dict[str, Any]]:
         """Box全文検索
 
@@ -142,6 +150,8 @@ class BoxConnector(BaseConnector):
             logger.info(f"Box: 検索完了 — {len(results)}件 (query={query})")
             return results
 
+        except RETRYABLE_EXCEPTIONS:
+            raise
         except Exception as e:
             logger.error(f"Box: 検索エラー — {e}")
             return []
@@ -219,5 +229,6 @@ class BoxConnector(BaseConnector):
                 headers=headers,
             )
             return response.status_code == 200
-        except Exception:
+        except Exception as e:
+            logger.warning("Box health_check 失敗: {}", str(e))
             return False

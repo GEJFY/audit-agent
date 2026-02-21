@@ -6,7 +6,12 @@ import httpx
 from loguru import logger
 
 from src.config.settings import get_settings
-from src.connectors.base import BaseConnector
+from src.connectors.base import (
+    RETRYABLE_EXCEPTIONS,
+    BaseConnector,
+    connector_retry,
+    with_circuit_breaker,
+)
 
 
 class SAPConnector(BaseConnector):
@@ -18,6 +23,7 @@ class SAPConnector(BaseConnector):
     """
 
     def __init__(self) -> None:
+        super().__init__()
         settings = get_settings()
         self._base_url = settings.sap_base_url
         self._username = settings.sap_username
@@ -95,6 +101,8 @@ class SAPConnector(BaseConnector):
             headers["Authorization"] = f"Bearer {self._access_token}"
         return headers
 
+    @connector_retry
+    @with_circuit_breaker
     async def search(self, query: str, **kwargs: Any) -> list[dict[str, Any]]:
         """SAPデータ検索 — OData APIクエリ実行
 
@@ -191,6 +199,8 @@ class SAPConnector(BaseConnector):
                 return await self.search(query, **kwargs)
             logger.error("SAP検索エラー: {} (status={})", str(e), e.response.status_code)
             return []
+        except RETRYABLE_EXCEPTIONS:
+            raise
         except Exception as e:
             logger.error("SAP検索エラー: {}", str(e))
             return []
@@ -247,5 +257,6 @@ class SAPConnector(BaseConnector):
                 auth=self._get_auth(),
             )
             return response.status_code in (200, 401, 403)
-        except Exception:
+        except Exception as e:
+            logger.warning("SAP health_check 失敗: {}", str(e))
             return False
