@@ -22,6 +22,7 @@ from src.api.routes import (
     analytics,
     auth,
     compliance,
+    connectors,
     dialogue,
     evidence,
     health,
@@ -145,6 +146,7 @@ def create_app() -> FastAPI:
     app.include_router(reports.router, prefix=f"{api_prefix}/reports", tags=["reports"])
     app.include_router(risk_templates.router, prefix=f"{api_prefix}/risk-templates", tags=["risk-templates"])
     app.include_router(analytics.router, prefix=f"{api_prefix}/analytics", tags=["analytics"])
+    app.include_router(connectors.router, prefix=f"{api_prefix}/connectors", tags=["connectors"])
 
     # WebSocket
     app.include_router(websocket.router, prefix=f"{api_prefix}", tags=["websocket"])

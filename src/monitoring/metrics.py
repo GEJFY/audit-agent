@@ -79,6 +79,32 @@ escalations_total = Counter(
     ["reason", "severity"],
 )
 
+# ── Connector メトリクス ──────────────────────────────
+connector_requests_total = Counter(
+    "connector_requests_total",
+    "コネクタリクエスト総数",
+    ["connector", "method", "status"],  # status: success/failure
+)
+
+connector_request_duration_seconds = Histogram(
+    "connector_request_duration_seconds",
+    "コネクタリクエスト処理時間",
+    ["connector", "method"],
+    buckets=[0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0, 30.0],
+)
+
+connector_circuit_breaker_state = Gauge(
+    "connector_circuit_breaker_state",
+    "サーキットブレーカー状態 (0=closed, 1=open)",
+    ["connector"],
+)
+
+connector_circuit_breaker_failures = Gauge(
+    "connector_circuit_breaker_failures",
+    "サーキットブレーカー連続失敗数",
+    ["connector"],
+)
+
 # ── DB メトリクス ─────────────────────────────────────
 db_pool_size = Gauge(
     "db_pool_size",
