@@ -204,7 +204,7 @@ jobs:
       - name: Check coverage threshold
         run: |
           pip install coverage
-          # カバレッジ閾値 70%（Phase 5）
+          # カバレッジ閾値 80%（Phase 7）
           python -c "
           import xml.etree.ElementTree as ET
           tree = ET.parse('coverage-unit.xml')
@@ -212,8 +212,8 @@ jobs:
           rate = float(root.attrib.get('line-rate', 0))
           pct = rate * 100
           print(f'Coverage: {pct:.1f}%')
-          if pct < 70:
-              print(f'FAIL: Coverage {pct:.1f}% is below 70% threshold')
+          if pct < 80:
+              print(f'FAIL: Coverage {pct:.1f}% is below 80% threshold')
               exit(1)
           print('PASS: Coverage meets threshold')
           "
