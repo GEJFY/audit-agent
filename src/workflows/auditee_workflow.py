@@ -11,6 +11,7 @@ from datetime import timedelta
 from typing import Any
 
 from temporalio import workflow
+from temporalio.common import RetryPolicy
 
 with workflow.unsafe.imports_passed_through():
     from src.workflows.activities import (
@@ -36,7 +37,7 @@ class AuditeeResponseWorkflow:
         self._state: dict[str, Any] = {}
         self._approved: bool = False
 
-    @workflow.run  # type: ignore[misc]
+    @workflow.run
     async def run(
         self,
         tenant_id: str,
@@ -102,24 +103,24 @@ class AuditeeResponseWorkflow:
                 tenant_id=tenant_id,
             ),
             start_to_close_timeout=timedelta(minutes=5),
-            retry_policy=workflow.RetryPolicy(
+            retry_policy=RetryPolicy(
                 maximum_attempts=3,
                 initial_interval=timedelta(seconds=5),
             ),
         )
 
-    @workflow.signal  # type: ignore[misc]
+    @workflow.signal
     async def approve_response(self) -> None:
         """承認シグナル"""
         self._approved = True
 
-    @workflow.signal  # type: ignore[misc]
+    @workflow.signal
     async def reject_response(self, reason: str = "") -> None:
         """却下シグナル"""
         self._state["rejection_reason"] = reason
         self._state["workflow_status"] = "rejected"
 
-    @workflow.query  # type: ignore[misc]
+    @workflow.query
     def get_state(self) -> dict[str, Any]:
         """現在ステートを返す"""
         return self._state
@@ -136,7 +137,7 @@ class ControlsMonitoringWorkflow:
     def __init__(self) -> None:
         self._state: dict[str, Any] = {}
 
-    @workflow.run  # type: ignore[misc]
+    @workflow.run
     async def run(self, tenant_id: str) -> dict[str, Any]:
         """モニタリング実行"""
         self._state = {
@@ -155,7 +156,7 @@ class ControlsMonitoringWorkflow:
                 tenant_id=tenant_id,
             ),
             start_to_close_timeout=timedelta(minutes=10),
-            retry_policy=workflow.RetryPolicy(maximum_attempts=2),
+            retry_policy=RetryPolicy(maximum_attempts=2),
         )
 
         if monitor_result.success:
@@ -182,7 +183,7 @@ class ControlsMonitoringWorkflow:
                 tenant_id=tenant_id,
             ),
             start_to_close_timeout=timedelta(minutes=5),
-            retry_policy=workflow.RetryPolicy(maximum_attempts=2),
+            retry_policy=RetryPolicy(maximum_attempts=2),
         )
 
         if alert_result.success:
@@ -192,6 +193,6 @@ class ControlsMonitoringWorkflow:
         workflow.logger.info(f"統制モニタリング完了: tenant={tenant_id}")
         return self._state
 
-    @workflow.query  # type: ignore[misc]
+    @workflow.query
     def get_state(self) -> dict[str, Any]:
         return self._state

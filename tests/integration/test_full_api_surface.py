@@ -3,22 +3,42 @@
 全登録ルーターのエンドポイントが正しく動作することを確認。
 """
 
+from datetime import UTC, datetime
+
 import pytest
 from fastapi import FastAPI
 from httpx import ASGITransport, AsyncClient
 
 from src.api.main import app
+from src.api.middleware.auth import get_current_user
 from src.api.routes import analytics, reports
+from src.security.auth import TokenPayload
+
+
+async def _mock_current_user() -> TokenPayload:
+    """テスト用: 認証をバイパスするダミーユーザー"""
+    now = datetime.now(tz=UTC)
+    return TokenPayload(
+        sub="test-user",
+        role="admin",
+        tenant_id="test-tenant",
+        exp=now,
+        iat=now,
+        jti="test-jti",
+        token_type="access",
+    )
 
 
 def _create_full_app() -> FastAPI:
     """全ルーター登録済みのテスト用アプリを構築
 
     mainに未登録のルーターも含めてテスト。
+    認証依存性をオーバーライドしてテスト可能にする。
     """
     test_app = FastAPI()
     test_app.include_router(reports.router, prefix="/api/v1/reports")
     test_app.include_router(analytics.router, prefix="/api/v1/analytics")
+    test_app.dependency_overrides[get_current_user] = _mock_current_user
     return test_app
 
 

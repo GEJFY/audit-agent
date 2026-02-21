@@ -8,6 +8,7 @@ from datetime import timedelta
 from typing import Any
 
 from temporalio import workflow
+from temporalio.common import RetryPolicy
 
 with workflow.unsafe.imports_passed_through():
     from src.workflows.activities import (
@@ -36,7 +37,7 @@ class AuditProjectWorkflow:
         self._is_cancelled: bool = False
         self._approval_pending: bool = False
 
-    @workflow.run  # type: ignore[misc]
+    @workflow.run
     async def run(
         self,
         project_id: str,
@@ -137,7 +138,7 @@ class AuditProjectWorkflow:
                 tenant_id=tenant_id,
             ),
             start_to_close_timeout=timedelta(minutes=10),
-            retry_policy=workflow.RetryPolicy(
+            retry_policy=RetryPolicy(
                 maximum_attempts=3,
                 initial_interval=timedelta(seconds=5),
                 backoff_coefficient=2.0,
@@ -189,23 +190,23 @@ class AuditProjectWorkflow:
             self._state["workflow_error_detail"] = detail
         return self._state
 
-    @workflow.query  # type: ignore[misc]
+    @workflow.query
     def get_current_phase(self) -> str:
         """現在フェーズを返す"""
         return self._current_phase
 
-    @workflow.query  # type: ignore[misc]
+    @workflow.query
     def get_state(self) -> dict[str, Any]:
         """現在ステートを返す"""
         return self._state
 
-    @workflow.signal  # type: ignore[misc]
+    @workflow.signal
     async def cancel_workflow(self) -> None:
         """ワークフローキャンセル"""
         self._is_cancelled = True
         workflow.logger.info("ワークフローキャンセルリクエスト受信")
 
-    @workflow.signal  # type: ignore[misc]
+    @workflow.signal
     async def approve(self) -> None:
         """外部からの承認シグナル"""
         self._state["requires_approval"] = False

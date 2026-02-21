@@ -8,6 +8,7 @@ from datetime import timedelta
 from typing import Any
 
 from temporalio import workflow
+from temporalio.common import RetryPolicy
 
 with workflow.unsafe.imports_passed_through():
     from src.workflows.activities import (
@@ -33,7 +34,7 @@ class PredictiveRiskWorkflow:
         self._current_step: str = "init"
         self._is_cancelled: bool = False
 
-    @workflow.run  # type: ignore[misc]
+    @workflow.run
     async def run(
         self,
         tenant_id: str,
@@ -101,7 +102,7 @@ class PredictiveRiskWorkflow:
                 tenant_id=tenant_id,
             ),
             start_to_close_timeout=timedelta(minutes=10),
-            retry_policy=workflow.RetryPolicy(
+            retry_policy=RetryPolicy(
                 maximum_attempts=2,
                 initial_interval=timedelta(seconds=5),
                 backoff_coefficient=2.0,
@@ -146,17 +147,17 @@ class PredictiveRiskWorkflow:
                 start_to_close_timeout=timedelta(seconds=30),
             )
 
-    @workflow.query  # type: ignore[misc]
+    @workflow.query
     def get_current_step(self) -> str:
         """現在のステップを返す"""
         return self._current_step
 
-    @workflow.query  # type: ignore[misc]
+    @workflow.query
     def get_state(self) -> dict[str, Any]:
         """現在のステートを返す"""
         return self._state
 
-    @workflow.signal  # type: ignore[misc]
+    @workflow.signal
     async def cancel_workflow(self) -> None:
         """ワークフローキャンセル"""
         self._is_cancelled = True

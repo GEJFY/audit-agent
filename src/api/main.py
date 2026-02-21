@@ -17,7 +17,20 @@ from src.api.middleware.security import (
     RequestValidationMiddleware,
     SecurityHeadersMiddleware,
 )
-from src.api.routes import agents, analytics, auth, compliance, dialogue, evidence, health, notifications, projects, reports, risk_templates, websocket
+from src.api.routes import (
+    agents,
+    analytics,
+    auth,
+    compliance,
+    dialogue,
+    evidence,
+    health,
+    notifications,
+    projects,
+    reports,
+    risk_templates,
+    websocket,
+)
 from src.config.settings import get_settings
 from src.monitoring.logging import setup_logging
 from src.monitoring.metrics import app_info
